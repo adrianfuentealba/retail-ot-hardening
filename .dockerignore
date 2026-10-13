@@ -1,0 +1,5 @@
+.git
+pcaps/*.pcap*
+*.zip
+__pycache__
+tests

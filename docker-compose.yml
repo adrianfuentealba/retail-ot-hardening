@@ -1,0 +1,582 @@
+{
+  "name": "retail-ot-hardening",
+  "services": {
+    "panel": {
+      "build": ".",
+      "image": "retail-ot-core:1.0",
+      "restart": "unless-stopped",
+      "security_opt": [
+        "no-new-privileges:true"
+      ],
+      "cap_drop": [
+        "ALL"
+      ],
+      "mem_limit": "512m",
+      "command": [
+        "python",
+        "-m",
+        "app.main"
+      ],
+      "ports": [
+        "127.0.0.1:${LAB_PORT:-8090}:8000"
+      ],
+      "networks": [
+        "web",
+        "training",
+        "supervision"
+      ],
+      "volumes": [
+        "panel-evidence:/evidence",
+        "captures:/captures:ro",
+        "certs:/certs:ro"
+      ],
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request;urllib.request.urlopen('http://127.0.0.1:8000/api/health')"
+        ],
+        "interval": "10s",
+        "timeout": "5s",
+        "retries": 20,
+        "start_period": "30s"
+      }
+    },
+    "plc": {
+      "build": ".",
+      "image": "retail-ot-core:1.0",
+      "restart": "unless-stopped",
+      "security_opt": [
+        "no-new-privileges:true"
+      ],
+      "cap_drop": [
+        "ALL"
+      ],
+      "mem_limit": "512m",
+      "command": [
+        "python",
+        "-m",
+        "plc.main"
+      ],
+      "networks": {
+        "control": {
+          "ipv4_address": "172.30.40.10"
+        },
+        "training": {
+          "ipv4_address": "172.30.50.10"
+        }
+      },
+      "volumes": [
+        "plc-evidence:/evidence",
+        "certs:/certs"
+      ],
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request;urllib.request.urlopen('http://127.0.0.1:8001/state')"
+        ],
+        "interval": "10s",
+        "timeout": "5s",
+        "retries": 20,
+        "start_period": "30s"
+      }
+    },
+    "gateway": {
+      "build": ".",
+      "image": "retail-ot-core:1.0",
+      "restart": "unless-stopped",
+      "security_opt": [
+        "no-new-privileges:true"
+      ],
+      "cap_drop": [
+        "ALL"
+      ],
+      "mem_limit": "512m",
+      "command": [
+        "python",
+        "-m",
+        "gateway.main"
+      ],
+      "networks": {
+        "supervision": {
+          "ipv4_address": "172.30.30.20"
+        },
+        "control": {
+          "ipv4_address": "172.30.40.20"
+        },
+        "training": {}
+      },
+      "volumes": [
+        "gateway-evidence:/evidence"
+      ],
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request;urllib.request.urlopen('http://127.0.0.1:8003/health')"
+        ],
+        "interval": "10s",
+        "timeout": "5s",
+        "retries": 20,
+        "start_period": "30s"
+      },
+      "depends_on": {
+        "plc": {
+          "condition": "service_healthy"
+        }
+      }
+    },
+    "ws-corporate": {
+      "build": "./workstation",
+      "image": "retail-ot-workstation:1.0",
+      "hostname": "ws-corporate",
+      "environment": {
+        "ROLE": "corporate"
+      },
+      "ports": [
+        "127.0.0.1:${CORPORATE_VNC_PORT:-6081}:6080"
+      ],
+      "networks": [
+        "web",
+        "training",
+        "it"
+      ],
+      "volumes": [
+        "ws-corporate-evidence:/evidence"
+      ],
+      "shm_size": "256m",
+      "mem_limit": "1500m",
+      "restart": "unless-stopped",
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request;urllib.request.urlopen('http://127.0.0.1:8010/health')"
+        ],
+        "interval": "10s",
+        "timeout": "5s",
+        "retries": 20,
+        "start_period": "30s"
+      },
+      "security_opt": [
+        "no-new-privileges:true"
+      ],
+      "cap_drop": [
+        "NET_RAW"
+      ]
+    },
+    "ws-vendor": {
+      "build": "./workstation",
+      "image": "retail-ot-workstation:1.0",
+      "hostname": "ws-vendor",
+      "environment": {
+        "ROLE": "vendor"
+      },
+      "ports": [
+        "127.0.0.1:${VENDOR_VNC_PORT:-6082}:6080"
+      ],
+      "networks": [
+        "web",
+        "training",
+        "dmz"
+      ],
+      "volumes": [
+        "ws-vendor-evidence:/evidence"
+      ],
+      "shm_size": "256m",
+      "mem_limit": "1500m",
+      "restart": "unless-stopped",
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request;urllib.request.urlopen('http://127.0.0.1:8010/health')"
+        ],
+        "interval": "10s",
+        "timeout": "5s",
+        "retries": 20,
+        "start_period": "30s"
+      },
+      "security_opt": [
+        "no-new-privileges:true"
+      ],
+      "cap_drop": [
+        "NET_RAW"
+      ]
+    },
+    "ws-engineering": {
+      "build": "./workstation",
+      "image": "retail-ot-workstation:1.0",
+      "hostname": "ws-engineering",
+      "environment": {
+        "ROLE": "engineering"
+      },
+      "ports": [
+        "127.0.0.1:${ENGINEERING_VNC_PORT:-6083}:6080"
+      ],
+      "networks": [
+        "web",
+        "training",
+        "supervision"
+      ],
+      "volumes": [
+        "ws-engineering-evidence:/evidence"
+      ],
+      "shm_size": "256m",
+      "mem_limit": "1500m",
+      "restart": "unless-stopped",
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request;urllib.request.urlopen('http://127.0.0.1:8010/health')"
+        ],
+        "interval": "10s",
+        "timeout": "5s",
+        "retries": 20,
+        "start_period": "30s"
+      },
+      "security_opt": [
+        "no-new-privileges:true"
+      ],
+      "cap_drop": [
+        "NET_RAW"
+      ]
+    },
+    "ws-hmi": {
+      "build": "./workstation",
+      "image": "retail-ot-workstation:1.0",
+      "hostname": "ws-hmi",
+      "environment": {
+        "ROLE": "hmi"
+      },
+      "ports": [
+        "127.0.0.1:${HMI_VNC_PORT:-6084}:6080"
+      ],
+      "networks": [
+        "web",
+        "training",
+        "supervision"
+      ],
+      "volumes": [
+        "ws-hmi-evidence:/evidence"
+      ],
+      "shm_size": "256m",
+      "mem_limit": "1500m",
+      "restart": "unless-stopped",
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request;urllib.request.urlopen('http://127.0.0.1:8010/health')"
+        ],
+        "interval": "10s",
+        "timeout": "5s",
+        "retries": 20,
+        "start_period": "30s"
+      },
+      "security_opt": [
+        "no-new-privileges:true"
+      ],
+      "cap_drop": [
+        "NET_RAW"
+      ]
+    },
+    "ws-soc": {
+      "build": "./workstation",
+      "image": "retail-ot-workstation:1.0",
+      "hostname": "ws-soc",
+      "environment": {
+        "ROLE": "soc"
+      },
+      "ports": [
+        "127.0.0.1:${SOC_VNC_PORT:-6085}:6080"
+      ],
+      "networks": [
+        "web",
+        "training",
+        "soc"
+      ],
+      "volumes": [
+        "ws-soc-evidence:/evidence"
+      ],
+      "shm_size": "256m",
+      "mem_limit": "1500m",
+      "restart": "unless-stopped",
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request;urllib.request.urlopen('http://127.0.0.1:8010/health')"
+        ],
+        "interval": "10s",
+        "timeout": "5s",
+        "retries": 20,
+        "start_period": "30s"
+      },
+      "security_opt": [
+        "no-new-privileges:true"
+      ],
+      "cap_drop": [
+        "NET_RAW"
+      ]
+    },
+    "sensor": {
+      "build": "./ids",
+      "network_mode": "service:gateway",
+      "depends_on": {
+        "gateway": {
+          "condition": "service_healthy"
+        }
+      },
+      "volumes": [
+        "sensor-evidence:/evidence",
+        "captures:/captures"
+      ],
+      "cap_drop": [
+        "ALL"
+      ],
+      "cap_add": [
+        "NET_RAW",
+        "NET_ADMIN"
+      ],
+      "security_opt": [
+        "no-new-privileges:true"
+      ],
+      "mem_limit": "600m",
+      "restart": "unless-stopped"
+    },
+    "elasticsearch": {
+      "image": "docker.elastic.co/elasticsearch/elasticsearch:8.17.3",
+      "environment": {
+        "discovery.type": "single-node",
+        "xpack.security.enabled": "false",
+        "ES_JAVA_OPTS": "-Xms1g -Xmx1g",
+        "node.store.allow_mmap": "false"
+      },
+      "networks": [
+        "soc"
+      ],
+      "volumes": [
+        "esdata:/usr/share/elasticsearch/data"
+      ],
+      "mem_limit": "2500m",
+      "restart": "unless-stopped",
+      "healthcheck": {
+        "test": [
+          "CMD-SHELL",
+          "curl -fsS http://localhost:9200/_cluster/health >/dev/null"
+        ],
+        "interval": "15s",
+        "timeout": "10s",
+        "retries": 30
+      }
+    },
+    "logstash": {
+      "image": "docker.elastic.co/logstash/logstash:8.17.3",
+      "environment": {
+        "LS_JAVA_OPTS": "-Xms512m -Xmx512m",
+        "XPACK_MONITORING_ENABLED": "false"
+      },
+      "volumes": [
+        "./elastic/logstash.conf:/usr/share/logstash/pipeline/logstash.conf:ro"
+      ],
+      "networks": [
+        "soc"
+      ],
+      "depends_on": {
+        "elasticsearch": {
+          "condition": "service_healthy"
+        }
+      },
+      "mem_limit": "1500m",
+      "restart": "unless-stopped",
+      "healthcheck": {
+        "test": [
+          "CMD-SHELL",
+          "curl -fsS http://localhost:9600/_node/stats/pipelines | grep -q '\"main\"'"
+        ],
+        "interval": "10s",
+        "timeout": "5s",
+        "retries": 30,
+        "start_period": "40s"
+      }
+    },
+    "kibana": {
+      "image": "docker.elastic.co/kibana/kibana:8.17.3",
+      "environment": {
+        "ELASTICSEARCH_HOSTS": "http://elasticsearch:9200",
+        "XPACK_SECURITY_ENABLED": "false",
+        "TELEMETRY_ENABLED": "false",
+        "SERVER_HOST": "0.0.0.0"
+      },
+      "networks": [
+        "soc",
+        "web"
+      ],
+      "ports": [
+        "127.0.0.1:${KIBANA_PORT:-5601}:5601"
+      ],
+      "depends_on": {
+        "elasticsearch": {
+          "condition": "service_healthy"
+        }
+      },
+      "mem_limit": "1800m",
+      "restart": "unless-stopped",
+      "healthcheck": {
+        "test": [
+          "CMD-SHELL",
+          "curl -fsS http://localhost:5601/api/status >/dev/null"
+        ],
+        "interval": "10s",
+        "timeout": "5s",
+        "retries": 30,
+        "start_period": "40s"
+      }
+    },
+    "collector": {
+      "build": ".",
+      "image": "retail-ot-core:1.0",
+      "restart": "unless-stopped",
+      "security_opt": [
+        "no-new-privileges:true"
+      ],
+      "cap_drop": [
+        "ALL"
+      ],
+      "mem_limit": "512m",
+      "command": [
+        "python",
+        "-m",
+        "collector.main"
+      ],
+      "networks": [
+        "soc"
+      ],
+      "volumes": [
+        "collector-state:/state",
+        "ws-corporate-evidence:/sources/ws-corporate:ro",
+        "ws-vendor-evidence:/sources/ws-vendor:ro",
+        "ws-engineering-evidence:/sources/ws-engineering:ro",
+        "ws-hmi-evidence:/sources/ws-hmi:ro",
+        "ws-soc-evidence:/sources/ws-soc:ro",
+        "panel-evidence:/sources/panel:ro",
+        "plc-evidence:/sources/plc:ro",
+        "gateway-evidence:/sources/gateway:ro",
+        "sensor-evidence:/sources/sensor:ro"
+      ],
+      "depends_on": {
+        "logstash": {
+          "condition": "service_healthy"
+        },
+        "bootstrap": {
+          "condition": "service_completed_successfully"
+        }
+      }
+    },
+    "bootstrap": {
+      "build": ".",
+      "image": "retail-ot-core:1.0",
+      "restart": "no",
+      "security_opt": [
+        "no-new-privileges:true"
+      ],
+      "cap_drop": [
+        "ALL"
+      ],
+      "mem_limit": "512m",
+      "command": [
+        "python",
+        "-m",
+        "elastic.bootstrap"
+      ],
+      "networks": [
+        "soc"
+      ],
+      "depends_on": [
+        "kibana"
+      ]
+    }
+  },
+  "networks": {
+    "it": {
+      "internal": true,
+      "ipam": {
+        "config": [
+          {
+            "subnet": "172.30.10.0/24"
+          }
+        ]
+      }
+    },
+    "dmz": {
+      "internal": true,
+      "ipam": {
+        "config": [
+          {
+            "subnet": "172.30.20.0/24"
+          }
+        ]
+      }
+    },
+    "supervision": {
+      "internal": true,
+      "ipam": {
+        "config": [
+          {
+            "subnet": "172.30.30.0/24"
+          }
+        ]
+      }
+    },
+    "control": {
+      "internal": true,
+      "ipam": {
+        "config": [
+          {
+            "subnet": "172.30.40.0/24"
+          }
+        ]
+      }
+    },
+    "training": {
+      "internal": true,
+      "ipam": {
+        "config": [
+          {
+            "subnet": "172.30.50.0/24"
+          }
+        ]
+      }
+    },
+    "soc": {
+      "internal": true
+    },
+    "web": {}
+  },
+  "volumes": {
+    "panel-evidence": {},
+    "plc-evidence": {},
+    "gateway-evidence": {},
+    "sensor-evidence": {},
+    "captures": {},
+    "certs": {},
+    "esdata": {},
+    "collector-state": {},
+    "ws-corporate-evidence": {},
+    "ws-vendor-evidence": {},
+    "ws-engineering-evidence": {},
+    "ws-hmi-evidence": {},
+    "ws-soc-evidence": {}
+  }
+}

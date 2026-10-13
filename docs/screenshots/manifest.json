@@ -1,0 +1,56 @@
+[
+  {
+    "file": "01-supermercado-3d.png",
+    "caption": "Escena 3D persistente y objetivos sin duración sugerida.",
+    "url": "http://127.0.0.1:8090/",
+    "source": "Captura real de servicios Docker locales; sin composición ni datos inventados."
+  },
+  {
+    "file": "02-consola.png",
+    "caption": "Consola acotada: endpoint fijo y comandos de aula.",
+    "url": "http://127.0.0.1:8090/",
+    "source": "Captura real de servicios Docker locales; sin composición ni datos inventados."
+  },
+  {
+    "file": "03-topologia-purdue.png",
+    "caption": "Topología Purdue: zonas y conductos, red de administración declarada.",
+    "url": "http://127.0.0.1:8090/",
+    "source": "Captura real de servicios Docker locales; sin composición ni datos inventados."
+  },
+  {
+    "file": "04-paquetes-reales.png",
+    "caption": "Payload TCP real capturado por Tshark.",
+    "url": "http://127.0.0.1:8090/",
+    "source": "Captura real de servicios Docker locales; sin composición ni datos inventados."
+  },
+  {
+    "file": "05-cinco-estaciones.png",
+    "caption": "Cinco estaciones Linux, escritorios noVNC y dashboards por host.",
+    "url": "http://127.0.0.1:8090/",
+    "source": "Captura real de servicios Docker locales; sin composición ni datos inventados."
+  },
+  {
+    "file": "06-anatomy-controlador.png",
+    "caption": "Despiece Anatomy: componentes de controlador ficticio y contramedidas.",
+    "url": "http://127.0.0.1:8090/",
+    "source": "Captura real de servicios Docker locales; sin composición ni datos inventados."
+  },
+  {
+    "file": "07-kibana-general.png",
+    "caption": "Kibana: gráficos por activo/fuente y evidencia independiente.",
+    "url": "http://127.0.0.1:5601/app/dashboards#/view/retail-overview?_g=(filters:!(),refreshInterval:(pause:!f,value:5000),time:(from:now-15m,to:now))",
+    "source": "Captura real de servicios Docker locales; sin composición ni datos inventados."
+  },
+  {
+    "file": "08-kibana-hmi.png",
+    "caption": "Dashboard filtrado por HMI: acciones y observaciones osquery reales.",
+    "url": "http://127.0.0.1:5601/app/dashboards#/view/retail-ws-hmi?_g=(filters:!(),refreshInterval:(pause:!f,value:5000),time:(from:now-15m,to:now))",
+    "source": "Captura real de servicios Docker locales; sin composición ni datos inventados."
+  },
+  {
+    "file": "09-hmi-novnc-linux.png",
+    "caption": "Escritorio Linux HMI noVNC con terminal de estudiante y osquery real.",
+    "url": "http://127.0.0.1:6084/vnc.html?autoconnect=true&resize=remote",
+    "source": "Captura real de servicios Docker locales; sin composición ni datos inventados."
+  }
+]

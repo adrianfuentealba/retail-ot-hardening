@@ -1,0 +1,202 @@
+{
+  "timestamp_utc": "2026-10-13T02:50:02Z",
+  "checks": [
+    {
+      "name": "ws-corporate osquery real",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "ws-corporate osqueryd active",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "ws-corporate noVNC HTML",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "ws-corporate SQL inventory",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "ws-vendor osquery real",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "ws-vendor osqueryd active",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "ws-vendor noVNC HTML",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "ws-vendor SQL inventory",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "ws-engineering osquery real",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "ws-engineering osqueryd active",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "ws-engineering noVNC HTML",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "ws-engineering SQL inventory",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "ws-hmi osquery real",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "ws-hmi osqueryd active",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "ws-hmi noVNC HTML",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "ws-hmi SQL inventory",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "ws-soc osquery real",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "ws-soc osqueryd active",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "ws-soc noVNC HTML",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "ws-soc SQL inventory",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "nominal process",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Modbus FC06 accepted",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "real process effect",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "PLC Write rejected",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "osquery observed benign process",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "actual Linux mode owner",
+      "passed": true,
+      "detail": "640:0"
+    },
+    {
+      "name": "endpoint guard blocked",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "two markers accepted",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "two markers blocked",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "gateway denies FC06",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "OPC UA Write accepted",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "OPC UA secure Write denied",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "fictitious firmware accepted",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "firmware integrity guard",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Tshark real packets",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Ethernet PCAP magic",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "five endpoints in Elastic",
+      "passed": true,
+      "detail": "['ws-corporate', 'ws-engineering', 'ws-hmi', 'ws-soc', 'ws-vendor']"
+    },
+    {
+      "name": "Suricata alert indexed",
+      "passed": true,
+      "detail": "{'value': 59, 'relation': 'eq'}"
+    },
+    {
+      "name": "default dashboard exists",
+      "passed": true,
+      "detail": ""
+    }
+  ],
+  "passed": true,
+  "platform": "Docker local; endpoint architecture visible in inventory"
+}

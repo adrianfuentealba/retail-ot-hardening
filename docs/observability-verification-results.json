@@ -1,0 +1,410 @@
+{
+  "timestamp_utc": "2026-10-13T02:53:06Z",
+  "checks": [
+    {
+      "name": "ws-corporate agent/osquery version",
+      "passed": true,
+      "detail": "osqueryi version 5.23.1"
+    },
+    {
+      "name": "ws-corporate osqueryd running",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "ws-corporate noVNC → RFB WebSocket",
+      "passed": true,
+      "detail": "820c524642203030332e3030380a"
+    },
+    {
+      "name": "ws-corporate native osquery SQL",
+      "passed": true,
+      "detail": [
+        {
+          "cpu_type": "aarch64",
+          "hostname": "ws-corporate",
+          "physical_memory": "67039223808"
+        }
+      ]
+    },
+    {
+      "name": "ws-corporate benign action accepted",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "ws-corporate fresh endpoint + osquery events indexed",
+      "passed": true,
+      "detail": {
+        "endpoint_id": "R_4sM6EBtGY_hDSKeE0a",
+        "osquery_id": "S_4sM6EBtGY_hDSKgE0Y",
+        "seconds_to_visible": 8.06
+      }
+    },
+    {
+      "name": "ws-corporate execution guard blocked",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "ws-corporate fresh blocked event indexed",
+      "passed": true,
+      "detail": "Vf4sM6EBtGY_hDSKmE0H"
+    },
+    {
+      "name": "ws-corporate Linux file write denied for student",
+      "passed": true,
+      "detail": "sh: 1: cannot create /home/student/lab/controller.conf: Permission denied"
+    },
+    {
+      "name": "ws-vendor agent/osquery version",
+      "passed": true,
+      "detail": "osqueryi version 5.23.1"
+    },
+    {
+      "name": "ws-vendor osqueryd running",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "ws-vendor noVNC → RFB WebSocket",
+      "passed": true,
+      "detail": "820c524642203030332e3030380a"
+    },
+    {
+      "name": "ws-vendor native osquery SQL",
+      "passed": true,
+      "detail": [
+        {
+          "cpu_type": "aarch64",
+          "hostname": "ws-vendor",
+          "physical_memory": "67039223808"
+        }
+      ]
+    },
+    {
+      "name": "ws-vendor benign action accepted",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "ws-vendor fresh endpoint + osquery events indexed",
+      "passed": true,
+      "detail": {
+        "endpoint_id": "Yf4sM6EBtGY_hDSKt032",
+        "osquery_id": "Y_4sM6EBtGY_hDSKt033",
+        "seconds_to_visible": 3.58
+      }
+    },
+    {
+      "name": "ws-vendor execution guard blocked",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "ws-vendor fresh blocked event indexed",
+      "passed": true,
+      "detail": "aP4sM6EBtGY_hDSKx03j"
+    },
+    {
+      "name": "ws-vendor Linux file write denied for student",
+      "passed": true,
+      "detail": "sh: 1: cannot create /home/student/lab/controller.conf: Permission denied"
+    },
+    {
+      "name": "ws-engineering agent/osquery version",
+      "passed": true,
+      "detail": "osqueryi version 5.23.1"
+    },
+    {
+      "name": "ws-engineering osqueryd running",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "ws-engineering noVNC → RFB WebSocket",
+      "passed": true,
+      "detail": "820c524642203030332e3030380a"
+    },
+    {
+      "name": "ws-engineering native osquery SQL",
+      "passed": true,
+      "detail": [
+        {
+          "cpu_type": "aarch64",
+          "hostname": "ws-engineering",
+          "physical_memory": "67039223808"
+        }
+      ]
+    },
+    {
+      "name": "ws-engineering benign action accepted",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "ws-engineering fresh endpoint + osquery events indexed",
+      "passed": true,
+      "detail": {
+        "endpoint_id": "ef4sM6EBtGY_hDSK503X",
+        "osquery_id": "gf4sM6EBtGY_hDSK903Z",
+        "seconds_to_visible": 8.12
+      }
+    },
+    {
+      "name": "ws-engineering execution guard blocked",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "ws-engineering fresh blocked event indexed",
+      "passed": true,
+      "detail": "i_4tM6EBtGY_hDSKD027"
+    },
+    {
+      "name": "ws-engineering Linux file write denied for student",
+      "passed": true,
+      "detail": "sh: 1: cannot create /home/student/lab/controller.conf: Permission denied"
+    },
+    {
+      "name": "ws-hmi agent/osquery version",
+      "passed": true,
+      "detail": "osqueryi version 5.23.1"
+    },
+    {
+      "name": "ws-hmi osqueryd running",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "ws-hmi noVNC → RFB WebSocket",
+      "passed": true,
+      "detail": "820c524642203030332e3030380a"
+    },
+    {
+      "name": "ws-hmi native osquery SQL",
+      "passed": true,
+      "detail": [
+        {
+          "cpu_type": "aarch64",
+          "hostname": "ws-hmi",
+          "physical_memory": "67039223808"
+        }
+      ]
+    },
+    {
+      "name": "ws-hmi benign action accepted",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "ws-hmi fresh endpoint + osquery events indexed",
+      "passed": true,
+      "detail": {
+        "endpoint_id": "lf4tM6EBtGY_hDSKL02L",
+        "osquery_id": "l_4tM6EBtGY_hDSKL02T",
+        "seconds_to_visible": 3.68
+      }
+    },
+    {
+      "name": "ws-hmi execution guard blocked",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "ws-hmi fresh blocked event indexed",
+      "passed": true,
+      "detail": "nP4tM6EBtGY_hDSKP02D"
+    },
+    {
+      "name": "ws-hmi Linux file write denied for student",
+      "passed": true,
+      "detail": "sh: 1: cannot create /home/student/lab/controller.conf: Permission denied"
+    },
+    {
+      "name": "ws-soc agent/osquery version",
+      "passed": true,
+      "detail": "osqueryi version 5.23.1"
+    },
+    {
+      "name": "ws-soc osqueryd running",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "ws-soc noVNC → RFB WebSocket",
+      "passed": true,
+      "detail": "820c524642203030332e3030380a"
+    },
+    {
+      "name": "ws-soc native osquery SQL",
+      "passed": true,
+      "detail": [
+        {
+          "cpu_type": "aarch64",
+          "hostname": "ws-soc",
+          "physical_memory": "67039223808"
+        }
+      ]
+    },
+    {
+      "name": "ws-soc benign action accepted",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "ws-soc fresh endpoint + osquery events indexed",
+      "passed": true,
+      "detail": {
+        "endpoint_id": "tv4tM6EBtGY_hDSKX02L",
+        "osquery_id": "uf4tM6EBtGY_hDSKZ01y",
+        "seconds_to_visible": 8.1
+      }
+    },
+    {
+      "name": "ws-soc execution guard blocked",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "ws-soc fresh blocked event indexed",
+      "passed": true,
+      "detail": "vv4tM6EBtGY_hDSKf01L"
+    },
+    {
+      "name": "ws-soc Linux file write denied for student",
+      "passed": true,
+      "detail": "sh: 1: cannot create /home/student/lab/controller.conf: Permission denied"
+    },
+    {
+      "name": "all five hosts have new indexed events",
+      "passed": true,
+      "detail": [
+        {
+          "key": "sensor",
+          "doc_count": 50
+        },
+        {
+          "key": "ws-hmi",
+          "doc_count": 27
+        },
+        {
+          "key": "ws-corporate",
+          "doc_count": 15
+        },
+        {
+          "key": "ws-vendor",
+          "doc_count": 15
+        },
+        {
+          "key": "ws-engineering",
+          "doc_count": 14
+        },
+        {
+          "key": "ws-soc",
+          "doc_count": 10
+        }
+      ]
+    },
+    {
+      "name": "Logstash events output >0",
+      "passed": true,
+      "detail": {
+        "in": 953,
+        "out": 953,
+        "filtered": 953,
+        "duration_in_millis": 5438,
+        "queue_push_duration_in_millis": 32
+      }
+    },
+    {
+      "name": "overview dashboard panels imported",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "ws-corporate default saved search",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "ws-corporate filtered dashboard",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "ws-vendor default saved search",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "ws-vendor filtered dashboard",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "ws-engineering default saved search",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "ws-engineering filtered dashboard",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "ws-hmi default saved search",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "ws-hmi filtered dashboard",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "ws-soc default saved search",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "ws-soc filtered dashboard",
+      "passed": true,
+      "detail": ""
+    }
+  ],
+  "measurements": [
+    {
+      "host": "ws-corporate",
+      "endpoint_id": "R_4sM6EBtGY_hDSKeE0a",
+      "osquery_id": "S_4sM6EBtGY_hDSKgE0Y",
+      "seconds_to_visible": 8.06
+    },
+    {
+      "host": "ws-vendor",
+      "endpoint_id": "Yf4sM6EBtGY_hDSKt032",
+      "osquery_id": "Y_4sM6EBtGY_hDSKt033",
+      "seconds_to_visible": 3.58
+    },
+    {
+      "host": "ws-engineering",
+      "endpoint_id": "ef4sM6EBtGY_hDSK503X",
+      "osquery_id": "gf4sM6EBtGY_hDSK903Z",
+      "seconds_to_visible": 8.12
+    },
+    {
+      "host": "ws-hmi",
+      "endpoint_id": "lf4tM6EBtGY_hDSKL02L",
+      "osquery_id": "l_4tM6EBtGY_hDSKL02T",
+      "seconds_to_visible": 3.68
+    },
+    {
+      "host": "ws-soc",
+      "endpoint_id": "tv4tM6EBtGY_hDSKX02L",
+      "osquery_id": "uf4tM6EBtGY_hDSKZ01y",
+      "seconds_to_visible": 8.1
+    }
+  ],
+  "passed": true,
+  "scope": "fresh benign endpoint events, real osquery, RFB WebSocket, Logstash/ES/Kibana"
+}

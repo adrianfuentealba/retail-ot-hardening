@@ -1,0 +1,63 @@
+{
+  "checks": [
+    {
+      "name": "FC06 accepted",
+      "passed": true
+    },
+    {
+      "name": "thermal impact observed",
+      "passed": true
+    },
+    {
+      "name": "stock quarantined",
+      "passed": true
+    },
+    {
+      "name": "PLC FC06 exception 86/03",
+      "passed": true
+    },
+    {
+      "name": "nominal setpoint restored",
+      "passed": true
+    },
+    {
+      "name": "quarantine retained",
+      "passed": true
+    },
+    {
+      "name": "actual OPC UA Write allowed",
+      "passed": true
+    },
+    {
+      "name": "secure Read and denied Write",
+      "passed": true
+    },
+    {
+      "name": "gateway denies FC06",
+      "passed": true
+    },
+    {
+      "name": "Tshark Modbus FC03 and FC06",
+      "passed": true
+    },
+    {
+      "name": "Tshark OPC UA payload",
+      "passed": true
+    },
+    {
+      "name": "real PCAP magic",
+      "passed": true
+    },
+    {
+      "name": "Suricata FC06/defrost signatures",
+      "passed": true
+    }
+  ],
+  "complete_stack_validated": false,
+  "timestamp_utc": "2026-10-13T02:33:06Z",
+  "suricata_alerts": {
+    "RETAIL LAB Modbus FC06 write request": 12,
+    "RETAIL LAB defrost setpoint 50 register zero": 12,
+    "RETAIL LAB OPC UA HEL presence - not Write detection": 11
+  }
+}

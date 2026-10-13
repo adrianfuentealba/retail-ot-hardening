@@ -1,0 +1,33 @@
+{
+  "services": {
+    "panel": {
+      "volumes": [
+        "./app:/lab/app:ro",
+        "./plc:/lab/plc:ro",
+        "./gateway:/lab/gateway:ro",
+        "./exercises:/lab/exercises:ro"
+      ]
+    },
+    "plc": {
+      "volumes": [
+        "./app:/lab/app:ro",
+        "./plc:/lab/plc:ro",
+        "./gateway:/lab/gateway:ro",
+        "./exercises:/lab/exercises:ro"
+      ]
+    },
+    "gateway": {
+      "volumes": [
+        "./app:/lab/app:ro",
+        "./plc:/lab/plc:ro",
+        "./gateway:/lab/gateway:ro",
+        "./exercises:/lab/exercises:ro"
+      ]
+    },
+    "sensor": {
+      "volumes": [
+        "./ids/start.sh:/opt/ids/start.sh:ro"
+      ]
+    }
+  }
+}
