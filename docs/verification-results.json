@@ -1,5 +1,5 @@
 {
-  "timestamp_utc": "2026-10-13T02:50:02Z",
+  "timestamp_utc": "2026-10-13T14:44:55Z",
   "checks": [
     {
       "name": "ws-corporate osquery real",
@@ -189,7 +189,7 @@
     {
       "name": "Suricata alert indexed",
       "passed": true,
-      "detail": "{'value': 59, 'relation': 'eq'}"
+      "detail": "{'value': 511, 'relation': 'eq'}"
     },
     {
       "name": "default dashboard exists",

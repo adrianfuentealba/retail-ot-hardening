@@ -8,7 +8,7 @@ class Contract(unittest.TestCase):
    for p in s.get('ports',[]):self.assertTrue(p.startswith('127.0.0.1:'))
   self.assertEqual(len([x for x in c['services'] if x.startswith('ws-')]),5)
  def test_guides(self):
-  for n in range(1,10):self.assertTrue(list((ROOT/'exercises').glob(f'{n:02d}-*.md')))
+  for n in range(1,11):self.assertTrue(list((ROOT/'exercises').glob(f'{n:02d}-*.md')))
  def test_no_socket(self):self.assertNotIn('docker.sock',(ROOT/'docker-compose.yml').read_text())
  def test_protocol_ports_not_published(self):
   c=json.loads((ROOT/'docker-compose.yml').read_text())

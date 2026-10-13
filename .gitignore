@@ -9,3 +9,4 @@ evidence/
 *.pem
 *.key
 cert.der
+node_modules/

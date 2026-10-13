@@ -1,5 +1,5 @@
 {
-  "timestamp_utc": "2026-10-13T02:53:06Z",
+  "timestamp_utc": "2026-10-13T14:46:15Z",
   "checks": [
     {
       "name": "ws-corporate agent/osquery version",
@@ -36,9 +36,9 @@
       "name": "ws-corporate fresh endpoint + osquery events indexed",
       "passed": true,
       "detail": {
-        "endpoint_id": "R_4sM6EBtGY_hDSKeE0a",
-        "osquery_id": "S_4sM6EBtGY_hDSKgE0Y",
-        "seconds_to_visible": 8.06
+        "endpoint_id": "Kv65NaEBtGY_hDSKZuAu",
+        "osquery_id": "Lf65NaEBtGY_hDSKbuAe",
+        "seconds_to_visible": 5.78
       }
     },
     {
@@ -49,7 +49,7 @@
     {
       "name": "ws-corporate fresh blocked event indexed",
       "passed": true,
-      "detail": "Vf4sM6EBtGY_hDSKmE0H"
+      "detail": "OP65NaEBtGY_hDSKfeD-"
     },
     {
       "name": "ws-corporate Linux file write denied for student",
@@ -91,9 +91,9 @@
       "name": "ws-vendor fresh endpoint + osquery events indexed",
       "passed": true,
       "detail": {
-        "endpoint_id": "Yf4sM6EBtGY_hDSKt032",
-        "osquery_id": "Y_4sM6EBtGY_hDSKt033",
-        "seconds_to_visible": 3.58
+        "endpoint_id": "Q_65NaEBtGY_hDSKneCw",
+        "osquery_id": "R_65NaEBtGY_hDSKpeCo",
+        "seconds_to_visible": 5.73
       }
     },
     {
@@ -104,7 +104,7 @@
     {
       "name": "ws-vendor fresh blocked event indexed",
       "passed": true,
-      "detail": "aP4sM6EBtGY_hDSKx03j"
+      "detail": "T_65NaEBtGY_hDSKteB4"
     },
     {
       "name": "ws-vendor Linux file write denied for student",
@@ -146,9 +146,9 @@
       "name": "ws-engineering fresh endpoint + osquery events indexed",
       "passed": true,
       "detail": {
-        "endpoint_id": "ef4sM6EBtGY_hDSK503X",
-        "osquery_id": "gf4sM6EBtGY_hDSK903Z",
-        "seconds_to_visible": 8.12
+        "endpoint_id": "XP65NaEBtGY_hDSK1eBE",
+        "osquery_id": "Xv65NaEBtGY_hDSK3eBE",
+        "seconds_to_visible": 5.68
       }
     },
     {
@@ -159,7 +159,7 @@
     {
       "name": "ws-engineering fresh blocked event indexed",
       "passed": true,
-      "detail": "i_4tM6EBtGY_hDSKD027"
+      "detail": "ZP65NaEBtGY_hDSK7eAn"
     },
     {
       "name": "ws-engineering Linux file write denied for student",
@@ -201,9 +201,9 @@
       "name": "ws-hmi fresh endpoint + osquery events indexed",
       "passed": true,
       "detail": {
-        "endpoint_id": "lf4tM6EBtGY_hDSKL02L",
-        "osquery_id": "l_4tM6EBtGY_hDSKL02T",
-        "seconds_to_visible": 3.68
+        "endpoint_id": "dP66NaEBtGY_hDSKDODi",
+        "osquery_id": "e_66NaEBtGY_hDSKHOC6",
+        "seconds_to_visible": 7.94
       }
     },
     {
@@ -214,7 +214,7 @@
     {
       "name": "ws-hmi fresh blocked event indexed",
       "passed": true,
-      "detail": "nP4tM6EBtGY_hDSKP02D"
+      "detail": "gf66NaEBtGY_hDSKLOCJ"
     },
     {
       "name": "ws-hmi Linux file write denied for student",
@@ -256,9 +256,9 @@
       "name": "ws-soc fresh endpoint + osquery events indexed",
       "passed": true,
       "detail": {
-        "endpoint_id": "tv4tM6EBtGY_hDSKX02L",
-        "osquery_id": "uf4tM6EBtGY_hDSKZ01y",
-        "seconds_to_visible": 8.1
+        "endpoint_id": "kf66NaEBtGY_hDSKTOBa",
+        "osquery_id": "lf66NaEBtGY_hDSKVOBG",
+        "seconds_to_visible": 5.72
       }
     },
     {
@@ -269,7 +269,7 @@
     {
       "name": "ws-soc fresh blocked event indexed",
       "passed": true,
-      "detail": "vv4tM6EBtGY_hDSKf01L"
+      "detail": "nP66NaEBtGY_hDSKZOAY"
     },
     {
       "name": "ws-soc Linux file write denied for student",
@@ -285,15 +285,11 @@
           "doc_count": 50
         },
         {
-          "key": "ws-hmi",
-          "doc_count": 27
-        },
-        {
           "key": "ws-corporate",
-          "doc_count": 15
+          "doc_count": 16
         },
         {
-          "key": "ws-vendor",
+          "key": "ws-hmi",
           "doc_count": 15
         },
         {
@@ -301,8 +297,12 @@
           "doc_count": 14
         },
         {
+          "key": "ws-vendor",
+          "doc_count": 14
+        },
+        {
           "key": "ws-soc",
-          "doc_count": 10
+          "doc_count": 9
         }
       ]
     },
@@ -310,11 +310,11 @@
       "name": "Logstash events output >0",
       "passed": true,
       "detail": {
-        "in": 953,
-        "out": 953,
-        "filtered": 953,
-        "duration_in_millis": 5438,
-        "queue_push_duration_in_millis": 32
+        "in": 38546,
+        "out": 38546,
+        "filtered": 38546,
+        "duration_in_millis": 134290,
+        "queue_push_duration_in_millis": 509
       }
     },
     {
@@ -376,33 +376,33 @@
   "measurements": [
     {
       "host": "ws-corporate",
-      "endpoint_id": "R_4sM6EBtGY_hDSKeE0a",
-      "osquery_id": "S_4sM6EBtGY_hDSKgE0Y",
-      "seconds_to_visible": 8.06
+      "endpoint_id": "Kv65NaEBtGY_hDSKZuAu",
+      "osquery_id": "Lf65NaEBtGY_hDSKbuAe",
+      "seconds_to_visible": 5.78
     },
     {
       "host": "ws-vendor",
-      "endpoint_id": "Yf4sM6EBtGY_hDSKt032",
-      "osquery_id": "Y_4sM6EBtGY_hDSKt033",
-      "seconds_to_visible": 3.58
+      "endpoint_id": "Q_65NaEBtGY_hDSKneCw",
+      "osquery_id": "R_65NaEBtGY_hDSKpeCo",
+      "seconds_to_visible": 5.73
     },
     {
       "host": "ws-engineering",
-      "endpoint_id": "ef4sM6EBtGY_hDSK503X",
-      "osquery_id": "gf4sM6EBtGY_hDSK903Z",
-      "seconds_to_visible": 8.12
+      "endpoint_id": "XP65NaEBtGY_hDSK1eBE",
+      "osquery_id": "Xv65NaEBtGY_hDSK3eBE",
+      "seconds_to_visible": 5.68
     },
     {
       "host": "ws-hmi",
-      "endpoint_id": "lf4tM6EBtGY_hDSKL02L",
-      "osquery_id": "l_4tM6EBtGY_hDSKL02T",
-      "seconds_to_visible": 3.68
+      "endpoint_id": "dP66NaEBtGY_hDSKDODi",
+      "osquery_id": "e_66NaEBtGY_hDSKHOC6",
+      "seconds_to_visible": 7.94
     },
     {
       "host": "ws-soc",
-      "endpoint_id": "tv4tM6EBtGY_hDSKX02L",
-      "osquery_id": "uf4tM6EBtGY_hDSKZ01y",
-      "seconds_to_visible": 8.1
+      "endpoint_id": "kf66NaEBtGY_hDSKTOBa",
+      "osquery_id": "lf66NaEBtGY_hDSKVOBG",
+      "seconds_to_visible": 5.72
     }
   ],
   "passed": true,

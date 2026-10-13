@@ -5,3 +5,7 @@ Cada archivo 01–08 incluye su secuencia copiar/pegar, por qué, resultados esp
 Secuencia recomendada: inventario → permisos → HMI → PLC → conductos → OPC UA → suministro → recuperación → integrador. Restablecer aula entre prácticas; conservar evidencia.
 
 NoVNC representa endpoints Linux completos en contenedores, no kernel independiente. Los controles privilegiados se aplican por agente local fijo, no por shell arbitraria del portal. No enseñar este despliegue sin contraseña como configuración productiva.
+
+## Módulo 10 adicional
+
+[Red/Purple Team Modbus/OPC UA y solución completa](10-redteam-modbus-opcua.md): seis prácticas aisladas con criterios de éxito. [Anatomy activo](../docs/anatomy-inspector-activo.md): código CPU, señales I/O y contraparte de hardening. Restablecer entre prácticas, conservar evidencia y no evaluar velocidad.

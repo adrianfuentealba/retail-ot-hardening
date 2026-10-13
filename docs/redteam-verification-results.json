@@ -1,0 +1,146 @@
+{
+  "checks": [
+    {
+      "name": "six fixed practices",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Anatomy serves actual CPU code",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "FC06 accepted",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "digital twin real thermal effect",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "FC06 interlock exception",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "nominal setpoint after interlock",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "incomplete FC06 denylist",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "FC16 bypasses incomplete denylist",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "FC16 hardening rejects value",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "FC03 still available",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "sensor bias write accepted",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "same physics sees false cold sensor",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "sensor remote write protected",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Anatomy disconnected signal triggers fallback alarm",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Anatomy reconnection restores primary signal",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "finite eight writes before guard",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "bounded burst partly rejected",
+      "passed": true,
+      "detail": 6
+    },
+    {
+      "name": "rate guard preserves Read",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "anonymous None Write initially accepted",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "encrypted observer Write initially accepted",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "server denies observer Write",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "authorized engineer still writes 3 C",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "server semantic guard rejects engineer bad setpoint",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "server removes None endpoint",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "secure Browse and Read remain",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "secure engineer remains functional",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "real captured FC16",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Suricata FC16 alert indexed",
+      "passed": true,
+      "detail": 18
+    }
+  ],
+  "passed": true,
+  "scope": "Fixed Modbus/OPC UA classroom scenarios, CPU source, wiring, same process physics, defenses and independent evidence"
+}

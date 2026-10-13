@@ -1,6 +1,6 @@
 # Validación del perfil ampliado Retail OT
 
-**La cadena cinco estaciones → collector → Logstash → Elasticsearch → Kibana está ejecutándose y pasó las pruebas.** Última validación UTC: 2026-10-13T02:53:06Z.
+**La cadena cinco estaciones → collector → Logstash → Elasticsearch → Kibana está ejecutándose y pasó las pruebas.** Módulo 10 y regresión verificados el 13-10-2026; observabilidad 58/58 corresponde a la suite anterior del 13-10-2026T02:53:06Z. Ver `validacion-modulo-10.md`.
 
 ## Resultados comprobados
 
@@ -8,7 +8,8 @@
 |---|---|---|
 | Escenarios/hardening e integración | 39/39 PASS | `verification-results.json` |
 | Observabilidad fresca y accesos | 58/58 PASS | `observability-verification-results.json` |
-| Contrato estático de aislamiento | 4/4 PASS | `tests/test_contract.py` |
+| Contrato y lógica del módulo 10 | 13/13 PASS | `tests/` |
+| Red/Purple Team y Anatomy backend | 28/28 PASS | `redteam-verification-results.json` |
 | Núcleo OT (validación anterior) | 13/13 PASS | `core-verification-results.json` |
 
 Pruebas de escenarios: cinco versiones osquery reales, SQL local, noVNC HTML, permisos `0640 root`, proceso benigno, bloqueo de ejecución, dos marcadores laterales permitidos/bloqueados, FC06 aceptado y rechazo PLC/pasarela, OPC UA Write None y Read SignAndEncrypt con Write denegado, archivo firmware ficticio, payload Tshark/PCAP, eventos de cinco hosts, Suricata indexada y dashboard importado.
@@ -66,7 +67,7 @@ NoVNC `6081–6085`, portal `8090`, Kibana `5601` solo loopback. PLC/gateway/ES/
 - Cinco endpoints son cinco roles, no cinco procesos térmicos independientes de supermercados.
 - Malware/lateralidad/firmware son emulaciones benignas por APIs internas fijas. El guard de ejecución no es antivirus ni allowlisting global; pasarela de aplicación no es firewall kernel transparente. No hay MFA real ni explotación APT.
 - Modbus es real pero PLC/térmica/stock son modelos de aula; no extrapolar a salud ni seguridad industrial.
-- OPC UA usa certificado/clave compartidos de laboratorio; None permanece interno; variable read-only no representa PKI independiente ni autenticación robusta por usuario.
+- OPC UA usa certificado/clave compartidos de laboratorio; None permanece por defecto/taller 06; módulo 10 permite retirarlo y añade autorización en servidor por identidades públicas de aula. No PKI independiente ni autenticación empresarial.
 - osquery hace consultas programadas, no auditd/eBPF ni detección infalible. TCP de collector tiene límites de duplicación/pérdida en fallos; no promete entrega exactly-once ni custodia certificada.
-- ELK/noVNC sin autenticación es únicamente aceptable como aula local aislada. No se certifica IEC 62443 ni SL-A. No se publicó repositorio ni servicio a una audiencia externa.
+- ELK/noVNC sin autenticación es únicamente aceptable como aula local aislada. No se certifica IEC 62443 ni SL-A. El repositorio base es público en GitHub; los servicios se ejecutan solo localmente.
 - ARM64 probado; amd64 tiene dependencias preparadas, pero aún no se ejecutó esa matriz de plataforma. No se han ejecutado talleres humanos completos ni prueba de carga de una cohorte.

@@ -1,10 +1,10 @@
 # RETAIL OT — Laboratorio de hardening industrial
 
-> **Estado actual:** perfil ampliado ejecutado y validado en Docker Linux ARM64: 39/39 pruebas de escenarios, 58/58 de observabilidad y 4/4 estáticas. Las cinco estaciones noVNC/osquery están conectadas a Logstash → Elasticsearch → Kibana. Leer `docs/validacion.md` para evidencia, plataforma y límites.
+> **Estado actual:** perfil ampliado ejecutado y validado en Docker Linux ARM64: 28/28 pruebas del módulo Red/Purple Team, 39/39 de regresión y 13/13 unitarias; la suite anterior de observabilidad pasó 58/58. Las cinco estaciones noVNC/osquery están conectadas a Logstash → Elasticsearch → Kibana. Leer `docs/validacion.md` para evidencia, plataforma y límites.
 
-Supermercado 3D persistente, cinco estaciones Linux noVNC con osquery, Elastic Stack con dashboard general y cinco dashboards por endpoint, controlador de refrigeración Modbus/OPC UA y evidencia de red real. Ocho talleres guiados más desafío integrador. Implementación educativa nueva e independiente.
+Supermercado 3D persistente, cinco estaciones Linux noVNC con osquery, Elastic Stack con dashboard general y cinco dashboards por endpoint, controlador de refrigeración Modbus/OPC UA y evidencia de red real. Ocho talleres guiados, desafío integrador y módulo adicional 10 Red/Purple Team de Modbus y OPC UA. Implementación educativa nueva e independiente.
 
-> Uso exclusivamente educativo y defensivo en una máquina aislada y autorizada. No conectar a infraestructura OT, tiendas reales ni Internet como servicio público. Las acciones ofensivas son escenarios controlados con marcadores benignos, procesos sleep y destinos internos fijos. No contiene exploits de firmware, malware operativo, cifrado, escaneo ni exfiltración. No retirar el bind `127.0.0.1` ni montar el socket Docker en contenedores.
+> Uso exclusivamente educativo y defensivo en una máquina aislada y autorizada. No conectar a infraestructura OT, tiendas reales ni Internet como servicio público. Las acciones ofensivas son escenarios controlados con marcadores benignos, procesos sleep y destinos internos fijos. No contiene exploits de firmware, malware operativo, cifrado de archivos, escaneo ni exfiltración. OPC UA sí permite cifrado legítimo del transporte. No retirar el bind `127.0.0.1` ni montar el socket Docker en contenedores.
 
 ## Inicio con un comando
 
@@ -52,7 +52,22 @@ La segunda ejecución está bloqueada por el guard del agente. El archivo se des
 
 ![Supermercado 3D y talleres sin duración sugerida](docs/screenshots/01-supermercado-3d.png)
 
-[Ver galería completa: nueve capturas](docs/galeria.md) del portal, consola, red, paquetes, estaciones, Anatomy, Kibana y escritorio Linux.
+[Ver galería completa: capturas reales](docs/galeria.md) del portal, consola, red, paquetes, estaciones, Anatomy, Kibana y escritorio Linux.
+
+## Módulo 10 · Red / Purple Team e inspector activo
+
+Abrir [módulo 10](http://127.0.0.1:8090/labs/10) o la pestaña **Red Team**. [Tutorial completo y solución](exercises/10-redteam-modbus-opcua.md): FC06 fuera de rango, FC16 atravesando denylist incompleta, sesgo de sensor, ráfaga finita de ocho escrituras, autorización OPC UA y eliminación de None. Cada práctica incluye impacto → hardening → misma prueba → verificación de tráfico legítimo.
+
+**Anatomy:** pulsar piezas del despiece o selector. CPU expone código Python real y ciclo de control; I/O explica PT100/RTD o 4–20 mA, contacto de puerta y salidas a contactores. El banco AI0/DI0 modifica señales del mismo proceso térmico, mostrando compresor, deshielo, alarma y respaldo. Panel lateral en escritorio para mantener el supermercado visible. Fuente editable Mantine en `ui/` y bundles locales incluidos.
+
+```sh
+# Desde noVNC ingeniería / Terminal (restablecer aula entre prácticas)
+labctl redteam modbus-write
+labctl harden plc
+labctl redteam modbus-write
+```
+
+[Reporte de la ampliación](docs/validacion-modulo-10.md). Destinos fijos, sin flood ni exploit y sin duración sugerida. Reiniciar entre prácticas con el botón del portal, que conserva evidencia.
 
 ## Observabilidad paso a paso
 
@@ -62,13 +77,14 @@ La segunda ejecución está bloqueada por el guard del agente. El archivo se des
 
 **Aprendizaje a tu ritmo:** no se asignan duraciones sugeridas, límites de resolución ni metas de velocidad. La evaluación se basa en objetivos, evidencia y criterios de éxito. Los intervalos técnicos del sistema y plazos normativos no son tiempos de resolución de los alumnos.
 
-01 Inventario; 02 Permisos Linux; 03 HMI y allowlist; 04 Parámetros PLC; 05 Conductos/proveedor; 06 OPC UA; 07 Firmware ficticio; 08 Recuperación; 09 desafío. Todos tienen tutorial, explicación, comandos copiar/pegar y solución en `exercises/`. En portal **Abrir tutorial completo y solución**.
+01 Inventario; 02 Permisos Linux; 03 HMI y allowlist; 04 Parámetros PLC; 05 Conductos/proveedor; 06 OPC UA; 07 Firmware ficticio; 08 Recuperación; 09 desafío; 10 Red/Purple Team con seis prácticas. Todos tienen tutorial, explicación, comandos copiar/pegar y solución en `exercises/`. En portal **Abrir tutorial completo y solución**.
 
-**Escena siempre visible**: panel derecho contextual con pestañas Taller, Consola, Red, Paquetes y Estaciones. En móvil la escena queda fijada arriba y el trabajo debajo. Se identifica pérdida de telemetría; no se genera estado ficticio cuando falta conexión.
+**Escena siempre visible**: panel derecho contextual con pestañas Taller, Consola, Red, Paquetes, Estaciones y Red Team. En móvil la escena queda fijada arriba y el trabajo debajo. Se identifica pérdida de telemetría; no se genera estado ficticio cuando falta conexión.
 
 ## Pruebas y capturas
 
 ```sh
+python3 scripts/verify-redteam.py
 python3 scripts/verify-lab.py
 python3 scripts/verify-observability.py
 bash scripts/baseline-capture.sh
@@ -86,11 +102,11 @@ No ejecutar `down -v` salvo decisión consciente de descartar evidencia. El rese
 
 ## Qué es real y qué se simula
 
-Real: XFCE/noVNC, procesos Linux, permisos/propietario de un archivo, osqueryd/osqueryi, Elasticsearch/Logstash/Kibana, Modbus TCP FC03/FC06, OPC UA Write/Read, TLS de OPC UA, captura Ethernet, EVE Suricata.
+Real: XFCE/noVNC, procesos Linux, permisos/propietario de un archivo, osqueryd/osqueryi, Elasticsearch/Logstash/Kibana, Modbus TCP FC03/FC06/FC16, OPC UA Write/Read, TLS de OPC UA, captura Ethernet, EVE Suricata.
 
 Simulado: controlador industrial, firmware, térmica acelerada, riesgo de incendio, stock, rol de mantenimiento, guard de ejecución y movimiento lateral por marcadores. Las cinco estaciones son cinco roles/redes, NO cinco tiendas térmicas independientes. Escena representa SCL-01; multitienda se trabaja en ejercicio de mesa. No se implementan DNP3, BACnet, S7, GOOSE, Zeek ni IDS comercial. No se llama firewall transparente a la pasarela Modbus de aplicación.
 
-OPC UA seguro usa una variable read-only y certificado compartido de laboratorio: None continúa accesible internamente y no se declara eliminado. No se obtiene certificación ni SL-A. Ver arquitectura, mapeo y límites.
+OPC UA del taller 06 conserva read-only y None de comparación. Módulo 10 añade autorización de servidor por usuario/nodo, validación semántica y `harden opcua-channel` que publica solo SignAndEncrypt. Certificado/clave compartidos y usuarios públicos de aula: no PKI productiva. No se obtiene certificación ni SL-A. Anatomy I/O usa referencia ideal de temperatura para respaldo del modelo; en planta haría falta redundancia física y análisis de riesgo.
 
 ## Procedencia
 

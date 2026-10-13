@@ -5,6 +5,7 @@ from fastapi import FastAPI,HTTPException
 from fastapi.responses import FileResponse,Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
+from app.redteam import COMMANDS as REDTEAM_COMMANDS,run as run_redteam
 from asyncua import Client,ua
 from asyncua.crypto.security_policies import SecurityPolicyBasic256Sha256
 HOSTS=['ws-corporate','ws-vendor','ws-engineering','ws-hmi','ws-soc']
@@ -27,6 +28,17 @@ def modbus(fc=3,value=2):
 def health():return {'status':'ok'}
 @app.get('/api/state')
 def state():return {'process':CACHE.get('process'),'gateway':CACHE.get('gateway'),'endpoints':CACHE.get('endpoints',{}),'policies':STATE,'events':EVENTS[-30:],'history':HISTORY[-90:],'last_update':CACHE.get('last_update'),'errors':CACHE.get('errors',[])}
+@app.get('/api/redteam/catalog')
+def redteam_catalog():return __import__('json').loads(Path('/lab/app/redteam-catalog.json').read_text())
+@app.get('/api/anatomy')
+def anatomy():
+ return {'source':Path('/lab/plc/control_logic.py').read_text(),'source_path':'plc/control_logic.py','process':CACHE.get('process'),'gateway':CACHE.get('gateway'),'notice':'Actual classroom Python source; not firmware or safety-certified PLC code'}
+class WiringRequest(BaseModel):signal:str;connected:bool
+@app.post('/api/anatomy/wiring')
+async def anatomy_wiring(r:WiringRequest):
+ if r.signal not in ['AI0','DI0']:raise HTTPException(400,'Fixed educational inputs only')
+ async with httpx.AsyncClient(timeout=5) as c:
+  x=await c.post('http://plc:8001/wiring',json=r.model_dump());x.raise_for_status();return x.json()
 @app.get('/api/training-artifact')
 def artifact():return Response('RETAIL OT TRAINING MARKER — BENIGN, NON EXECUTABLE\n',media_type='text/plain')
 @app.post('/api/command')
@@ -50,6 +62,7 @@ async def action(r:Action):
  if r.host not in HOSTS:raise HTTPException(400,'Fixed hosts only')
  async with httpx.AsyncClient(timeout=10) as client:
   c=r.command
+  if c in REDTEAM_COMMANDS:return await run_redteam(c,client,event,r.host)
   if c=='simulate defrost':
    if STATE['access'] and r.host!='ws-engineering':return event('defrost','blocked','Training role gate: engineering only',r.host)
    try:res=await asyncio.to_thread(modbus,6,50)

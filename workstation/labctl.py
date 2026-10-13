@@ -1,6 +1,7 @@
 #!/opt/venv/bin/python
 import sys,json,urllib.request,urllib.error
 args=sys.argv[1:];allowed=['status','inventory','baseline','simulate defrost','simulate malware','simulate lateral','simulate firmware','simulate opcua','harden os','harden application','harden plc','harden network','harden access','harden opcua','harden supply-chain','detect','recover','reset','evidence']
+allowed += ['redteam baseline', 'redteam modbus-write', 'redteam modbus-fc16', 'redteam modbus-sensor', 'redteam modbus-burst', 'redteam opcua-anonymous', 'redteam opcua-observer', 'redteam opcua-engineer', 'redteam opcua-overrange', 'redteam opcua-browse', 'harden modbus', 'harden inputs', 'harden write-rate', 'harden opcua-rbac', 'harden opcua-channel', 'redteam fc06-only']
 cmd=' '.join(args)
 if cmd not in allowed:print('Comandos: '+' | '.join(allowed));sys.exit(2)
 req=urllib.request.Request('http://127.0.0.1:8010/command',data=json.dumps({'command':cmd}).encode(),headers={'Content-Type':'application/json'})

@@ -36,6 +36,9 @@ def contain():
 @app.post('/command')
 async def command(r:Request):
  c=r.command
+ if c in ['redteam baseline', 'redteam modbus-write', 'redteam modbus-fc16', 'redteam modbus-sensor', 'redteam modbus-burst', 'redteam opcua-anonymous', 'redteam opcua-observer', 'redteam opcua-engineer', 'redteam opcua-overrange', 'redteam opcua-browse', 'harden modbus', 'harden inputs', 'harden write-rate', 'harden opcua-rbac', 'harden opcua-channel', 'redteam fc06-only']:
+  async with httpx.AsyncClient(timeout=18) as client:
+   x=await client.post('http://panel:8000/api/action',json={'command':c,'host':HOST,'role':ROLE});x.raise_for_status();return x.json()
  if c=='status':return health()
  if c=='inventory':
   out=subprocess.run(['osqueryi','--json','SELECT hostname,cpu_type,physical_memory FROM system_info;'],capture_output=True,text=True);return {'source':'osqueryi','rows':json.loads(out.stdout or '[]')}

@@ -1,0 +1,105 @@
+{
+  "checks": [
+    {
+      "name": "module 10 selected",
+      "passed": true
+    },
+    {
+      "name": "Mantine practices mounted",
+      "passed": true
+    },
+    {
+      "name": "canvas visible",
+      "passed": true
+    },
+    {
+      "name": "signals visible",
+      "passed": true
+    },
+    {
+      "name": "actual CPU code shown",
+      "passed": true
+    },
+    {
+      "name": "desktop inspector leaves twin unobscured",
+      "passed": true
+    },
+    {
+      "name": "click I/O opens wiring explanation",
+      "passed": true
+    },
+    {
+      "name": "UI switch updates actual PLC",
+      "passed": true
+    },
+    {
+      "name": "UI action shows guarded fallback alarm",
+      "passed": true
+    },
+    {
+      "name": "keyboard selects Anatomy CPU",
+      "passed": true
+    },
+    {
+      "name": "sensor bias impact visible in twin",
+      "passed": true
+    },
+    {
+      "name": "UI step returns actual FC06 result",
+      "passed": true
+    },
+    {
+      "name": "step result did not unmount practice",
+      "passed": true
+    },
+    {
+      "name": "switching tabs keeps twin",
+      "passed": true
+    },
+    {
+      "name": "Red Team remounts correctly",
+      "passed": true
+    },
+    {
+      "name": "no browser JavaScript errors",
+      "passed": true
+    },
+    {
+      "name": "no suggested workshop duration",
+      "passed": true
+    }
+  ],
+  "passed": true,
+  "screenshots": [
+    {
+      "file": "10-redteam-modbus-opcua.png",
+      "caption": "Módulo 10 con seis prácticas, hardening e impacto sobre el mismo gemelo.",
+      "url": "http://127.0.0.1:8090/labs/10",
+      "source": "Captura real del laboratorio ampliado: sin composición ni telemetría inventada."
+    },
+    {
+      "file": "11-anatomy-cpu-codigo.png",
+      "caption": "Código real de CPU y despiece seleccionable con supermercado visible al lado.",
+      "url": "http://127.0.0.1:8090/labs/10",
+      "source": "Captura real del laboratorio ampliado: sin composición ni telemetría inventada."
+    },
+    {
+      "file": "12-anatomy-io-desconectada.png",
+      "caption": "AI0 desconectada desde inspector: misma señal del PLC y estado del gemelo.",
+      "url": "http://127.0.0.1:8090/labs/10",
+      "source": "Captura real del laboratorio ampliado: sin composición ni telemetría inventada."
+    },
+    {
+      "file": "13-anatomy-io-hardening.png",
+      "caption": "Hardening de entrada y respaldo ideal del simulador con alarma: no sensor físico redundante.",
+      "url": "http://127.0.0.1:8090/labs/10",
+      "source": "Captura real del laboratorio ampliado: sin composición ni telemetría inventada."
+    },
+    {
+      "file": "14-redteam-sensor-impacto.png",
+      "caption": "Lectura de sensor falsa, compresor detenido y señal divergente visible en el gemelo.",
+      "url": "http://127.0.0.1:8090/labs/10",
+      "source": "Captura real del laboratorio ampliado: sin composición ni telemetría inventada."
+    }
+  ]
+}

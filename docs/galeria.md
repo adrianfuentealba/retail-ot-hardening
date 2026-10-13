@@ -38,3 +38,26 @@ Capturas reales de servicios Docker locales, sin imágenes generadas ni datos fi
 
 ![Escritorio Linux HMI noVNC con terminal de estudiante y osquery real.](screenshots/09-hmi-novnc-linux.png)
 
+
+## Módulo 10 · Red / Purple Team y Anatomy activo
+
+### Módulo 10 con seis prácticas, hardening e impacto sobre el mismo gemelo.
+
+![Módulo 10 con seis prácticas, hardening e impacto sobre el mismo gemelo.](screenshots/10-redteam-modbus-opcua.png)
+
+### Código real de CPU y despiece seleccionable con supermercado visible al lado.
+
+![Código real de CPU y despiece seleccionable con supermercado visible al lado.](screenshots/11-anatomy-cpu-codigo.png)
+
+### AI0 desconectada desde inspector: misma señal del PLC y estado del gemelo.
+
+![AI0 desconectada desde inspector: misma señal del PLC y estado del gemelo.](screenshots/12-anatomy-io-desconectada.png)
+
+### Hardening de entrada y respaldo ideal del simulador con alarma: no sensor físico redundante.
+
+![Hardening de entrada y respaldo ideal del simulador con alarma: no sensor físico redundante.](screenshots/13-anatomy-io-hardening.png)
+
+### Lectura de sensor falsa, compresor detenido y señal divergente visible en el gemelo.
+
+![Lectura de sensor falsa, compresor detenido y señal divergente visible en el gemelo.](screenshots/14-redteam-sensor-impacto.png)
+

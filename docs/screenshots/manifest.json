@@ -52,5 +52,35 @@
     "caption": "Escritorio Linux HMI noVNC con terminal de estudiante y osquery real.",
     "url": "http://127.0.0.1:6084/vnc.html?autoconnect=true&resize=remote",
     "source": "Captura real de servicios Docker locales; sin composición ni datos inventados."
+  },
+  {
+    "file": "10-redteam-modbus-opcua.png",
+    "caption": "Módulo 10 con seis prácticas, hardening e impacto sobre el mismo gemelo.",
+    "url": "http://127.0.0.1:8090/labs/10",
+    "source": "Captura real del laboratorio ampliado: sin composición ni telemetría inventada."
+  },
+  {
+    "file": "11-anatomy-cpu-codigo.png",
+    "caption": "Código real de CPU y despiece seleccionable con supermercado visible al lado.",
+    "url": "http://127.0.0.1:8090/labs/10",
+    "source": "Captura real del laboratorio ampliado: sin composición ni telemetría inventada."
+  },
+  {
+    "file": "12-anatomy-io-desconectada.png",
+    "caption": "AI0 desconectada desde inspector: misma señal del PLC y estado del gemelo.",
+    "url": "http://127.0.0.1:8090/labs/10",
+    "source": "Captura real del laboratorio ampliado: sin composición ni telemetría inventada."
+  },
+  {
+    "file": "13-anatomy-io-hardening.png",
+    "caption": "Hardening de entrada y respaldo ideal del simulador con alarma: no sensor físico redundante.",
+    "url": "http://127.0.0.1:8090/labs/10",
+    "source": "Captura real del laboratorio ampliado: sin composición ni telemetría inventada."
+  },
+  {
+    "file": "14-redteam-sensor-impacto.png",
+    "caption": "Lectura de sensor falsa, compresor detenido y señal divergente visible en el gemelo.",
+    "url": "http://127.0.0.1:8090/labs/10",
+    "source": "Captura real del laboratorio ampliado: sin composición ni telemetría inventada."
   }
 ]

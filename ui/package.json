@@ -1,0 +1,1 @@
+{"name":"retail-ot-ui-islands","private":true,"version":"1.1.0","type":"module","scripts":{"build":"esbuild instructor.jsx --bundle --format=esm --minify --outfile=../app/static/instructor.bundle.js"},"dependencies":{"react":"19.1.1","react-dom":"19.1.1","@mantine/core":"8.3.1","@mantine/hooks":"8.3.1"},"devDependencies":{"esbuild":"0.25.10"}}
