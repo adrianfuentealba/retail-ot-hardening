@@ -1,0 +1,62 @@
+<h1 id="validacion-del-modulo-10-y-anatomy-activo">Validación del módulo 10 y Anatomy activo</h1>
+<p>Ampliación ejecutada sobre el laboratorio Docker local, contenedores Linux ARM64. No se añadieron puertos de protocolo públicos ni acceso al socket Docker. Los servicios conservan bind loopback y el expediente anterior permanece en volúmenes.</p>
+<h2 id="resultados">Resultados</h2>
+<table>
+<thead>
+<tr>
+<th>Comprobación</th>
+<th>Resultado</th>
+<th>Evidencia reproducible</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Lógica CPU y contrato estático</td>
+<td>13/13 PASS</td>
+<td><code>python3 -m unittest discover -s tests -v</code></td>
+</tr>
+<tr>
+<td>Módulo Red/Purple Team end-to-end</td>
+<td>28/28 PASS</td>
+<td><code>redteam-verification-results.json</code>, <code>scripts/verify-redteam.py</code></td>
+</tr>
+<tr>
+<td>Regresión de escenarios anteriores</td>
+<td>39/39 PASS</td>
+<td><code>verification-results.json</code>, <code>scripts/verify-lab.py</code></td>
+</tr>
+<tr>
+<td>UI e inspector en Chromium escritorio</td>
+<td>17/17 PASS</td>
+<td><code>redteam-ui-verification.json</code></td>
+</tr>
+<tr>
+<td>Observabilidad reforzada anterior</td>
+<td>58/58 PASS en ejecución previa</td>
+<td><code>observability-verification-results.json</code>; no se presenta como una nueva suite de este turno</td>
+</tr>
+</tbody>
+</table>
+<h2 id="que-se-comprobo">Qué se comprobó</h2>
+<p>Escrituras TCP reales FC06/FC16 y respuestas de excepción; impacto en la misma térmica que usa el gemelo; denylist FC06 incompleta frente a FC16; allowlist función/dirección/valor; señal de sensor sesgada y escritura remota protegida; ráfaga finita de ocho operaciones y rechazos de tasa sin romper FC03; OPC UA Write None y cifrado; observador denegado por servidor y usuario de ingeniería autorizado; valor inseguro denegado aunque ingeniería tenga permiso; endpoint solo SignAndEncrypt con Browse/Read y Write legítimos conservados. PCAP/Tshark captura FC16 y la alerta Suricata se indexa en Elastic.</p>
+<p>En UI se comprobó selección del módulo, canvas visible, señales, código CPU servido desde archivo real, inspector lateral sin invadir la escena, selección de piezas por ratón y teclado, explicación PT100/contactor, desconexión real de AI0 por switch y alarma/respaldo después de proteger entrada. También respuesta real de FC06 desde botón, conservación del panel tras ejecutar, cambio de pestaña sin perder canvas, ausencia de errores JavaScript y ausencia de duración sugerida.</p>
+<p>Cinco capturas nuevas documentan módulo 10, CPU, señal desconectada, entrada protegida y sesgo de sensor. Se conservan las nueve anteriores como documentación histórica. La UI final usa un mismo evento de snapshot para escena y tarjetas Mantine, evitando mostrar dos polls distintos en capturas.</p>
+<h2 id="correcciones-que-se-verificaron">Correcciones que se verificaron</h2>
+<ul>
+<li>La capa de servicios de asyncua denegaba Write de todos los usuarios cifrados antes del control fino. Se permitió Read/Browse y Write llegar al guard de nodo; administración remota de nodos no se habilitó. Se verificó Write 3 °C de ingeniería y BadUserAccessDenied del observador.</li>
+<li>None se retiró del catálogo de endpoint del servidor, no solo del cliente. El rechazo por falta de endpoint compatible se diferencia de error de conexión/servidor. Un canal seguro legítimo debe seguir funcionando para considerar exitoso el control.</li>
+<li>El inspector fue alineado al panel de trabajo real, manteniendo escena completa a la izquierda en escritorio ancho.</li>
+<li>La prueba de switches usa su etiqueta visible; espera la reconexión registrada antes de repetir desconexión. No se cambió backend para simular un éxito.</li>
+<li>Validación de FC16 es atómica y la lógica es común con FC06/OPC UA, evitando una ruta de escritura equivalente sin interlock.</li>
+</ul>
+<h2 id="limites-que-no-se-deben-ocultar">Límites que no se deben ocultar</h2>
+<p>El código es un PLC ficticio Python, no firmware industrial ni SIS. La física, alarma, stock y los estados eléctricos son modelos educativos. <code>input_guard</code> usa una referencia ideal de temperatura del simulador: en planta se necesita redundancia física/diagnóstico y análisis de riesgo operacional. El banco Anatomy es una API pedagógica fuera de banda, no acceso físico remoto.</p>
+<p>Las identidades OPC UA y el certificado/clave compartidos son públicos de aula, no PKI productiva. NoVNC/ELK continúan sin autenticación y solo en loopback. Todas las pruebas de protocolo parten del orquestador a gateway; cinco roles no son cinco orígenes de protocolo independientes. No hay MITM, flood, explotación de CVE, malware ni pentest contra tiendas reales. La ráfaga no demuestra un DoS. Las firmas simples FC06/FC16 requieren payload alineado; no son un IDS ICS completo ni descifran Write cifrado.</p>
+<p>ARM64 se ejecutó; amd64 conserva dependencias, sin nueva matriz funcional. El flujo visual se verificó a 1600×1050 y se inspeccionó en navegador estrecho; no se afirma cobertura exhaustiva de todos los dispositivos ni validación humana de una cohorte. IEC 62443/MITRE son referencias didácticas, no certificación SL-A. El repositorio público previo no cambia por la entrega local de esta ampliación.</p>
+<h2 id="reproducir-sin-interferir-con-una-clase">Reproducir sin interferir con una clase</h2>
+<pre><code class="language-sh">docker compose up -d
+python3 -m unittest discover -s tests -v
+python3 scripts/verify-redteam.py
+python3 scripts/verify-lab.py
+</code></pre>
+<p>Ejecutar una suite después de otra; restablecen proceso y políticas sin eliminar evidencia. Usar el <a href="index.html?guide=10">tutorial del módulo</a>, <a href="index.html?guide=ref-anatomy-inspector-activo">Anatomy paso a paso</a> y <a href="index.html?guide=ref-mapa-implementacion-modulo-10">mapa de implementación</a>. No evaluar a alumnos por velocidad ni convertir polling/plazos legales en duración de resolución.</p>

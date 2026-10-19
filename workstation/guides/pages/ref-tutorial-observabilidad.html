@@ -1,0 +1,205 @@
+<h1 id="tutorial-de-observabilidad-cinco-estaciones-linux-y-elastic-stack">Tutorial de observabilidad: cinco estaciones Linux y Elastic Stack</h1>
+<h2 id="objetivo-y-criterio-de-exito">Objetivo y criterio de éxito</h2>
+<p>El alumno debe demostrar una <strong>acción permitida, proceso real observado por osquery, control aplicado y reintento bloqueado</strong>. Debe identificar el endpoint y la ventana temporal en Elasticsearch/Kibana, y distinguir un registro del agente de una observación independiente. El SOC reúne evidencia; no ejecuta SQL mágicamente sobre otros hosts.</p>
+<blockquote>
+<p>Aula aislada y autorizada. Todos los puertos publicados están en <code>127.0.0.1</code>. noVNC y Elastic sin autenticación son una simplificación local, NO una configuración productiva. Los escenarios descargan un archivo de texto interno y ejecutan <code>sleep 45</code>; no hay malware operativo, cifrado, exploit, acceso a tiendas reales ni exfiltración.</p>
+</blockquote>
+<h2 id="1-arrancar-y-asignar-roles">1. Arrancar y asignar roles</h2>
+<p>En la terminal del anfitrión, dentro del repositorio:</p>
+<pre><code class="language-sh">docker compose up -d
+docker compose ps -a
+</code></pre>
+<p>Esperar que las cinco estaciones, PLC/gateway/panel, Elasticsearch, Logstash y Kibana estén <code>healthy</code>. <code>bootstrap</code> debe finalizar <code>Exited (0)</code>: importa los dashboards y no es un servicio permanente. Collector/sensor permanecen activos. Si algo falla, revisar:</p>
+<pre><code class="language-sh">docker compose logs --tail=60 ws-hmi logstash collector bootstrap
+</code></pre>
+<p>No usar <code>down -v</code>, porque descarta evidencia. La primera construcción necesita conexión a registries, Debian, PyPI y Elastic. Los paquetes osquery ARM64/amd64 están incluidos localmente.</p>
+<p>Abrir <a href="http://127.0.0.1:8090">portal</a> → <strong>Estaciones</strong>. Asignar:</p>
+<table>
+<thead>
+<tr>
+<th>Rol</th>
+<th>Endpoint</th>
+<th>Escritorio</th>
+<th>Dashboard</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>TI L4</td>
+<td>ws-corporate</td>
+<td>http://127.0.0.1:6081/vnc.html?autoconnect=true&amp;resize=remote</td>
+<td>http://127.0.0.1:5601/app/dashboards#/view/retail-ws-corporate</td>
+</tr>
+<tr>
+<td>Proveedor DMZ L3.5</td>
+<td>ws-vendor</td>
+<td>http://127.0.0.1:6082/vnc.html?autoconnect=true&amp;resize=remote</td>
+<td>http://127.0.0.1:5601/app/dashboards#/view/retail-ws-vendor</td>
+</tr>
+<tr>
+<td>Ingeniería L3</td>
+<td>ws-engineering</td>
+<td>http://127.0.0.1:6083/vnc.html?autoconnect=true&amp;resize=remote</td>
+<td>http://127.0.0.1:5601/app/dashboards#/view/retail-ws-engineering</td>
+</tr>
+<tr>
+<td>HMI L2</td>
+<td>ws-hmi</td>
+<td>http://127.0.0.1:6084/vnc.html?autoconnect=true&amp;resize=remote</td>
+<td>http://127.0.0.1:5601/app/dashboards#/view/retail-ws-hmi</td>
+</tr>
+<tr>
+<td>SOC</td>
+<td>ws-soc</td>
+<td>http://127.0.0.1:6085/vnc.html?autoconnect=true&amp;resize=remote</td>
+<td>http://127.0.0.1:5601/app/dashboards#/view/retail-ws-soc</td>
+</tr>
+</tbody>
+</table>
+<p>El dashboard general es <a href="http://127.0.0.1:5601/app/dashboards#/view/retail-overview">Centro de operaciones</a>. Incluye conteos por activo y fuente, y cuatro tablas: endpoint, osquery, proceso/control y alertas Suricata. <strong>Un documento no equivale a un incidente único</strong>. Los cinco dashboards filtran automáticamente por host.</p>
+<p>En el portal restablecer aula antes de comenzar; coordinar para no interrumpir a otra cohorte. La escena sigue visible mientras se usan las pestañas o las ventanas noVNC/Kibana.</p>
+<h2 id="2-como-viaja-la-evidencia">2. Cómo viaja la evidencia</h2>
+<pre><code class="language-text">Cinco Linux/XFCE/noVNC
+ ├─ labctl → API local → acciones Linux reales y guards de aula
+ │                        └─ /evidence/endpoint.jsonl
+ └─ osqueryd → SQL local programado → /evidence/osquery/*.log
+                      ↓ volúmenes montados read-only
+Collector → normalización → TCP JSON lines interno :5044
+                      ↓
+Logstash → índice retail-ot-AAAA.MM.DD en Elasticsearch
+                      ↓
+Kibana → dashboard general + cinco dashboards por host
+
+PLC/gateway/panel → sus registros ────────┐
+Suricata → EVE y Tshark → PCAP ───────────┘ → Collector
+</code></pre>
+<p>No se usa Elastic Agent, Fleet ni Beats: el envío de esta aula se hace por collector propio. TCP 5044 acepta <strong>JSON lines</strong>, no el protocolo Beats. Los flags <code>--disable_events=true</code> desactivan publishers de eventos osquery; aquí se usan <strong>tablas consultadas periódicamente</strong>, no auditd/eBPF. Process/download/config cada 5 s, inventory cada 30 s y listeners cada 15 s. El collector recorre fuentes cada 2 s; Kibana refresca cada 5 s. El transporte no tiene ack aplicativo/exactly-once ni custodia forense certificada.</p>
+<h2 id="3-preparar-la-hmi-y-linea-base">3. Preparar la HMI y línea base</h2>
+<p>En noVNC HMI, abrir <strong>Terminal del laboratorio</strong> con doble clic. Si XFCE pregunta si confiar en un lanzador, leer el nombre y elegir lanzarlo; alternativamente <strong>Applications → Terminal Emulator</strong>. Usar el menú de portapapeles de noVNC para pegar si el navegador captura atajos.</p>
+<p>Todos los siguientes comandos se ejecutan <strong>en la terminal de ws-hmi</strong>, salvo que se indique anfitrión.</p>
+<pre><code class="language-sh">whoami
+hostname
+date -u +%Y-%m-%dT%H:%M:%SZ
+labctl status
+labctl inventory
+</code></pre>
+<p>Esperado: <code>student</code>, <code>ws-hmi</code>, versión osquery 5.23.1, políticas iniciales <code>false</code>. La hora UTC fija la ventana de comparación; Kibana puede presentar hora local.</p>
+<pre><code class="language-sh">osqueryi --json &quot;SELECT hostname,cpu_type FROM system_info;&quot;
+osqueryi --json &quot;SELECT path,mode,uid,gid FROM file WHERE path='/home/student/lab/controller.conf';&quot;
+osqueryi --json &quot;SELECT pid,name,cmdline,uid FROM processes WHERE name='sleep' AND cmdline LIKE '%retail-benign-malware%';&quot;
+</code></pre>
+<p>La configuración inicial es modo <code>0666</code>, propietario estudiante. La consulta de <code>sleep</code> puede estar vacía antes del escenario: registrar <strong>no observado en esa consulta</strong>, no “host libre de malware”. Filtrar por <code>name='sleep'</code> evita confundir el propio proceso osqueryi con la evidencia buscada.</p>
+<h2 id="4-actividad-permitida-y-observacion-independiente">4. Actividad permitida y observación independiente</h2>
+<pre><code class="language-sh">labctl simulate malware
+</code></pre>
+<p>La respuesta debe indicar <code>event.action=malware-emulation</code> y <code>event.outcome=success</code>. El agente descarga desde <code>http://panel:8000/api/training-artifact</code>, escribe <code>retail-marker.txt</code> y crea un proceso benigno de 45 s. <strong>No descargar ni ejecutar archivos de Internet ajenos al aula.</strong></p>
+<p>Ejecutar inmediatamente:</p>
+<pre><code class="language-sh">osqueryi --json &quot;SELECT pid,name,cmdline,uid FROM processes WHERE name='sleep' AND cmdline LIKE '%retail-benign-malware%';&quot;
+osqueryi --json &quot;SELECT path,mode,uid,size FROM file WHERE path='/home/student/lab/downloads/retail-marker.txt';&quot;
+</code></pre>
+<p>Esperado: nombre <code>sleep</code>, cmdline <code>retail-benign-malware 45</code>, UID <code>1000</code>. El texto se crea por el agente root: no asumir que su propietario es estudiante. Registrar PID y tamaño real, no inventarlos.</p>
+<p>En <a href="http://127.0.0.1:5601/app/dashboards#/view/retail-ws-hmi">dashboard HMI</a>, últimos 15 min, refresco 5 s:</p>
+<ul>
+<li><strong>Acciones Linux:</strong> <code>malware-emulation</code>, <code>success</code>.</li>
+<li><strong>osquery:</strong> <code>processes</code>, <code>added</code>, cmdline del proceso y host HMI.</li>
+<li><strong>Todos los eventos:</strong> línea temporal del mismo host.</li>
+</ul>
+<p>Para búsquedas precisas usar Discover → data view <code>retail-ot-*</code>, y pegar <strong>KQL</strong>:</p>
+<pre><code class="language-kql">host.name : &quot;ws-hmi&quot; AND event.dataset : &quot;lab.endpoint&quot; AND event.action : &quot;malware-emulation&quot;
+</code></pre>
+<pre><code class="language-kql">host.name : &quot;ws-hmi&quot; AND event.dataset : &quot;osquery&quot; AND osquery.name : &quot;processes&quot; AND osquery.columns.name : &quot;sleep&quot;
+</code></pre>
+<pre><code class="language-kql">host.name : &quot;ws-hmi&quot; AND event.dataset : &quot;osquery&quot; AND osquery.name : &quot;downloads&quot;
+</code></pre>
+<p>Abrir una fila y revisar <code>_id</code>, <code>@timestamp</code>, <code>host.name</code>, <code>event.dataset</code>, <code>osquery.columns</code>. El agente acredita lo que intentó; osquery acredita lo que vio en Linux. <strong>No son el mismo registro duplicado.</strong> Si el proceso termina antes de observarlo, repetir después de restablecer, documentando el reintento.</p>
+<h2 id="5-hardening-de-aplicacion-y-reintento">5. Hardening de aplicación y reintento</h2>
+<pre><code class="language-sh">labctl harden application
+labctl simulate malware
+</code></pre>
+<p>El primer comando activa el guard del agente y termina los procesos benignos que este creó. El segundo todavía descarga texto, pero responde <code>blocked</code> y no inicia un nuevo <code>sleep</code>.</p>
+<pre><code class="language-sh">osqueryi --json &quot;SELECT pid,name,cmdline FROM processes WHERE name='sleep' AND cmdline LIKE '%retail-benign-malware%';&quot;
+</code></pre>
+<p>Esperado: sin proceso lanzado por el escenario. En Kibana buscar:</p>
+<pre><code class="language-kql">host.name : &quot;ws-hmi&quot; AND event.dataset : &quot;lab.endpoint&quot; AND event.outcome : &quot;blocked&quot;
+</code></pre>
+<p>La política <strong>no es antivirus ni allowlisting global del kernel</strong>. Un usuario puede ejecutar otros comandos Linux: no afirmar que se bloquea toda ejecución maliciosa del sistema. El control limita el lanzador del ejercicio. La evidencia osquery del proceso puede mostrar <code>removed</code> en el siguiente ciclo.</p>
+<h2 id="6-hardening-de-permisos-y-evidencia-diferencial">6. Hardening de permisos y evidencia diferencial</h2>
+<pre><code class="language-sh">labctl harden os
+stat -c '%a:%U:%G' /home/student/lab/controller.conf
+osqueryi --json &quot;SELECT path,mode,uid,gid FROM file WHERE path='/home/student/lab/controller.conf';&quot;
+</code></pre>
+<p>Esperado: <code>640:root:student</code>, UID <code>0</code>, GID del grupo estudiante. Prueba real como alumno:</p>
+<pre><code class="language-sh">printf 'student-write-test\n' &gt;&gt; /home/student/lab/controller.conf
+</code></pre>
+<p>Esperado: <strong>Permission denied</strong>; no modifica archivo. El alumno conserva lectura por grupo, pero pierde escritura. El agente root sigue pudiendo aplicar los cambios de aula; no equivale a SELinux/AppArmor ni separación completa de funciones.</p>
+<p>En Kibana:</p>
+<pre><code class="language-kql">host.name : &quot;ws-hmi&quot; AND event.dataset : &quot;osquery&quot; AND osquery.name : &quot;config_integrity&quot;
+</code></pre>
+<p>Comparar filas <code>added/removed</code>, <code>osquery.columns.mode</code>, UID y SHA256. Cambiar permisos no necesariamente cambia hash del contenido. Esta distinción es parte de la evaluación.</p>
+<h2 id="7-proveedor-y-marcadores-laterales">7. Proveedor y marcadores laterales</h2>
+<p>En portal restablecer aula, guardar antes la evidencia. En terminal noVNC <strong>ws-vendor</strong>:</p>
+<pre><code class="language-sh">labctl simulate lateral
+</code></pre>
+<p>Esperado: dos resultados <code>success</code>, destinos fijos <code>ws-engineering</code> y <code>ws-hmi</code>. Los destinos crean <code>lateral-marker.txt</code>, no se explotan credenciales ni servicios.</p>
+<p>En dashboard general/Discover:</p>
+<pre><code class="language-kql">event.dataset : &quot;lab.endpoint&quot; AND event.action : &quot;lateral&quot;
+</code></pre>
+<pre><code class="language-kql">event.dataset : &quot;osquery&quot; AND osquery.name : &quot;downloads&quot; AND osquery.columns.path : &quot;/home/student/lab/downloads/lateral-marker.txt&quot;
+</code></pre>
+<p>En la misma terminal proveedor:</p>
+<pre><code class="language-sh">labctl harden network
+labctl simulate lateral
+</code></pre>
+<p>Esperado: ambos destinos <code>blocked</code>. La pasarela también rechaza FC06 y mantiene FC03. <strong>El guard lateral actúa en las APIs de los agentes por la red training; no prueba filtrado kernel entre todas las zonas Purdue.</strong></p>
+<h2 id="8-repetir-por-los-cinco-endpoints">8. Repetir por los cinco endpoints</h2>
+<p>Restablecer aula una sola vez antes de esta ronda. Repetir secciones 3–5 en cada estación, dejando registro del host y hora. Usar su dashboard correspondiente. En el general, el gráfico “Eventos por activo” debe incluir los cinco nombres; el conteo cambia continuamente y no es un criterio fijo.</p>
+<p>La prueba automática secuencial desde anfitrión cubre esta ronda y valida además WebSocket→RFB real y eventos nuevos por host:</p>
+<pre><code class="language-sh">python3 scripts/verify-observability.py
+</code></pre>
+<p>No ejecutar junto a otro taller ni con <code>verify-lab.py</code> simultáneo: ambas restablecen estado. Resultados detallados en <code>docs/observability-verification-results.json</code>. La latencia medida es acción→documentos visibles por consulta ES, <strong>no SLA, ni MTTD, ni latencia visual completa de Kibana</strong>. Añadir hasta el próximo refresco de la UI.</p>
+<h2 id="9-evidencia-y-resolucion">9. Evidencia y resolución</h2>
+<p>En cada estación:</p>
+<pre><code class="language-sh">labctl evidence
+</code></pre>
+<p>Desde anfitrión, guardar expediente local del aula:</p>
+<pre><code class="language-sh">mkdir -p evidence
+curl -fsS http://127.0.0.1:8090/api/evidence -o evidence/panel.json
+docker compose exec -T ws-hmi cat /evidence/endpoint.jsonl &gt; evidence/ws-hmi-endpoint.jsonl
+docker compose exec -T ws-hmi cat /evidence/osquery/osqueryd.results.log &gt; evidence/ws-hmi-osquery.jsonl
+bash scripts/baseline-capture.sh
+</code></pre>
+<p><code>api/evidence</code> no exporta todos los logs Linux/Elastic por sí solo. PCAP de red no prueba un permiso de archivo local. Para concluir cada control presentar al menos <strong>dos fuentes apropiadas</strong>, con comando, host, hora UTC, <code>_id</code> del evento, resultado y límite. El reset conserva registros y marcadores: no elimina evidencias históricas del dashboard.</p>
+<h3 id="rubrica-10-puntos">Rúbrica (10 puntos)</h3>
+<table>
+<thead>
+<tr>
+<th>Criterio</th>
+<th>Puntos</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Identifica las cinco estaciones y fuentes</td>
+<td>2</td>
+</tr>
+<tr>
+<td>Correlaciona agente + proceso osquery real por host/hora</td>
+<td>2</td>
+</tr>
+<tr>
+<td>Demuestra ejecución bloqueada y proceso ausente tras control</td>
+<td>2</td>
+</tr>
+<tr>
+<td>Verifica <code>0640 root</code> y escritura denegada como estudiante</td>
+<td>2</td>
+</tr>
+<tr>
+<td>Entrega expediente, latencia y límites correctamente</td>
+<td>2</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Solución:</strong> seguir secciones 3→4→5→6; luego 7 y repetir 3→5 para los demás endpoints. Resultado correcto no consiste en que el botón cambie a verde, sino en la comparación de evidencias. Para errores: verificar host, tiempo, política, disponibilidad y logs en ese orden. No reducir controles ni exponer puertos para solucionar una búsqueda vacía.</p>
+<h2 id="referencias-de-control">Referencias de control</h2>
+<p>IEC 62443 FR2/FR3: control de uso e integridad; FR5: conductos acotados; FR6: evidencia/respuesta; FR7: continuidad. Referencias pedagógicas, no cumplimiento de cada SR ni SL-A certificado. MITRE ICS T0836/T0831 se usa en las escrituras/efectos de proceso de los talleres 04/06; los procesos benignos y marcadores laterales no demuestran una APT. Ley 21.663: preservar la evidencia para evaluar significancia y preparar el borrador de aula; no enviar notificaciones reales. Ver <code>respuesta-chile.md</code> para sujeto obligado, RACI y plazos.</p>

@@ -1,0 +1,294 @@
+<h1 id="06-opc-ua-canal-seguro-y-permisos">06 · OPC UA: canal seguro y permisos</h1>
+<blockquote>
+<p><strong>Borrador local del laboratorio Retail OT.</strong> Esta guía es autocontenida: las instrucciones se ejecutan desde la <strong>Terminal del laboratorio</strong> dentro del noVNC recomendado y las comprobaciones visuales son opcionales en el Firefox local. No hace falta volver al portal para saber qué comando ejecutar.</p>
+</blockquote>
+<h2 id="portada-y-alcance">Portada y alcance</h2>
+<p><strong>Estación recomendada:</strong> <code>ws-engineering</code>.</p>
+<p><strong>Dónde se ejecuta cada bloque:</strong> todos los bloques de shell se copian en la Terminal del laboratorio de <code>ws-engineering</code>. No se usa la consola web del portal como shell, no se cambia de host para “probar de nuevo” y no se usa el terminal del anfitrión. Si es necesario comprobar Kibana, se hace en la misma sesión de Firefox del noVNC; no es una fuente alternativa de comandos.</p>
+<p><strong>Objetivos medibles</strong></p>
+<ul>
+<li>Distinguir <strong>cifrado del canal</strong> de <strong>autorización de la variable</strong>.</li>
+<li>Comprobar una escritura OPC UA real, inicialmente permitida, sobre <code>ns=2;s=Setpoint</code>.</li>
+<li>Aplicar la política del taller: el cliente posterior usa <code>Basic256Sha256/SignAndEncrypt</code> y la variable queda de solo lectura.</li>
+<li>Comprobar que el <code>Read</code> seguro sigue funcionando y que el <code>Write</code> posterior es rechazado sin cambiar la consigna.</li>
+<li>No afirmar que el endpoint <code>None</code> fue retirado: en este taller continúa disponible internamente. La retirada de <code>None</code>, los usuarios OPC UA/RBAC y el usuario <code>engineer</code> pertenecen al <strong>módulo 10</strong>, no se deben simular aquí.</li>
+</ul>
+<p><strong>Criterio de éxito del taller:</strong> escritura inicial permitida; lectura posterior con <code>security: "SignAndEncrypt"</code>; escritura posterior con resultado <code>blocked</code>; valor leído de vuelta sin cambio; evidencia conservada con host y hora. Los timestamps, temperaturas, contadores y valores <code>before</code>/<code>readback</code> son capturados en la sesión y no se deben reemplazar por números inventados.</p>
+<h2 id="mapa-tecnico-que-se-va-a-observar">Mapa técnico que se va a observar</h2>
+<ul>
+<li>Cliente didáctico: <code>labctl simulate opcua</code> desde el agente de la estación.</li>
+<li>Ruta OPC UA fija: <code>opc.tcp://gateway:4840/retail/</code>.</li>
+<li>Nodo objetivo: <code>ns=2;s=Setpoint</code>.</li>
+<li>Antes del hardening, el servidor acepta el <code>Write</code> de <code>50.0</code> en el modelo ficticio.</li>
+<li>Después de <code>harden opcua</code>, el cliente configura <code>Basic256Sha256</code> con <code>SignAndEncrypt</code>; el servidor mantiene la variable de solo lectura. El <code>Read</code> ocurre antes del intento de escritura, por lo que una respuesta con <code>readback</code> demuestra lectura, no permiso de escritura.</li>
+<li><code>labctl simulate opcua</code> retorna una estructura distinta de <code>labctl harden opcua</code>: para la simulación, el resultado suele tener el evento en <code>.event.event.outcome</code>; para el hardening, el evento puede estar en <code>.event.outcome</code>. No asumir una ruta común ni inventar campos.</li>
+</ul>
+<p>La barrera de este taller controla <strong>el permiso de escritura de esa variable y la seguridad que configura el cliente</strong>. No implementa PKI empresarial, MFA, RBAC de usuarios, firewall transparente, TLS de Modbus ni una certificación de seguridad. El gateway solo hace túnel del tráfico OPC UA; su política TLS de Modbus no forma parte de esta práctica.</p>
+<h2 id="preparacion-coordinada">Preparación coordinada</h2>
+<p>Antes de comenzar, asignar operador/ingeniería, observador SOC y responsable de evidencia. La maqueta es compartida: no ejecutar otro escenario simultáneamente. <code>labctl reset-all</code> afecta al proceso, políticas y endpoints de las cinco estaciones; <strong>solo se ejecuta después de coordinarlo con los demás alumnos</strong>. Conserva la evidencia existente.</p>
+<h3 id="paso-01-confirmar-host-y-usuario">Paso 0.1 — Confirmar host y usuario</h3>
+<p><strong>Propósito:</strong> demostrar que los comandos se ejecutarán en el endpoint previsto y con el usuario de laboratorio, no en el anfitrión ni en otra estación.</p>
+<p><strong>Acción exacta:</strong></p>
+<pre><code class="language-sh">hostname
+</code></pre>
+<p><strong>Resultado esperado y significado:</strong> se identifica la estación actual; para este taller debe ser <code>ws-engineering</code> (la representación puede variar según el sistema). El siguiente comando confirma el usuario:</p>
+<pre><code class="language-sh">id
+</code></pre>
+<p>Debe mostrar el usuario de estudiante del laboratorio, normalmente <code>student</code>, sin exigir UID/PID inventados. <code>student</code> no tiene sudo general.</p>
+<p><strong>Segunda evidencia:</strong> comparar el host obtenido con <code>host</code>/<code>role</code> de <code>labctl status</code> y con <code>host.name</code>/<code>role</code> de los eventos de las respuestas del taller.</p>
+<p><strong>Si difiere:</strong> detenerse. Cambiar a la pestaña noVNC de <code>ws-engineering</code> y abrir allí <strong>Terminal del laboratorio</strong>. No usar un pivote, el portapapeles del anfitrión ni comandos Docker/Git/sudo para compensarlo.</p>
+<h3 id="paso-02-abrir-la-guia-local-no-instrucciones-del-portal">Paso 0.2 — Abrir la guía local, no instrucciones del portal</h3>
+<p><strong>Propósito:</strong> verificar que se usa la copia HTML/Markdown local provista para la estación.</p>
+<p><strong>Acción exacta:</strong></p>
+<pre><code class="language-sh">labctl guides
+</code></pre>
+<p><strong>Resultado esperado y significado:</strong> el comando abre o presenta la guía local de la estación; no es la interfaz del portal. La salida concreta depende de la implementación de <code>guides</code> del aula.</p>
+<p><strong>Segunda evidencia:</strong> comprobar en Firefox que la página corresponde al taller 06 y que la URL es local de la guía, no una página externa.</p>
+<p><strong>Si difiere:</strong> no buscar instrucciones en Internet ni en el portal. Conservar la salida y avisar al facilitador: la estación podría conservar una imagen anterior. Solicitar actualización desde el anfitrión siguiendo README.</p>
+<h3 id="paso-03-ver-el-gemelo-antes-de-resetear">Paso 0.3 — Ver el gemelo antes de resetear</h3>
+<p><strong>Propósito:</strong> obtener una lectura de solo consulta del proceso, gateway, endpoints, políticas y eventos recientes antes de modificar el aula.</p>
+<p><strong>Acción exacta:</strong></p>
+<pre><code class="language-sh">labctl classroom-state
+</code></pre>
+<p><strong>Resultado esperado y significado:</strong> JSON de solo lectura equivalente a <code>/api/state</code>, con claves como <code>process</code>, <code>gateway</code>, <code>endpoints</code>, <code>policies</code>, <code>events</code>, <code>history</code>, <code>last_update</code> y <code>errors</code>. Sirve para saber si hay otro escenario activo; no es por sí mismo una prueba de un paquete OPC UA.</p>
+<p><strong>Segunda evidencia:</strong> la persona observadora puede mirar el mismo estado en el Firefox local, pero se conserva como evidencia primaria el JSON de la Terminal. <code>classroom-state</code> no debe mutar el aula.</p>
+<p><strong>Si difiere:</strong> si <code>errors</code> informa PLC, gateway o endpoints no disponibles, no deducir que una barrera funcionó. Conservar el JSON y resolver la disponibilidad con el facilitador antes de continuar.</p>
+<h3 id="paso-04-restablecer-el-aula-completo-con-coordinacion">Paso 0.4 — Restablecer el aula completo, con coordinación</h3>
+<p><strong>Propósito:</strong> obtener una línea base limpia para proceso, PLC, gateway y las cinco estaciones. <code>labctl reset</code> no es equivalente: solo restablece el endpoint actual.</p>
+<p><strong>Acción exacta:</strong></p>
+<pre><code class="language-sh">labctl reset-all
+</code></pre>
+<p><strong>Resultado esperado y significado:</strong> evento de reset de aula con proceso y políticas globales restablecidos; la evidencia histórica no se borra. El evento global debe acreditarse con una consulta posterior de <code>classroom-state</code>. Este comando puede interrumpir el trabajo de otros alumnos.</p>
+<p><strong>Segunda evidencia:</strong> volver a leer el estado:</p>
+<pre><code class="language-sh">labctl classroom-state
+</code></pre>
+<p>Tras el reset, el estado debe mostrar el PLC en su línea nominal, políticas de este escenario desactivadas y endpoints disponibles. No se requiere que todos los campos aparezcan instantáneamente; un <code>errors</code> no vacío es una discrepancia a diagnosticar, no un éxito.</p>
+<p><strong>Si difiere:</strong> no sustituirlo por cinco <code>labctl reset</code> ni continuar con una línea base desconocida. Coordinar el aula, guardar las dos salidas y repetir el reset-all solo cuando no haya una sesión concurrente.</p>
+<h3 id="paso-05-capturar-identidad-estado-e-inventario-de-linea-base">Paso 0.5 — Capturar identidad, estado e inventario de línea base</h3>
+<p><strong>Propósito:</strong> dejar evidencia reproducible del host, agente y permisos locales antes de la primera escritura.</p>
+<p><strong>Acción exacta, un bloque por comando:</strong></p>
+<pre><code class="language-sh">labctl status
+</code></pre>
+<pre><code class="language-sh">labctl inventory
+</code></pre>
+<pre><code class="language-sh">labctl baseline
+</code></pre>
+<p><strong>Resultado esperado y significado:</strong></p>
+<ul>
+<li><code>status</code> devuelve la salud del agente, el host/rol, las políticas locales y la modalidad del archivo de configuración; no es un certificado de seguridad.</li>
+<li><code>inventory</code> devuelve JSON de <code>osqueryi</code> con filas de inventario local.</li>
+<li><code>baseline</code> devuelve una consulta manual de <code>controller.conf</code> y el estado local. En una línea base limpia el archivo educativo suele ser escribible por <code>student</code> (<code>0666</code> y propietario de estudiante); confirmar los campos reales, sin copiar un UID o modo no observado.</li>
+</ul>
+<p>Los wrappers no son uniformes: algunas acciones retornan una fila de evento, otras <code>{event, ...}</code>. Leer los campos presentes en cada respuesta.</p>
+<p><strong>Segunda evidencia:</strong> guardar los tres resultados junto con <code>hostname</code> e <code>id</code> en <code>~/lab/evidencias/taller-06/</code> cuando se cree esa carpeta en el paso de evidencia. Para el proceso/PLC usar además <code>labctl classroom-state</code>; no confundir <code>baseline</code> del endpoint con una lectura del PLC.</p>
+<p><strong>Si difiere:</strong> si aparecen políticas OPC UA activas antes de la prueba, si el host no es <code>ws-engineering</code> o si el endpoint no responde, no ejecutar la escritura inicial. Registrar la salida y coordinar un nuevo <code>reset-all</code>.</p>
+<h2 id="acciones-opc-ua">Acciones OPC UA</h2>
+<h3 id="paso-1-probar-el-write-inicial-con-none">Paso 1 — Probar el <code>Write</code> inicial con <code>None</code></h3>
+<p><strong>Propósito:</strong> reproducir de forma benigna el riesgo de una escritura OPC UA sin canal seguro ni autorización de solo lectura. Es una demostración controlada de <strong>MITRE ATT&amp;CK for ICS T0836 Modify Parameter</strong>, no una intrusión ni una prueba contra un equipo real.</p>
+<p><strong>Preparación de evidencia:</strong></p>
+<pre><code class="language-sh">mkdir -p ~/lab/evidencias/taller-06
+</code></pre>
+<p><strong>Acción exacta:</strong></p>
+<pre><code class="language-sh">labctl simulate opcua | tee ~/lab/evidencias/taller-06/01-opcua-none.json
+</code></pre>
+<p><strong>Resultado esperado y significado:</strong> en una línea base limpia, la respuesta debe indicar:</p>
+<ul>
+<li><code>security</code> igual a <code>"None"</code>;</li>
+<li><code>event.event.action</code> igual a <code>"opcua-write"</code>;</li>
+<li><code>event.event.outcome</code> igual a <code>"success"</code>;</li>
+<li><code>readback</code> igual a <code>50.0</code> (o el formato numérico equivalente), porque la escritura sobre <code>ns=2;s=Setpoint</code> fue aceptada;</li>
+<li><code>before</code> es el valor capturado antes de escribir y no se debe inventar. Tras un reset limpio normalmente representa la consigna nominal del modelo, pero solo la salida real es evidencia.</li>
+</ul>
+<p>La respuesta combina el <code>Read</code> previo, el <code>Write</code> real y la lectura de vuelta. <code>success</code> aquí significa que el servidor aceptó la escritura; no significa que exista un canal confidencial ni que se haya demostrado seguridad física.</p>
+<p><strong>Segunda evidencia:</strong> consultar el gemelo sin mutarlo:</p>
+<pre><code class="language-sh">labctl classroom-state | tee ~/lab/evidencias/taller-06/01-classroom-state.json
+</code></pre>
+<p>En el objeto <code>process</code>, <code>setpoint</code> debe reflejar la nueva consigna del modelo y <code>opcua_secure</code> aún debe estar desactivado. El evento más reciente debe corresponder a <code>opcua-write</code>. Esta segunda fuente es el estado/evento de aplicación; la evidencia primaria de aceptación sigue siendo la respuesta OPC UA del comando.</p>
+<p><strong>Si difiere:</strong></p>
+<ul>
+<li>Si el resultado ya es <code>blocked</code>, <code>security</code> ya es <code>SignAndEncrypt</code> o el estado muestra políticas activas, la línea base no estaba limpia: conservar ambas salidas y coordinar <code>reset-all</code>.</li>
+<li>Si hay <code>OPC UA error</code>, endpoint no disponible o <code>process</code> nulo, no convertir un fallo de infraestructura en un bloqueo de seguridad; revisar <code>errors</code> y detenerse.</li>
+<li>Si <code>event.event.outcome</code> es <code>success</code> pero <code>readback</code> no refleja el valor solicitado, conservar la respuesta completa y revisar el estado del PLC; no repetir a ciegas.</li>
+</ul>
+<h3 id="paso-2-aplicar-la-barrera-de-variable-de-solo-lectura">Paso 2 — Aplicar la barrera de variable de solo lectura</h3>
+<p><strong>Propósito:</strong> activar la protección específica de OPC UA del taller. Esta acción no habilita RBAC de usuarios ni retira automáticamente el endpoint <code>None</code>.</p>
+<p><strong>Acción exacta:</strong></p>
+<pre><code class="language-sh">labctl harden opcua | tee ~/lab/evidencias/taller-06/02-harden-opcua.json
+</code></pre>
+<p><strong>Resultado esperado y significado:</strong> respuesta de evento de aplicación con <code>event.action: "harden-opcua"</code> y <code>event.outcome: "success"</code> cuando la política del PLC se aplicó. En esta acción el evento puede estar en la raíz, por lo que no se debe buscar <code>.event.event.outcome</code> por costumbre.</p>
+<p><strong>Segunda evidencia:</strong></p>
+<pre><code class="language-sh">labctl classroom-state | tee ~/lab/evidencias/taller-06/02-classroom-state.json
+</code></pre>
+<p>En <code>process</code> verificar <code>opcua_secure: true</code>. <code>opcua_tls_only</code> no debe interpretarse como true por este taller: <code>None</code> sigue siendo una opción interna. El estado también permite comprobar que el proceso sigue siendo el mismo y que no se cambió de host.</p>
+<p><strong>Si difiere:</strong></p>
+<ul>
+<li>Si el evento no es exitoso o <code>opcua_secure</code> no cambia, guardar la salida, comprobar que se está en <code>ws-engineering</code> y que el PLC está disponible; no pasar al criterio final.</li>
+<li>Si el estado indica <code>opcua_tls_only: true</code> sin haber ejecutado el módulo 10, registrar la condición como estado heredado o reset incompleto; no presentarla como resultado de este paso.</li>
+<li>Si el comando aparece como no permitido, no usar <code>harden opcua-rbac</code> o <code>harden opcua-channel</code> como sustituto: son controles del módulo 10.</li>
+</ul>
+<h3 id="paso-3-repetir-la-operacion-read-seguro-y-write-rechazado">Paso 3 — Repetir la operación: <code>Read</code> seguro y <code>Write</code> rechazado</h3>
+<p><strong>Propósito:</strong> repetir el mismo objetivo sin cambiar estación ni nodo y separar dos afirmaciones: la lectura funciona mediante un canal configurado por el cliente, mientras la escritura es rechazada por autorización de la variable.</p>
+<p><strong>Acción exacta:</strong></p>
+<pre><code class="language-sh">labctl simulate opcua | tee ~/lab/evidencias/taller-06/03-opcua-secure-readonly.json
+</code></pre>
+<p>Ejecutar cuando <code>classroom-state</code> refleje la política aplicada; no medir ni reportar el tiempo de transición como resultado del laboratorio.</p>
+<p><strong>Resultado esperado y significado:</strong></p>
+<ul>
+<li><code>security</code> igual a <code>"SignAndEncrypt"</code>;</li>
+<li><code>event.event.action</code> igual a <code>"opcua-write"</code>;</li>
+<li><code>event.event.outcome</code> igual a <code>"blocked"</code>;</li>
+<li><code>before</code> y <code>readback</code> permanecen iguales a la consigna vigente, sin mutación por el intento de escritura;</li>
+<li>la presencia de <code>before</code> y <code>readback</code> demuestra que el <code>Read</code> fue posible; <code>blocked</code> corresponde al <code>Write</code> posterior.</li>
+</ul>
+<p>El cliente usa el certificado fijado del laboratorio para esta conexión. Eso demuestra la configuración de esta prueba, no una PKI empresarial ni la identidad de una persona.</p>
+<p><strong>Segunda evidencia:</strong></p>
+<pre><code class="language-sh">labctl classroom-state | tee ~/lab/evidencias/taller-06/03-classroom-state.json
+</code></pre>
+<p>Comparar <code>process.setpoint</code> con el <code>readback</code> de la respuesta. En <code>events</code> debe quedar un evento <code>opcua-write</code> bloqueado. <code>lab.control</code> y <code>classroom-state</code> son fuentes de aplicación; deben acompañar, no reemplazar, la respuesta real del cliente OPC UA.</p>
+<p><strong>Si difiere:</strong></p>
+<ul>
+<li>Si <code>security</code> sigue siendo <code>None</code>, revisar <code>process.opcua_secure</code> y el host. No afirmar que el canal es seguro.</li>
+<li>Si el servidor rechaza la conexión por no encontrar un endpoint <code>None</code>, eso no es el resultado esperado de este taller: probablemente quedó aplicado el control <code>opcua-channel</code> del módulo 10 o faltó resetear el aula. Guardar la salida y diagnosticar el estado.</li>
+<li>Si el resultado sigue siendo <code>success</code>, la variable no quedó protegida o otro actor cambió el estado; conservar ambas respuestas y no marcar éxito.</li>
+<li>Si hay un error de preparación (<code>opcua_ready</code> falso, PLC/gateway no disponible), registrar el estado y repetir solo después de que el estado del aula confirme disponibilidad. No cambiar de estación ni transformar un error de transporte en <code>blocked</code>.</li>
+<li>Si <code>readback</code> cambia después de un <code>blocked</code>, la barrera no está demostrada; detenerse y conservar la evidencia completa.</li>
+</ul>
+<h2 id="verificacion-independiente-del-endpoint-con-osquery">Verificación independiente del endpoint con osquery</h2>
+<p>Estas consultas se ejecutan en la Terminal de <strong><code>ws-engineering</code></strong> y solo leen ese endpoint. <code>osqueryi</code> manual no es <code>osqueryd</code>: las consultas programadas de <code>osqueryd</code> llegan a ELK por separado. Un arreglo JSON vacío significa <strong>no observado en esa consulta</strong>, no ausencia absoluta de actividad. Los PID, timestamps, hashes y filas pueden variar; no rellenarlos con valores de ejemplo.</p>
+<h3 id="paso-41-version-local-de-osquery">Paso 4.1 — Versión local de osquery</h3>
+<p><strong>Propósito:</strong> confirmar que las siguientes consultas se ejecutan con el recolector local autorizado.</p>
+<pre><code class="language-sh">osqueryi --json &quot;SELECT name,version,platform FROM os_version;&quot; | tee ~/lab/evidencias/taller-06/04-os-version.json
+</code></pre>
+<p><strong>Resultado esperado y significado:</strong> uno o más objetos JSON con nombre, versión y plataforma del sistema local. Es una evidencia de endpoint, no de cifrado OPC UA.</p>
+<p><strong>Segunda evidencia:</strong> el campo <code>osquery</code> de <code>labctl status</code> y el host del propio comando deben corresponder a <code>ws-engineering</code>.</p>
+<p><strong>Si difiere:</strong> si el comando no existe o retorna error, guardar la salida y no sustituirla por una consulta ejecutada en otra estación. Si retorna <code>[]</code>, registrar “no observado”.</p>
+<h3 id="paso-42-procesos-del-ejercicio">Paso 4.2 — Procesos del ejercicio</h3>
+<p><strong>Propósito:</strong> comprobar si el endpoint tiene procesos cuyo <code>cmdline</code> contenga el marcador educativo <code>retail-</code>.</p>
+<pre><code class="language-sh">osqueryi --json &quot;SELECT pid,name,path,cmdline FROM processes WHERE cmdline LIKE '%retail-%';&quot; | tee ~/lab/evidencias/taller-06/05-processes-retail.json
+</code></pre>
+<p><strong>Resultado esperado y significado:</strong> JSON con las filas que existan en el instante de consulta; en este taller OPC UA normalmente no se espera un proceso educativo de larga duración. No se espera ni se inventa un PID. La ausencia de filas solo significa “no observado ahora”.</p>
+<p><strong>Segunda evidencia:</strong> <code>labctl classroom-state</code> y <code>labctl evidence</code> muestran eventos del agente, pero no reemplazan la consulta local de procesos.</p>
+<p><strong>Si difiere:</strong> si aparece un proceso, conservar PID y comando tal como fueron capturados y no matarlo manualmente. <code>harden application</code> no es parte de este taller; cualquier contención debe coordinarse con el facilitador.</p>
+<h3 id="paso-43-usuarios-locales">Paso 4.3 — Usuarios locales</h3>
+<p><strong>Propósito:</strong> documentar la identidad local sin confundir usuario Linux con identidad OPC UA.</p>
+<pre><code class="language-sh">osqueryi --json &quot;SELECT uid,username,shell FROM users;&quot; | tee ~/lab/evidencias/taller-06/06-users.json
+</code></pre>
+<p><strong>Resultado esperado y significado:</strong> filas de usuarios locales y sus shells. Esto no demuestra RBAC OPC UA, MFA ni autorización de la variable.</p>
+<p><strong>Segunda evidencia:</strong> comparar el usuario activo de <code>id</code> con la fila correspondiente, sin exigir una fila concreta que no haya sido observada.</p>
+<p><strong>Si difiere:</strong> si <code>student</code> no aparece o la consulta falla, guardar el JSON y tratarlo como discrepancia del endpoint; no usar usuarios del portal como sustituto.</p>
+<h3 id="paso-44-puertos-que-escucha-el-endpoint">Paso 4.4 — Puertos que escucha el endpoint</h3>
+<p><strong>Propósito:</strong> identificar listeners locales sin hacer escaneo ni afirmar que un puerto prueba una política OPC UA.</p>
+<pre><code class="language-sh">osqueryi --json &quot;SELECT pid,port,address,protocol FROM listening_ports;&quot; | tee ~/lab/evidencias/taller-06/07-listeners.json
+</code></pre>
+<p><strong>Resultado esperado y significado:</strong> filas locales de puertos, direcciones y protocolos. La salida es inventario del endpoint y no acredita que el túnel <code>gateway:4840</code> esté cifrado.</p>
+<p><strong>Segunda evidencia:</strong> el campo <code>gateway</code>/<code>endpoints</code> de <code>labctl classroom-state</code> permite observar disponibilidad del gemelo; no debe confundirse con esta lista de sockets locales.</p>
+<p><strong>Si difiere:</strong> si no hay filas, registrar “no observado”; si aparece un listener inesperado, no cerrarlo ni cambiar firewall. Coordinar diagnóstico.</p>
+<h3 id="paso-45-permisos-del-archivo-de-configuracion-local">Paso 4.5 — Permisos del archivo de configuración local</h3>
+<p><strong>Propósito:</strong> recordar el límite de alcance: este taller no aplica <code>harden os</code>; los permisos Linux son una evidencia de endpoint independiente del permiso OPC UA.</p>
+<pre><code class="language-sh">osqueryi --json &quot;SELECT path,mode,uid,gid FROM file WHERE path='/home/student/lab/controller.conf';&quot; | tee ~/lab/evidencias/taller-06/08-controller-conf.json
+</code></pre>
+<p><strong>Resultado esperado y significado:</strong> en la línea base limpia, la fila suele reflejar modo <code>0666</code> y propietario de estudiante; la representación exacta del modo y los IDs se toma de la salida real. Este archivo no es el certificado OPC UA ni el nodo <code>Setpoint</code>.</p>
+<p><strong>Segunda evidencia:</strong> <code>labctl baseline</code> consulta el mismo archivo y permite comparar el resultado manual con <code>osqueryi</code>. Las dos consultas siguen siendo evidencia del endpoint, no de la red.</p>
+<p><strong>Si difiere:</strong> no ejecutar <code>sudo chmod</code> ni convertir este taller en hardening de sistema operativo. Guardar la diferencia y, si se necesita restaurar la línea base, coordinar <code>reset-all</code>.</p>
+<h3 id="paso-46-hash-manual-del-firmware-educativo">Paso 4.6 — Hash manual del firmware educativo</h3>
+<p><strong>Propósito:</strong> conservar la consulta original de integridad como evidencia manual, dejando claro que no forma parte de la barrera OPC UA.</p>
+<pre><code class="language-sh">osqueryi --json &quot;SELECT path,sha256 FROM hash WHERE path='/home/student/lab/firmware.bin';&quot; | tee ~/lab/evidencias/taller-06/09-firmware-hash.json
+</code></pre>
+<p><strong>Resultado esperado y significado:</strong> una fila con el hash que exista en ese instante, sin publicar ni inventar un valor literal. En este taller no se ejecuta <code>simulate firmware</code>; el hash no prueba el canal OPC UA.</p>
+<p><strong>Segunda evidencia:</strong> la consulta manual es independiente de las consultas programadas de <code>osqueryd</code>; el schedule de osquery no incluye <code>firmware.bin</code> por defecto. Si se necesitara probar cadena de suministro, se haría en su taller con <code>simulate firmware</code> y <code>harden supply-chain</code>.</p>
+<p><strong>Si difiere:</strong> una lista vacía es “no observado”, no “firmware seguro”. No modificar el archivo ni atribuir un hash a una captura que no existe.</p>
+<h2 id="observabilidad-local-opcional">Observabilidad local opcional</h2>
+<p>La terminal y el Firefox del noVNC son dos vistas del mismo laboratorio. La observabilidad visual no sustituye las respuestas guardadas de la Terminal. Si se usa Kibana local, seleccionar el data view <code>retail-ot-*</code>, una ventana de últimos 15 minutos y refresco de 5 segundos. Copiar <strong>KQL</strong>, no SQL.</p>
+<h3 id="paso-51-consultas-osquery-por-estacion">Paso 5.1 — Consultas osquery por estación</h3>
+<p>En Discover ejecutar:</p>
+<pre><code class="language-kql">event.dataset : &quot;osquery&quot; AND host.name : &quot;ws-engineering&quot;
+</code></pre>
+<p><strong>Resultado esperado y significado:</strong> eventos osqueryd del endpoint <code>ws-engineering</code>, incluidos los campos <code>osquery.columns</code> y, para integridad, el nombre <code>config_integrity</code> cuando corresponda. No se espera que este filtro muestre automáticamente la consulta manual de <code>osqueryi</code>.</p>
+<p><strong>Segunda evidencia:</strong> los JSON guardados en <code>04-os-version.json</code> a <code>09-firmware-hash.json</code> son la fuente directa de cada consulta manual.</p>
+<p><strong>Si difiere:</strong> si no aparece el evento, no inventar latencia ni timestamp. Conservar la consulta local; la ausencia en Kibana no invalida ni confirma por sí sola el resultado.</p>
+<h3 id="paso-52-eventos-del-endpoint">Paso 5.2 — Eventos del endpoint</h3>
+<pre><code class="language-kql">event.dataset : &quot;lab.endpoint&quot; AND host.name : &quot;ws-engineering&quot;
+</code></pre>
+<p><strong>Resultado esperado y significado:</strong> eventos producidos por políticas o simulaciones locales del agente. La simulación OPC UA se registra principalmente como <code>lab.control</code>, por lo que este filtro puede no mostrar el <code>opcua-write</code>.</p>
+<p><strong>Segunda evidencia:</strong> <code>labctl status</code>, <code>labctl evidence</code> y <code>labctl classroom-state</code> muestran la fuente local/aplicación.</p>
+<p><strong>Si difiere:</strong> no buscar el evento bajo HMI ni cambiar el host del filtro. Registrar que el dataset esperado para la acción fue <code>lab.control</code>.</p>
+<h3 id="paso-53-eventos-de-control-opc-ua">Paso 5.3 — Eventos de control OPC UA</h3>
+<pre><code class="language-kql">event.dataset : &quot;lab.control&quot;
+</code></pre>
+<p><strong>Resultado esperado y significado:</strong> eventos <code>harden-opcua</code> y <code>opcua-write</code>, con <code>event.outcome</code> aplanado en Kibana: primero <code>success</code>, después <code>blocked</code>, y con el host de la estación solicitante o la fuente que corresponda. La vista es un log de aplicación y no una detección independiente de Suricata.</p>
+<p><strong>Segunda evidencia:</strong> comparar <code>event.outcome</code>, <code>event.action</code> y timestamp con los JSON de los pasos 1–3 y con <code>classroom-state</code>.</p>
+<p><strong>Si difiere:</strong> conservar la salida de la Terminal como fuente del protocolo. Un filtro vacío no autoriza a repetir una escritura fuera de la secuencia ni a marcarla como bloqueada.</p>
+<h3 id="paso-54-alertas-suricata-solo-como-contexto">Paso 5.4 — Alertas Suricata, solo como contexto</h3>
+<pre><code class="language-kql">event.dataset : &quot;suricata&quot; AND event.action : &quot;alert&quot;
+</code></pre>
+<p><strong>Resultado esperado y significado:</strong> puede no haber una alerta para esta operación de aplicación permitida/bloqueada. Suricata usa el host <code>sensor</code>; no se debe filtrar todo por <code>ws-engineering</code> ni tratar la ausencia de alerta como prueba de cifrado o autorización.</p>
+<p><strong>Segunda evidencia:</strong> la respuesta real de <code>labctl simulate opcua</code> y el estado del PLC son las fuentes relevantes para este taller.</p>
+<p><strong>Si difiere:</strong> si aparece una alerta, conservarla y describirla sin atribuirle un significado que el campo no indique. Si no aparece, no convertirlo en fallo del ejercicio.</p>
+<h2 id="evidencia-y-cierre">Evidencia y cierre</h2>
+<h3 id="paso-61-exportar-el-resumen-del-agente">Paso 6.1 — Exportar el resumen del agente</h3>
+<p><strong>Propósito:</strong> conservar eventos recientes del endpoint sin escribir en el directorio interno del collector.</p>
+<pre><code class="language-sh">labctl evidence | tee ~/lab/evidencias/taller-06/10-labctl-evidence.json
+</code></pre>
+<p><strong>Resultado esperado y significado:</strong> JSON con el host, eventos recientes y la referencia del log de osquery. La referencia <code>/evidence/osquery/osqueryd.results.log</code> es del collector y se lee según permisos; no se debe redireccionar allí.</p>
+<p><strong>Segunda evidencia:</strong> <code>~/lab/evidencias/taller-06/01-opcua-none.json</code>, <code>02-harden-opcua.json</code>, <code>03-opcua-secure-readonly.json</code> y los tres estados de aula vinculan cada resultado con su acción.</p>
+<p><strong>Si difiere:</strong> conservar la salida aunque haya menos eventos de los esperados; <code>labctl evidence</code> no crea detecciones de osquery o Suricata retroactivamente.</p>
+<h3 id="paso-62-guardar-una-copia-final-del-estado-de-aula">Paso 6.2 — Guardar una copia final del estado de aula</h3>
+<pre><code class="language-sh">labctl classroom-state | tee ~/lab/evidencias/taller-06/11-classroom-state-final.json
+</code></pre>
+<p><strong>Resultado esperado y significado:</strong> snapshot JSON con proceso, gateway, endpoints, políticas y eventos. Es una segunda fuente de aplicación para comprobar que la consigna no cambió tras el rechazo.</p>
+<p><strong>Segunda evidencia:</strong> comparar <code>process.setpoint</code> con <code>readback</code> del paso 3 y conservar cualquier diferencia, incluidos <code>errors</code>.</p>
+<p><strong>Si difiere:</strong> no editar el JSON ni rellenar valores faltantes; la discrepancia debe quedar explícita en el informe.</p>
+<h3 id="paso-63-pcap-opcional-sin-atribucion-automatica">Paso 6.3 — PCAP opcional, sin atribución automática</h3>
+<p>Si el facilitador solicita el segmento real, descargarlo desde el endpoint fijo del panel a la carpeta de evidencias. No se debe interpretar un archivo descargado como prueba de contenido hasta inspeccionarlo.</p>
+<pre><code class="language-sh">curl -f http://panel:8000/api/capture -o ~/lab/evidencias/taller-06/retail-ot-live.pcap
+</code></pre>
+<p><strong>Resultado esperado y significado:</strong> archivo PCAP real si la captura está preparada. El endpoint puede responder que aún no está listo; eso no cambia el resultado del protocolo guardado en la Terminal. No usar <code>/api/capture</code> para fabricar un paquete ni reemplazar los JSON.</p>
+<p><strong>Segunda evidencia:</strong> para este taller, cotejar la ventana de captura y el evento <code>lab.control</code> en Kibana. <code>/api/packets</code> y <code>/api/capture</code> son ayudas de captura del panel, especialmente útiles para Modbus; no afirmar que un segmento contiene una trama OPC UA concreta sin inspección.</p>
+<p><strong>Si difiere:</strong> conservar el error HTTP y continuar con las fuentes primarias disponibles. No descargar desde una URL externa ni usar una herramienta de escaneo.</p>
+<h3 id="paso-64-restablecer-para-la-siguiente-practica">Paso 6.4 — Restablecer para la siguiente práctica</h3>
+<p><strong>Propósito:</strong> devolver proceso y políticas a la línea base sin eliminar evidencia. Es una operación de aula que afecta a otros alumnos.</p>
+<p><strong>Acción exacta, solo tras coordinar con operador, SOC y responsable de evidencia:</strong></p>
+<pre><code class="language-sh">labctl reset-all | tee ~/lab/evidencias/taller-06/12-reset-all-cierre.json
+</code></pre>
+<p>Verificar:</p>
+<pre><code class="language-sh">labctl classroom-state | tee ~/lab/evidencias/taller-06/13-classroom-state-after-reset.json
+</code></pre>
+<p><strong>Resultado esperado y significado:</strong> proceso y endpoints vuelven a la línea base, las políticas se limpian y los archivos de evidencia permanecen. <code>labctl reset</code> por sí solo no restablece PLC/gateway/otras estaciones. No ejecutar <code>docker compose down -v</code>, porque elimina volúmenes y evidencia.</p>
+<p><strong>Segunda evidencia:</strong> <code>13-classroom-state-after-reset.json</code> y un <code>labctl status</code> final muestran el estado de aula después de la operación coordinada.</p>
+<p><strong>Si difiere:</strong> no repetir resets mientras haya otra sesión. Guardar las salidas y escalar la discrepancia al facilitador.</p>
+<h2 id="diagnostico-compacto-de-salidas">Diagnóstico compacto de salidas</h2>
+<ul>
+<li><strong>Host incorrecto:</strong> cambiar de pestaña noVNC a <code>ws-engineering</code>; no cambiar la ruta OPC UA ni usar otro objetivo.</li>
+<li><strong><code>labctl</code> no reconoce <code>classroom-state</code>, <code>reset-all</code> o <code>guides</code>:</strong> la estación conserva una imagen anterior; solicitar al instructor actualizarla desde el anfitrión siguiendo README. No sustituirlos con Docker, Git o llamadas externas.</li>
+<li><strong><code>labctl simulate opcua</code> devuelve <code>success</code> después del hardening:</strong> la variable no quedó de solo lectura, o se perdió el estado entre acciones; conservar los JSON y no marcar éxito.</li>
+<li><strong><code>security: "None"</code> después del hardening:</strong> no hay demostración de canal seguro. Comprobar <code>process.opcua_secure</code> y la estación. No decir que <code>None</code> fue retirado.</li>
+<li><strong><code>security: "SignAndEncrypt"</code> pero el <code>Write</code> no aparece como bloqueado:</strong> cifrado y autorización son barreras diferentes; la política de variable no está demostrada.</li>
+<li><strong><code>Read</code>/<code>readback</code> ausentes:</strong> el resultado no permite afirmar que la lectura funcionó; distinguir error de transporte de rechazo de escritura.</li>
+<li><strong><code>osqueryi</code> vacío:</strong> significa “no observado” en ese instante y endpoint; no ausencia absoluta.</li>
+<li><strong>Kibana vacío o sin alerta Suricata:</strong> la fuente visual no reemplaza el protocolo ni el estado local. Conservar la terminal y no inventar tiempos de ingestión.</li>
+</ul>
+<h2 id="evidencia-entregable-y-solucion-razonada">Evidencia entregable y solución razonada</h2>
+<p>La carpeta entregable es <code>~/lab/evidencias/taller-06/</code>. Debe contener, como mínimo, la respuesta inicial, el hardening, la respuesta segura, los snapshots de <code>classroom-state</code>, <code>labctl evidence</code>, y cualquier consulta osquery realmente ejecutada. Para cada evidencia registrar en el informe: comando, host, hora UTC capturada, resultado permitido/bloqueado, efecto sobre la consigna, fuente exacta y limitación. No usar capturas de pantalla inventadas ni sustituir un JSON por el resultado esperado.</p>
+<p>La solución es la secuencia: comprobar identidad y línea base; ejecutar una única escritura inicial sobre el nodo fijo; aplicar exactamente la barrera OPC UA; repetir la misma operación; comprobar <code>security</code>, <code>outcome</code>, <code>before</code> y <code>readback</code>; contrastar el proceso y conservar los artefactos. La primera respuesta del protocolo y la segunda lectura de estado deben concordar. <code>lab.endpoint</code> y <code>lab.control</code> son logs de aplicación, no detecciones independientes de osquery o Suricata.</p>
+<p><strong>Criterios finales:</strong></p>
+<ol>
+<li><code>Write</code> inicial real permitido con <code>security: "None"</code>.</li>
+<li>Estado de proceso con la consigna inicializada por la primera acción.</li>
+<li><code>Read</code> posterior exitoso mediante <code>SignAndEncrypt</code>.</li>
+<li><code>Write</code> posterior rechazado y <code>readback</code> sin cambio.</li>
+<li>Evidencia de terminal y segunda fuente de estado conservadas, sin hashes, PID, timestamps o resultados inventados.</li>
+<li>Afirmación explícita de que <code>None</code> <strong>no</strong> fue retirado por este taller.</li>
+</ol>
+<h2 id="mapeo-normativo-y-limites">Mapeo normativo y límites</h2>
+<p><strong>MITRE ATT&amp;CK for ICS:</strong> la primera escritura controlada representa <strong>T0836 Modify Parameter</strong>. La etiqueta describe la técnica pedagógica; no convierte la maqueta en un ataque real.</p>
+<p><strong>IEC 62443:</strong> el ejercicio ilustra requisitos fundacionales <strong>FR2, FR3 y FR4</strong> a nivel de diseño y controles de aula. El <code>SL-T</code> debe definirse mediante análisis de riesgo de cada zona; un <code>SL-A</code> requiere evaluación, arquitectura y evidencia mucho más amplias. Siete botones o esta guía no acreditan un nivel de seguridad.</p>
+<p><strong>Ley 21.663:</strong> se conserva como marco de discusión del material del laboratorio. Esta práctica no determina cumplimiento legal, no notifica a ANCI y no reemplaza inventario, gestión de cambios, respuesta a incidentes ni las obligaciones que correspondan a una organización.</p>
+<p><strong>Qué sí controla la barrera:</strong> una variable OPC UA concreta queda de solo lectura para este flujo; el cliente de la repetición solicita <code>SignAndEncrypt</code>; el resultado del <code>Write</code> se verifica con una respuesta real y un <code>readback</code>.</p>
+<p><strong>Qué no demuestra:</strong> no retira <code>None</code> del servidor, no prueba RBAC, MFA o identidad de usuarios; no endurece el sistema operativo; no configura el gateway Modbus/TLS; no es firewall, SELinux/AppArmor, GPO, EDR, SIS, antivirus global ni certificación IEC 62443. El guard de malware benigno, la validación PLC y otros controles pertenecen a otros talleres.</p>
+<h2 id="uso-responsable-y-antipatron-contextual">Uso responsable y antipatrón contextual</h2>
+<p>Ejecutar solo en el aula aislada y autorizada. No conectar a PLC, HMI, RTU, gateway o tiendas reales. El laboratorio usa destinos fijos internos y un nodo didáctico; no acepta IP, puerto, payload ni objetivo libre. No hay malware operativo, explotación, escaneo, cifrado ni direcciones externas configurables. Un ejercicio de corta duración tampoco demuestra una APT.</p>
+<p>Antipatrón para discutir —no una observación atribuida a una organización—: acceso compartido del proveedor sin ventana, copia de configuración sin hash y cambios del HMI sin validación del proceso. El lunes, en una instalación real: identificar al dueño del activo, documentar cambio y reversión, probar fuera de producción y acordar una ventana con operaciones. No bloquear remotamente una planta sin evaluar la seguridad física.</p>
+<h2 id="separacion-respecto-de-otros-modulos">Separación respecto de otros módulos</h2>
+<p>Este documento es únicamente el taller 06. No mezclarlo con el <strong>desafío 09</strong>, que debe separar sus hosts y sus siete controles, ni con el <strong>módulo 10</strong>, que debe cubrir individualmente sus seis prácticas. En particular, <code>harden opcua-rbac</code> y <code>harden opcua-channel</code> no son sustitutos de <code>harden opcua</code> aquí: el módulo 10 trata usuarios públicos/RBAC y la retirada de <code>None</code> del servidor; el usuario legítimo <code>engineer</code> y su escritura de <code>3 °C</code> se validan allí. Este taller solo deja constancia del canal que configura el cliente y de la autorización de solo lectura de su variable.</p>
+<h2 id="referencia-operativa-local">Referencia operativa local</h2>
+<p>El tutorial local de observabilidad puede consultarse desde la guía si el facilitador lo solicita, pero no es necesario para resolver la secuencia ni habilita nuevos destinos. No ejecutar pruebas automáticas en paralelo con este taller. Antes de marcar éxito, revisar que las fuentes estén identificadas: respuesta del comando OPC UA para el protocolo; <code>classroom-state</code> para el gemelo; osquery para el endpoint; Kibana/Suricata solo como observabilidad adicional; PCAP solo cuando se haya descargado e inspeccionado realmente.</p>

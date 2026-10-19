@@ -1,0 +1,262 @@
+<h1 id="01-inventario-y-linea-base">01 · Inventario y línea base</h1>
+<blockquote>
+<p><strong>Borrador local para el laboratorio Retail OT.</strong> Esta guía reemplaza la dependencia de instrucciones del portal: se lee en el Firefox local de la estación y todos los bloques de comandos se ejecutan en la <strong>Terminal del laboratorio</strong> del noVNC indicado. No es un PPTX ni una certificación de seguridad.</p>
+</blockquote>
+<h2 id="estacion-recomendada-y-forma-de-trabajo">Estación recomendada y forma de trabajo</h2>
+<ul>
+<li><strong>Estación recomendada:</strong> <code>ws-hmi</code>.</li>
+<li><strong>Dónde ejecutar comandos:</strong> escritorio noVNC de <code>ws-hmi</code> → Firefox local para esta guía → doble clic en <strong>Terminal del laboratorio</strong>. No usar una shell del anfitrión, una consola web como sustituto, el clipboard del anfitrión ni un pivote entre estaciones.</li>
+<li><strong>Copiar y pegar:</strong> usar el botón <strong>Copiar</strong> de esta guía y pegar con <code>Ctrl+Shift+V</code> en <code>xfce4-terminal</code>; como alternativa, seleccionar el comando dentro del Firefox local y usar <code>Ctrl+C</code>/<code>Ctrl+V</code> dentro de la misma estación. No copiar el <code>$</code> del prompt ni una salida JSON como si fuera un comando.</li>
+<li><strong>Coordinación:</strong> la maqueta es compartida. Una persona opera, otra observa y otra conserva evidencia. No ejecutar dos escenarios simultáneos.</li>
+<li><strong>Alcance:</strong> los comandos locales (<code>hostname</code>, <code>id</code>, <code>labctl status</code>, <code>inventory</code>, <code>baseline</code>, <code>evidence</code> y las consultas <code>osqueryi</code>) observan únicamente la estación cuya Terminal los ejecuta. <code>labctl classroom-state</code> observa el gemelo de aula completo. <code>labctl reset</code> restablece solo el endpoint actual; <code>labctl reset-all</code> es global y requiere coordinación explícita porque afecta a otros alumnos.</li>
+</ul>
+<h2 id="objetivos-medibles">Objetivos medibles</h2>
+<p>Al terminar, la persona debe poder:</p>
+<ol>
+<li>Identificar el host y usuario de la Terminal y distinguir el endpoint local del estado global.</li>
+<li>Inventariar el endpoint observado y corroborar los cinco hosts del aula y sus roles/zona sin confundir una vista de aplicación con un inventario de sistema.</li>
+<li>Registrar la línea base de <code>controller.conf</code>, proceso térmico y políticas antes de cualquier cambio.</li>
+<li>Identificar tráfico Modbus TCP <strong>FC03</strong> legítimo con una fuente de paquetes/PCAP y conservar una segunda fuente de evidencia.</li>
+<li>Ejecutar consultas manuales <code>osqueryi</code> sobre versión, procesos, usuarios, puertos, permisos y hash, explicando qué significa un resultado vacío.</li>
+<li>Entregar evidencia con endpoint, hora UTC, fuente, resultado y limitación; no inventar hashes, PID, timestamps ni capturas.</li>
+</ol>
+<h3 id="mapa-pedagogico-de-hosts">Mapa pedagógico de hosts</h3>
+<p>El aula publica cinco hosts fijos. La siguiente es una <strong>asignación de trabajo por nombre</strong>, no una prueba de segmentación de red; el rol que el agente devuelva en <code>classroom-state</code> es la fuente para confirmar la sesión:</p>
+<table>
+<thead>
+<tr>
+<th>Host</th>
+<th>Rol/zona pedagógica</th>
+<th>Alcance en este taller</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ws-corporate</code></td>
+<td>corporativo</td>
+<td>inventario global del aula</td>
+</tr>
+<tr>
+<td><code>ws-vendor</code></td>
+<td>proveedor</td>
+<td>inventario global del aula</td>
+</tr>
+<tr>
+<td><code>ws-engineering</code></td>
+<td>ingeniería</td>
+<td>inventario global del aula</td>
+</tr>
+<tr>
+<td><code>ws-hmi</code></td>
+<td>HMI/operación</td>
+<td>estación recomendada y consultas locales</td>
+</tr>
+<tr>
+<td><code>ws-soc</code></td>
+<td>SOC/observabilidad</td>
+<td>inventario global del aula</td>
+</tr>
+</tbody>
+</table>
+<h2 id="preparacion-limpia-y-segura">Preparación limpia y segura</h2>
+<h3 id="0-abrir-la-guia-local-y-verificar-identidad">0. Abrir la guía local y verificar identidad</h3>
+<p><strong>Propósito.</strong> Confirmar que las instrucciones se leen localmente y que la sesión corresponde a <code>ws-hmi</code> y a un usuario sin privilegios generales.</p>
+<p><strong>Acción exacta — ejecutar cada línea por separado y esperar su respuesta:</strong></p>
+<pre><code class="language-sh">labctl guides
+</code></pre>
+<pre><code class="language-sh">hostname
+</code></pre>
+<pre><code class="language-sh">id
+</code></pre>
+<pre><code class="language-sh">mkdir -p ~/lab/evidencias/taller-01
+</code></pre>
+<p><strong>Resultado esperado y significado.</strong> <code>labctl guides</code> abre la guía HTML local de la estación; no abre la interfaz de evaluación del portal. <code>hostname</code> debe identificar la estación recomendada como <code>ws-hmi</code> y <code>id</code> debe mostrar al usuario de laboratorio (<code>student</code>, normalmente UID 1000) sin convertirlo en root. El directorio de evidencia queda dentro de <code>~/lab/evidencias/taller-01/</code>, no en el directorio <code>/evidence</code> del collector.</p>
+<p><strong>Segunda evidencia:</strong></p>
+<pre><code class="language-sh">ip -brief address | tee ~/lab/evidencias/taller-01/ip-brief.txt
+</code></pre>
+<p>Esto conserva las interfaces de la estación y ayuda a detectar que se está en el noVNC correcto; no es un escaneo ni prueba conectividad con una tienda real.</p>
+<p><strong>Si difiere.</strong> Si el hostname no es <code>ws-hmi</code>, detenerse y volver al noVNC recomendado: no compensa cambiar el objetivo en mitad del taller. Si <code>id</code> muestra un usuario inesperado o privilegios no previstos, conservar la salida y avisar al responsable; no usar <code>sudo</code>, <code>docker</code>, <code>git</code>, <code>chmod</code> ni <code>iptables</code> para “arreglarlo”. Si <code>labctl guides</code> no abre la guía, continuar solo después de que el padre corrija la implementación del comando local; no volver al portal para sustituirla.</p>
+<h3 id="1-comprobar-estado-local-y-estado-global-antes-de-tocar-nada">1. Comprobar estado local y estado global antes de tocar nada</h3>
+<p><strong>Propósito.</strong> Establecer el punto de comparación y detectar una sesión de otra persona antes de un reset.</p>
+<pre><code class="language-sh">labctl status
+</code></pre>
+<p><strong>Resultado esperado y significado.</strong> La respuesta es un objeto de estado local con campos como <code>host</code>, <code>role</code>, <code>policies</code>, <code>mode</code> y <code>osquery</code>. En una línea base limpia, el host/rol corresponden a <code>ws-hmi</code>, <code>policies</code> están desactivadas y el modo de <code>controller.conf</code> es el vulnerable inicial (semánticamente <code>0666</code>). El formato exacto puede variar; no asumir que existe <code>.event.outcome</code> en este comando.</p>
+<p><strong>Segunda evidencia:</strong></p>
+<pre><code class="language-sh">labctl classroom-state | tee ~/lab/evidencias/taller-01/classroom-state-before.json
+</code></pre>
+<p>Debe conservar un JSON con <code>process</code>, <code>gateway</code>, <code>endpoints</code>, <code>policies</code>, <code>events</code>, <code>history</code>, <code>last_update</code> y <code>errors</code>. En una sesión disponible, <code>endpoints</code> debe permitir reconocer los cinco hosts fijos: <code>ws-corporate</code>, <code>ws-vendor</code>, <code>ws-engineering</code>, <code>ws-hmi</code> y <code>ws-soc</code>. La fuente global no sustituye las consultas del endpoint local.</p>
+<p><strong>Si difiere.</strong> Si <code>errors</code> contiene <code>plc unavailable</code>, <code>gateway unavailable</code> o endpoints <code>unavailable</code>, registrar el estado y no declarar una línea base completa. Si aparecen políticas o una temperatura alterada, existe estado residual o una sesión concurrente: coordinar antes de resetear. Si <code>classroom-state</code> no existe, la estación conserva una imagen anterior: pedir al instructor actualizarla desde el anfitrión siguiendo README; no reemplazarlo con un endpoint inventado.</p>
+<h3 id="2-reset-global-unicamente-coordinado">2. Reset global, únicamente coordinado</h3>
+<p><strong>Propósito.</strong> Empezar desde un estado de aula reproducible sin borrar evidencia previa.</p>
+<p><strong>Regla.</strong> <code>reset-all</code> afecta proceso, gateway, políticas y endpoints de la clase; puede afectar a otros alumnos. Ejecutarlo solo cuando el responsable de la maqueta confirme que no hay otra sesión activa.</p>
+<pre><code class="language-sh">labctl reset-all
+</code></pre>
+<p><strong>Resultado esperado y significado.</strong> La acción informa que el aula fue restablecida. El reset mantiene eventos, logs y PCAP; no es una limpieza forense.</p>
+<p><strong>Segunda evidencia:</strong></p>
+<pre><code class="language-sh">labctl classroom-state | tee ~/lab/evidencias/taller-01/classroom-state-after-reset.json
+</code></pre>
+<p>Comprobar que <code>process</code> vuelve al estado nominal (<code>setpoint</code> 2, temperatura cercana a 2 °C, <code>heater=false</code>, <code>compressor=true</code>, sin <code>spoiled</code>), que <code>policies</code> globales están desactivadas y que los endpoints no conservan políticas locales. La salida concreta y los timestamps son variables y deben conservarse tal como fueron capturados.</p>
+<p><strong>Si difiere.</strong> No repetir el reset a ciegas. Si solo la estación actual quedó alterada, <code>labctl reset</code> puede restablecer ese endpoint, pero no corrige PLC, gateway ni otras estaciones. Si el aula no puede ser coordinada, registrar el estado inicial real y marcar el taller como no limpio; no afirmar que se partió de cero. Nunca usar <code>docker compose down -v</code>: elimina volúmenes y evidencia. El arranque de Docker, si lo realiza el operador del laboratorio, es una tarea de infraestructura fuera de esta Terminal y no un paso del estudiante.</p>
+<h2 id="acciones-paso-a-paso">Acciones paso a paso</h2>
+<h3 id="3-inventario-del-endpoint-y-anatomia-del-activo">3. Inventario del endpoint y anatomía del activo</h3>
+<p><strong>Propósito.</strong> Obtener el inventario del sistema observado y conservar la distinción entre datos del backend y un dibujo pedagógico.</p>
+<p>La vista gráfica de anatomía es opcional: en el Firefox local, si el panel de aula está disponible, se puede seleccionar <code>PLC-R01</code> → <strong>Explorar anatomía</strong> → <strong>Separar componentes</strong> para reconocer CPU, alimentación, interfaces y E/S. El SVG no es evidencia de inventario. La fuente primaria de este paso es <code>osqueryi</code> en la estación.</p>
+<pre><code class="language-sh">labctl inventory | tee ~/lab/evidencias/taller-01/inventory-ws-hmi.json
+</code></pre>
+<p><strong>Resultado esperado y significado.</strong> La respuesta de este wrapper tiene <code>source: "osqueryi"</code> y <code>rows</code> con una fila de <code>system_info</code> que incluye <code>hostname</code>, <code>cpu_type</code> y <code>physical_memory</code>. Los valores de CPU y memoria son propios de la imagen y no deben copiarse desde un ejemplo. El resultado demuestra inventario del endpoint actual, no que se hayan inspeccionado mágicamente los otros cuatro.</p>
+<p><strong>Segunda evidencia:</strong></p>
+<pre><code class="language-sh">labctl classroom-state | jq '{endpoint_hosts:(.endpoints|keys), endpoint_count:(.endpoints|length)}' | tee ~/lab/evidencias/taller-01/hosts-aula.json
+</code></pre>
+<p>El resultado esperado es un mapa global con cinco claves de host fijas y <code>endpoint_count: 5</code> cuando todos están disponibles. Su significado es “hosts publicados por el gemelo del aula”, no un escaneo de red ni una prueba de que cada host esté sano si su valor contiene <code>error</code>.</p>
+<p><strong>Si difiere.</strong> Si <code>rows</code> está vacío o <code>source</code> no es <code>osqueryi</code>, repetir una vez tras comprobar <code>labctl status</code>; no fabricar datos. Si el estado global no contiene cinco claves, revisar <code>errors</code> y distinguir host ausente de host no observado. Si la anatomía no carga, no usarla como sustituto: conservar la salida de <code>inventory</code> y la limitación visual.</p>
+<h3 id="4-linea-base-de-archivo-y-proceso-termico">4. Línea base de archivo y proceso térmico</h3>
+<p><strong>Propósito.</strong> Medir los valores iniciales que el taller necesita antes de una contramedida; separar la evidencia del archivo de la evidencia del proceso.</p>
+<pre><code class="language-sh">labctl baseline | tee ~/lab/evidencias/taller-01/baseline-ws-hmi.json
+</code></pre>
+<p><strong>Resultado esperado y significado.</strong> Este comando devuelve un objeto con <code>rows</code>, <code>policies</code> y un evento de aplicación. En <code>rows</code> debe aparecer <code>/home/student/lab/controller.conf</code> con el modo inicial semánticamente <code>0666</code> y propietario UID de <code>student</code> (normalmente 1000). <code>baseline</code> no devuelve por sí solo la temperatura ni el estado de deshielo; no interpretar un campo ausente como “deshielo apagado”.</p>
+<p><strong>Segunda evidencia:</strong></p>
+<pre><code class="language-sh">stat -c 'path=%n mode=%a uid=%u gid=%g user=%U group=%G' /home/student/lab/controller.conf | tee ~/lab/evidencias/taller-01/controller-stat.txt
+</code></pre>
+<p>Debe corroborar el modo y propietario del archivo. El modo numérico puede imprimirse sin ceros a la izquierda; el criterio es que sea equivalente a <code>0666</code>, no la decoración del texto. La segunda fuente no prueba por sí sola la política del PLC.</p>
+<p>Para completar el estado térmico, ejecutar además esta consulta de aula (es una observación global, no una segunda lectura física):</p>
+<pre><code class="language-sh">labctl classroom-state | jq '.process | {temperature,setpoint,heater,compressor,spoiled,thermal_risk,plc_guard}' | tee ~/lab/evidencias/taller-01/process-baseline.json
+</code></pre>
+<p>En una línea base limpia se espera <code>setpoint: 2</code>, temperatura próxima a <code>2.0</code>, <code>heater: false</code>, <code>compressor: true</code>, <code>spoiled: false</code>, <code>plc_guard: false</code> y sin riesgo térmico. Es un modelo acelerado de entrenamiento; no calcula salud alimentaria real.</p>
+<p><strong>Si difiere.</strong> Si el modo no es <code>0666</code>, la estación conserva hardening o se alteró el archivo: no cambiar permisos manualmente. Coordinar <code>reset</code> local o <code>reset-all</code> según el alcance y conservar la evidencia previa. Si faltan <code>process</code> o hay <code>errors</code>, no convertir un estado no observado en un estado seguro. Si la temperatura no es nominal, detener el resto de acciones hasta acordar si se reinicia el aula.</p>
+<h3 id="5-trafico-legitimo-fc03">5. Tráfico legítimo FC03</h3>
+<p><strong>Propósito.</strong> Identificar una lectura Modbus TCP producida por el ciclo legítimo del gateway, sin atribuirla a un ataque.</p>
+<pre><code class="language-sh">labctl evidence | tee ~/lab/evidencias/taller-01/evidence-endpoint.json
+</code></pre>
+<p><strong>Resultado esperado y significado.</strong> La respuesta local contiene <code>host</code>, una lista <code>events</code> y la ruta <code>osquery_logs</code>. Es evidencia de eventos del agente de la estación; <strong>no</strong> es por sí sola un paquete Modbus ni una detección Suricata. Un resultado vacío significa “no observado en esta ventana”, no ausencia absoluta de actividad.</p>
+<p><strong>Segunda evidencia — consultar los paquetes conservados por el panel:</strong></p>
+<pre><code class="language-sh">curl -fsS http://panel:8000/api/packets | jq '[.[] | select(.protocol==&quot;Modbus TCP&quot; and .function==3)] | .[-5:]' | tee ~/lab/evidencias/taller-01/fc03-packets.json
+</code></pre>
+<p>Debe mostrar, si la captura ya está lista, uno o más registros de lectura FC03 y campos de respuesta como protocolo, función, excepción, hex y fuente real de respuesta. <code>function: 3</code> significa lectura de registros; <code>exception: false</code> indica que esa respuesta no fue una excepción. No llamar “ataque” a este tráfico periódico: es el flujo legítimo del gateway hacia el PLC ficticio.</p>
+<p><strong>Si difiere.</strong> Si la lista es <code>[]</code>, revisar <code>classroom-state.errors</code>, esperar el ciclo normal del aula y consultar de nuevo; no inventar un paquete. Si hay registros pero no tienen exactamente todos esos campos, conservar el JSON real y describir solo los campos presentes. Si el panel no responde, no sustituirlo por un host o puerto externo. La API de paquetes y el PCAP son fuentes de captura; <code>lab.endpoint</code> y <code>lab.control</code> son logs de aplicación, no reemplazos independientes de PCAP.</p>
+<h3 id="6-consulta-de-version-del-sistema">6. Consulta de versión del sistema</h3>
+<p><strong>Propósito.</strong> Obtener una fuente SQL manual independiente del agente programado.</p>
+<pre><code class="language-sh">osqueryi --json &quot;SELECT name,version,platform FROM os_version;&quot; | tee ~/lab/evidencias/taller-01/os-version.json
+</code></pre>
+<p><strong>Resultado esperado y significado.</strong> Un arreglo JSON con la versión y plataforma del sistema de la estación. Los valores concretos dependen de la imagen y deben capturarse, no predecirse. Es una instantánea manual de <code>osqueryi</code>, no una afirmación de que <code>osqueryd</code> haya enviado exactamente la misma fila en ese momento.</p>
+<p><strong>Segunda evidencia:</strong></p>
+<pre><code class="language-sh">labctl status | jq '{host,role,osquery}' | tee ~/lab/evidencias/taller-01/osquery-status.txt
+</code></pre>
+<p>El campo <code>osquery</code> confirma que el binario local responde y aporta su versión de ejecución. Es corroboración de disponibilidad, no una segunda consulta SQL del mismo contenido.</p>
+<p><strong>Si difiere.</strong> Si <code>osqueryi</code> devuelve error, conservar el texto y revisar <code>labctl status</code>; no instalar herramientas ni ejecutar con <code>sudo</code>. Si devuelve <code>[]</code>, significa que la consulta no observó una fila, no que el sistema carezca de versión. Si las versiones difieren, registrar hora y diferencia: una consulta manual y una versión del binario son fuentes con alcances distintos.</p>
+<h3 id="7-procesos-y-consultas-programadas">7. Procesos y consultas programadas</h3>
+<p><strong>Propósito.</strong> Saber qué procesos relacionados con el laboratorio están presentes en el instante observado y distinguir una observación manual de un proceso histórico.</p>
+<pre><code class="language-sh">osqueryi --json &quot;SELECT pid,name,path,cmdline FROM processes WHERE cmdline LIKE '%retail-%';&quot; | tee ~/lab/evidencias/taller-01/processes-retail.json
+</code></pre>
+<p><strong>Resultado esperado y significado.</strong> El resultado puede ser un arreglo vacío durante la línea base: significa que no se observó un proceso cuyo <code>cmdline</code> coincida en esa instantánea. Si aparecen filas, conservar cada <code>pid</code>, <code>name</code>, <code>path</code> y <code>cmdline</code>; ningún PID es permanente.</p>
+<p><strong>Segunda evidencia:</strong></p>
+<pre><code class="language-sh">{ pgrep -af 'retail-|osqueryd' || true; } | tee ~/lab/evidencias/taller-01/processes-pgrep.txt
+</code></pre>
+<p>Esto permite contrastar la instantánea de <code>osqueryi</code> con el proceso del agente y los marcadores benignos presentes. La consulta programada de <code>osqueryd</code> es otra fuente y puede llegar con latencia de collector/Logstash/Kibana.</p>
+<p><strong>Si difiere.</strong> Un resultado vacío no prueba que no haya existido actividad antes ni que un guard sea antivirus. Si se ve un proceso benigno <code>retail-benign-malware</code>, registrar el PID capturado y no inventar otro. Si solo aparece en una fuente, anotar la diferencia de instante y del filtro. No matar procesos manualmente como parte de este taller de inventario.</p>
+<h3 id="8-usuarios-locales">8. Usuarios locales</h3>
+<p><strong>Propósito.</strong> Registrar la identidad disponible para operar y evitar atribuir privilegios de una cuenta a otra.</p>
+<pre><code class="language-sh">osqueryi --json &quot;SELECT uid,username,shell FROM users;&quot; | tee ~/lab/evidencias/taller-01/users.json
+</code></pre>
+<p><strong>Resultado esperado y significado.</strong> Un arreglo con los usuarios visibles en el endpoint, sus UID y shells. Se espera poder localizar <code>student</code>; la lista completa y sus valores son variables de la imagen y deben conservarse tal cual.</p>
+<p><strong>Segunda evidencia:</strong></p>
+<pre><code class="language-sh">id student | tee ~/lab/evidencias/taller-01/id-student.txt
+</code></pre>
+<p>La salida confirma grupos y UID de la cuenta de laboratorio. Una cuenta listada por <code>osqueryi</code> no demuestra que tenga privilegios de root ni autorización sobre otros hosts.</p>
+<p><strong>Si difiere.</strong> Si <code>student</code> no existe o su UID no coincide entre fuentes, detenerse y registrar la anomalía. No crear usuarios, cambiar shells ni elevar privilegios. Si la consulta lista más usuarios, no convertir su presencia en un hallazgo de compromiso sin evidencia adicional.</p>
+<h3 id="9-puertos-en-escucha">9. Puertos en escucha</h3>
+<p><strong>Propósito.</strong> Registrar los listeners que el endpoint declara mediante SQL y comprobar que el agente local responde, sin hacer un escaneo.</p>
+<pre><code class="language-sh">osqueryi --json &quot;SELECT pid,port,address,protocol FROM listening_ports;&quot; | tee ~/lab/evidencias/taller-01/listening-ports.json
+</code></pre>
+<p><strong>Resultado esperado y significado.</strong> Un arreglo con los listeners observados por <code>osqueryi</code>; <code>pid</code>, <code>port</code>, <code>address</code> y <code>protocol</code> identifican cada fila. La presencia de un listener no demuestra que el servicio sea seguro ni que exista exposición fuera de la red de entrenamiento.</p>
+<p><strong>Segunda evidencia:</strong></p>
+<pre><code class="language-sh">curl -fsS http://127.0.0.1:8010/health | jq '{host,role,mode,policies,osquery}' | tee ~/lab/evidencias/taller-01/agent-health.json
+</code></pre>
+<p>Una respuesta HTTP válida demuestra que el agente local atiende en su endpoint pedagógico; es corroboración de servicio, no un inventario completo de puertos. El contenido debe conservarse con los campos que realmente devuelva.</p>
+<p><strong>Si difiere.</strong> Si no hay filas, significa que no se observaron listeners en esa consulta. Si el health local falla, conservar el error y revisar <code>labctl status</code>; no usar <code>nc</code>, escáneres ni direcciones externas. No concluir que un puerto está “cerrado” solo porque el query llegó vacío.</p>
+<h3 id="10-hash-de-firmware-de-entrenamiento">10. Hash de firmware de entrenamiento</h3>
+<p><strong>Propósito.</strong> Registrar una huella manual del artefacto educativo antes de cualquier ejercicio de cadena de suministro; esta guía no cambia firmware.</p>
+<pre><code class="language-sh">osqueryi --json &quot;SELECT path,sha256 FROM hash WHERE path='/home/student/lab/firmware.bin';&quot; | tee ~/lab/evidencias/taller-01/firmware-hash-osquery.json
+</code></pre>
+<p><strong>Resultado esperado y significado.</strong> Una fila con la ruta y un <code>sha256</code> de 64 caracteres hexadecimales. La huella exacta depende del archivo presente y debe ser la capturada en la sesión; no pegar una huella predeterminada ni confundirla con un PID o timestamp.</p>
+<p><strong>Segunda evidencia:</strong></p>
+<pre><code class="language-sh">sha256sum /home/student/lab/firmware.bin | tee ~/lab/evidencias/taller-01/firmware-hash-sha256sum.txt
+</code></pre>
+<p>El digest de <code>sha256sum</code> debe coincidir con el de la fila <code>osqueryi</code>; esta coincidencia comprueba el archivo local mediante dos consultas, no una firma de fabricante ni una validación de firmware real.</p>
+<p><strong>Si difiere.</strong> Si la ruta no existe, la consulta queda sin observación y debe registrarse así. Si los digest difieren, no elegir uno: conservar ambas salidas, comprobar que se leyó exactamente <code>/home/student/lab/firmware.bin</code> y avisar al responsable. <code>osqueryd</code> no monitoriza automáticamente <code>firmware.bin</code> solo por aparecer en esta consulta manual; la consulta manual y el log programado son fuentes distintas.</p>
+<h2 id="verificacion-opcional-en-kibana-sin-depender-del-portal">Verificación opcional en Kibana, sin depender del portal</h2>
+<p>La resolución del taller no depende de Kibana. Si el observador SOC necesita una comprobación visual, abrir en el Firefox local la instancia interna de Kibana (<code>kibana:5601</code>) y usar la data view <code>retail-ot-*</code>, ventana <strong>últimos 15 minutos</strong> y refresco de 5 segundos. Copiar KQL, no SQL:</p>
+<pre><code class="language-kql">event.dataset : &quot;osquery&quot; AND host.name : &quot;ws-hmi&quot;
+</code></pre>
+<pre><code class="language-kql">event.dataset : &quot;lab.endpoint&quot; AND host.name : &quot;ws-hmi&quot;
+</code></pre>
+<pre><code class="language-kql">event.dataset : &quot;lab.control&quot;
+</code></pre>
+<pre><code class="language-kql">event.dataset : &quot;suricata&quot; AND event.action : &quot;alert&quot;
+</code></pre>
+<ul>
+<li><code>osquery</code> muestra la telemetría del endpoint; los eventos de configuración pueden incluir <code>osquery.columns</code> y <code>config_integrity</code>.</li>
+<li><code>lab.endpoint</code> es el log del agente local; <code>lab.control</code> puede tener como host <code>PLC</code>, <code>gateway</code> o el endpoint solicitante, por lo que no se debe filtrar todo por <code>ws-hmi</code>.</li>
+<li>Suricata usa el host <code>sensor</code> cuando existe una alerta; una consulta vacía es “no observada”.</li>
+<li>Ninguno de esos datasets sustituye el PCAP para demostrar FC03 ni convierte un botón de la interfaz en una aprobación.</li>
+</ul>
+<p>Como referencia local opcional, el tutorial de observabilidad puede conservarse sin depender de una ruta relativa del repositorio:</p>
+<pre><code class="language-sh">curl -fsS http://panel:8000/api/tutorial-observability | tee ~/lab/evidencias/taller-01/tutorial-observabilidad.md
+</code></pre>
+<p>Si el endpoint no está disponible, no bloquear la resolución: los pasos de esta guía contienen las consultas necesarias.</p>
+<h2 id="evidencia-entregable-y-cierre">Evidencia entregable y cierre</h2>
+<h3 id="11-descargar-el-segmento-pcap-real">11. Descargar el segmento PCAP real</h3>
+<p><strong>Propósito.</strong> Conservar el artefacto de red que respalda la lectura FC03, sin escribir datos en <code>/evidence</code> del collector.</p>
+<pre><code class="language-sh">curl -fsS -o ~/lab/evidencias/taller-01/retail-ot-live.pcap http://panel:8000/api/capture
+</code></pre>
+<p><strong>Resultado esperado y significado.</strong> Se crea <code>~/lab/evidencias/taller-01/retail-ot-live.pcap</code> cuando existe una captura lista. Es el segmento descargable del aula, no una captura de pantalla ni un paquete inventado.</p>
+<p><strong>Segunda evidencia:</strong></p>
+<pre><code class="language-sh">stat -c 'path=%n size=%s mtime=%y' ~/lab/evidencias/taller-01/retail-ot-live.pcap | tee ~/lab/evidencias/taller-01/pcap-stat.txt
+</code></pre>
+<p>El tamaño debe ser mayor que cero y el archivo debe tener una hora de modificación; esos campos prueban que se conservó un archivo, no que cada paquete sea FC03. La identificación de FC03 se hace con <code>/api/packets</code> y, si corresponde, el análisis del PCAP por el observador.</p>
+<p><strong>Si difiere.</strong> Un HTTP 404 (<code>Capture is not yet ready</code>) significa que la captura aún no está lista; revisar paquetes y repetir después del ciclo legítimo. No crear un archivo vacío con ese nombre ni afirmar que fue descargado.</p>
+<h3 id="12-consolidar-la-ultima-evidencia">12. Consolidar la última evidencia</h3>
+<p><strong>Propósito.</strong> Capturar el estado al cierre y dejar trazabilidad de la ventana de observación.</p>
+<pre><code class="language-sh">date -u +'%Y-%m-%dT%H:%M:%SZ' | tee ~/lab/evidencias/taller-01/closed-at-utc.txt
+</code></pre>
+<pre><code class="language-sh">labctl evidence | tee ~/lab/evidencias/taller-01/evidence-endpoint-final.json
+</code></pre>
+<pre><code class="language-sh">labctl classroom-state | tee ~/lab/evidencias/taller-01/classroom-state-final.json
+</code></pre>
+<p><strong>Resultado esperado y significado.</strong> La carpeta contiene las salidas originales y el momento UTC de cierre. El registro de entrega debe indicar, para cada evidencia, comando, endpoint, hora UTC, resultado (<code>observado</code>, <code>no observado</code>, <code>permitido</code> o <code>bloqueado</code>), efecto térmico, fuente y limitación. No usar una captura de pantalla inventada para completar un campo.</p>
+<p><strong>Segunda evidencia:</strong></p>
+<pre><code class="language-sh">curl -fsS http://panel:8000/api/evidence | jq '{notice,state:(.state | {process,gateway,endpoints,policies,last_update,errors})}' | tee ~/lab/evidencias/taller-01/panel-evidence-final.json
+</code></pre>
+<p>Esta consulta del panel ayuda a correlacionar proceso, gateway, endpoints y políticas; sus eventos de aplicación siguen siendo independientes de <code>osquery</code>, Suricata y PCAP.</p>
+<p><strong>Si difiere.</strong> Si el estado cambió durante la observación, no sobrescribir los archivos anteriores: registrar la secuencia y la concurrencia. Un evento de <code>lab.endpoint</code> o <code>lab.control</code> no prueba por sí solo una detección de seguridad. Si faltan fuentes, marcar la limitación y no marcar éxito solo porque un comando terminó con código cero.</p>
+<p>Después de revisar y copiar la evidencia, el responsable puede coordinar el reset de aula para la siguiente práctica:</p>
+<pre><code class="language-sh">labctl reset-all
+</code></pre>
+<p>No ejecutar este último comando durante la sesión de otro alumno. Si solo se debe abandonar la estación sin reiniciar el aula, no usar <code>labctl reset</code> como sustituto de una coordinación global: el reset local no restablece PLC, gateway ni las otras estaciones.</p>
+<h2 id="solucion-razonada">Solución razonada</h2>
+<p>La resolución completa es: (1) confirmar <code>ws-hmi</code> y usuario, (2) comprobar estado local y global, (3) ejecutar un único <code>reset-all</code> coordinado si se requiere línea base limpia, (4) inventariar el endpoint y los cinco hosts publicados, (5) medir permisos del archivo y estado nominal del proceso, (6) separar <code>labctl evidence</code> de la evidencia real de FC03 en paquetes/PCAP, (7) contrastar cada consulta manual de <code>osqueryi</code> con su segunda fuente y (8) entregar los artefactos sin reemplazar discrepancias por resultados esperados.</p>
+<p>La evidencia mínima válida combina fuentes con alcances diferentes:</p>
+<ul>
+<li><code>inventory</code>/<code>osqueryi</code>: sistema del endpoint local.</li>
+<li><code>baseline</code> y <code>stat</code>: permiso/propietario del archivo local.</li>
+<li><code>classroom-state</code>: gemelo global y estado del proceso, no un segundo sensor físico.</li>
+<li><code>/api/packets</code> y <code>/api/capture</code>: tráfico y PCAP de Modbus real del aula.</li>
+<li><code>lab.endpoint</code>/<code>lab.control</code>: logs de aplicación, no detecciones independientes de osquery o Suricata.</li>
+<li><code>sha256sum</code> frente a la tabla <code>hash</code>: misma huella capturada desde dos caminos locales.</li>
+</ul>
+<h2 id="criterios-de-exito">Criterios de éxito</h2>
+<ul>
+<li>Se identifica <code>ws-hmi</code>, el usuario de laboratorio y el alcance local/global.</li>
+<li>Se conserva un inventario <code>osqueryi</code> del endpoint y el estado global permite identificar los cinco hosts fijos, sin confundir disponibilidad con seguridad.</li>
+<li>Se registran permisos iniciales equivalentes a <code>0666</code>, propietario inicial de <code>student</code> y una hora UTC.</li>
+<li>Se registra el proceso nominal: consigna 2 °C, temperatura próxima a 2 °C, deshielo/calefacción apagado y compresor activo, con la salvedad de que es un modelo acelerado.</li>
+<li>Existe evidencia de FC03 en <code>/api/packets</code> y un PCAP descargable cuando la captura está disponible.</li>
+<li>Se conservan las seis consultas manuales de <code>osqueryi</code> y sus comprobaciones secundarias, incluyendo resultados vacíos como <strong>no observado</strong>.</li>
+<li>Las discrepancias, latencias y fuentes faltantes quedan documentadas; no se inventan hashes, PID, timestamps ni capturas.</li>
+</ul>
+<h2 id="limites-mapeo-y-uso-responsable">Límites, mapeo y uso responsable</h2>
+<p>Solo usar el aula aislada y autorizada. No conectar a PLC, HMI, RTU, tienda o red productiva. No hay malware operativo, explotación, cifrado, escaneo ni direcciones externas configurables. Los artefactos están bajo <code>/home/student/lab</code>. Una emulación de 45 segundos no demuestra una APT.</p>
+<p>El hardening que aparece en talleres posteriores es acotado: permisos reales de un archivo Linux, guard de ejecución del agente, validación de consigna en un PLC ficticio, gateway de aplicación y variable OPC UA de solo lectura. Eso no equivale a SELinux/AppArmor, firewall transparente, GPO, protección completa de endpoint, SIS ni certificación IEC 62443. La red de administración pedagógica es una excepción declarada. Este taller tampoco acredita cumplimiento de la Ley 21.663 ni genera notificaciones reales a ANCI; cualquier aplicación en una organización chilena requiere alcance, responsables, evaluación y procedimiento propios.</p>
+<p><strong>MITRE ATT&amp;CK for ICS:</strong> el objetivo es inventario defensivo y observabilidad; no representa una intrusión ni atribuye una técnica ofensiva.</p>
+<p><strong>IEC 62443:</strong> el ejercicio se relaciona pedagógicamente con FR6 y FR7 y con la necesidad de definir SL-T por zona mediante análisis de riesgo. SL-A exige evaluación y evidencia mucho más amplias; no se obtiene por ejecutar comandos o botones.</p>
+<h2 id="antipatron-contextual-y-que-hacer-el-lunes">Antipatrón contextual y qué hacer el lunes</h2>
+<p>Ejemplo para discutir en plantas y tiendas chilenas, no una observación atribuida a una organización: acceso compartido del proveedor sin ventana, copia de configuración sin hash y cambios del HMI sin validación del proceso. El lunes: inventariar al dueño del activo, documentar cambio y reversión, probar primero fuera de producción y asignar una ventana con operaciones. No bloquear remotamente una planta sin evaluar la seguridad física.</p>

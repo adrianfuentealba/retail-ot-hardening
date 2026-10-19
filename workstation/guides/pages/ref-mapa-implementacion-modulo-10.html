@@ -1,0 +1,79 @@
+<h1 id="mapa-de-implementacion-del-modulo-10">Mapa de implementación del módulo 10</h1>
+<p>El laboratorio sigue arrancando con <code>docker compose up -d</code>. No hay nuevos puertos públicos ni acceso al socket Docker. Docker copia source/bundles y guías; Node solo hace falta si se desea editar los paneles Mantine.</p>
+<table>
+<thead>
+<tr>
+<th>Archivo</th>
+<th>Responsabilidad</th>
+<th>Punto de hardening</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>plc/control_logic.py</code></td>
+<td>Validación central y ciclo térmico</td>
+<td><code>validate_change</code>, <code>apply_changes</code>, <code>control_cycle</code></td>
+</tr>
+<tr>
+<td><code>plc/main.py</code></td>
+<td>Servidor Modbus FC03/FC06/FC16 y OPC UA</td>
+<td>Guard de atributo con usuario/rango; endpoint sin None configurable</td>
+</tr>
+<tr>
+<td><code>gateway/main.py</code></td>
+<td>Conducto de aplicación</td>
+<td>Allowlist función/dirección/cantidad/valor, presupuesto Write</td>
+</tr>
+<tr>
+<td><code>app/redteam.py</code></td>
+<td>Pruebas de destino fijo</td>
+<td>No IP/puerto/payload libre; ocho solicitudes máximo en ráfaga</td>
+</tr>
+<tr>
+<td><code>app/redteam-catalog.json</code></td>
+<td>Seis prácticas estructuradas</td>
+<td>Impacto, comandos, criterio de éxito y referencia</td>
+</tr>
+<tr>
+<td><code>app/main.py</code></td>
+<td>Orquestación, código CPU e I/O del aula</td>
+<td><code>/api/anatomy</code> y <code>/api/anatomy/wiring</code>, fuera de banda declarado</td>
+</tr>
+<tr>
+<td><code>workstation/agent.py</code>, <code>labctl.py</code></td>
+<td>Comandos desde cinco Linux</td>
+<td>Lista explícita de acciones</td>
+</tr>
+<tr>
+<td><code>ui/instructor.jsx</code></td>
+<td>Paneles Mantine de prácticas e inspector</td>
+<td>Estado real del backend, sin código libre ni telemetría inventada</td>
+</tr>
+<tr>
+<td><code>app/static/anatomy.js</code></td>
+<td>Despiece kit Anatomy</td>
+<td>Ratón/teclado y selección sincronizada</td>
+</tr>
+<tr>
+<td><code>app/static/scene.js</code></td>
+<td>Animación Three.js</td>
+<td>Compresor/sensor/alarma según proceso, no resultado ficticio</td>
+</tr>
+<tr>
+<td><code>ids/retail.rules</code></td>
+<td>Evidencia IDS</td>
+<td>SID 1000004 FC16 y 1000005 sesgo de sensor</td>
+</tr>
+<tr>
+<td><code>scripts/verify-redteam.py</code></td>
+<td>28 comprobaciones end-to-end</td>
+<td>Modifica/restablece el aula sin borrar evidencia</td>
+</tr>
+<tr>
+<td><code>tests/test_redteam_logic.py</code></td>
+<td>Unit tests de lógica y aislamiento</td>
+<td>Atomicidad, I/O, cuarentena y destinos fijos</td>
+</tr>
+</tbody>
+</table>
+<p>La guía de solución incluye secuencias reproducibles para todas las prácticas. No hay una herramienta de pentest genérica reorientable a otra infraestructura. Cambiar objetivos o límites requiere modificar el código y revisar su autorización; no está disponible por CLI ni formulario del alumno.</p>

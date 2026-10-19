@@ -1,0 +1,402 @@
+<h1 id="05-conductos-y-acceso-del-proveedor">05 · Conductos y acceso del proveedor</h1>
+<blockquote>
+<p><strong>Guía local del laboratorio Retail OT — borrador ampliado.</strong> Este taller se ejecuta únicamente en la maqueta aislada. La guía es autosuficiente: no se debe volver al portal para buscar instrucciones.</p>
+</blockquote>
+<h2 id="ficha-de-ejecucion">Ficha de ejecución</h2>
+<ul>
+<li><strong>Estación principal (carril proveedor):</strong> <code>ws-vendor</code>, abierta en noVNC.</li>
+<li><strong>Estación de verificación de protocolo (carril ingeniería):</strong> <code>ws-engineering</code>, solo para las pruebas Modbus del paso 4. Volver después a <code>ws-vendor</code>.</li>
+<li><strong>Interfaz de instrucciones:</strong> Firefox local en el escritorio de la estación. Abrir la guía local con <code>labctl guides</code>; no usar la consola web del portal como shell.</li>
+<li><strong>Terminal:</strong> cada bloque se pega en <strong>Terminal del laboratorio</strong> de la estación indicada. En noVNC se puede usar el botón Copiar de esta guía y <code>Ctrl+Shift+V</code> en xfce4-terminal. No copiar el prompt <code>$</code>, salidas JSON ni el portapapeles del anfitrión.</li>
+<li><strong>Participantes:</strong> operador, observador SOC y responsable de evidencia. La maqueta es compartida: no ejecutar dos escenarios a la vez.</li>
+</ul>
+<h3 id="que-se-demostrara">Qué se demostrará</h3>
+<ol>
+<li>Los marcadores laterales usan dos destinos internos fijos (<code>ws-engineering</code> y <code>ws-hmi</code>); no son una ruta de movimiento lateral OT productiva.</li>
+<li><code>harden access</code> aplica un guard global a los endpoints, pero la excepción de escritura de proceso solo permite la ruta <code>simulate defrost</code> cuando el hostname es <code>ws-engineering</code>. Es un control de rol/hostname, <strong>no</strong> MFA ni una prueba de identidad humana.</li>
+<li><code>harden network</code> pone un rechazo de escrituras en el gateway y guardas de marcadores en los agentes. FC06 y FC16 quedan bloqueados; FC03 de lectura permanece disponible.</li>
+<li>La misma acción lateral, con los mismos objetivos, cambia de dos resultados <code>success</code> a dos resultados <code>blocked</code>.</li>
+</ol>
+<h3 id="alcance-local-frente-a-global">Alcance local frente a global</h3>
+<table>
+<thead>
+<tr>
+<th>Acción</th>
+<th>Dónde se inicia</th>
+<th>Alcance real</th>
+<th>Qué no demuestra</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>labctl status</code>, <code>inventory</code>, <code>baseline</code>, <code>evidence</code></td>
+<td>Estación de la terminal</td>
+<td>Endpoint local</td>
+<td>No inspecciona mágicamente otro contenedor</td>
+</tr>
+<tr>
+<td><code>labctl reset</code></td>
+<td>Estación de la terminal</td>
+<td>Solo ese endpoint; conserva evidencia</td>
+<td>No restablece PLC, gateway ni las otras estaciones</td>
+</tr>
+<tr>
+<td><code>labctl reset-all</code></td>
+<td>Terminal de la estación principal, con coordinación</td>
+<td>Aula completa: proceso, gateway, endpoints y políticas; conserva evidencia</td>
+<td>No debe ejecutarse durante la sesión de otro alumno</td>
+</tr>
+<tr>
+<td><code>labctl harden access</code></td>
+<td><code>ws-vendor</code> en esta guía</td>
+<td>Estado del panel y guardas de los cinco endpoints</td>
+<td>No añade MFA ni gate universal a todos los comandos Red/Purple Team</td>
+</tr>
+<tr>
+<td><code>labctl harden network</code></td>
+<td><code>ws-vendor</code> en esta guía</td>
+<td>Política global del gateway y guardas de lateralidad de los endpoints</td>
+<td>No elimina conectividad ni convierte el gateway en un firewall transparente</td>
+</tr>
+<tr>
+<td><code>labctl simulate lateral</code></td>
+<td><code>ws-vendor</code></td>
+<td>Solo marcadores hacia los dos destinos fijos del laboratorio</td>
+<td>No prueba explotación, credenciales ni una ruta productiva</td>
+</tr>
+<tr>
+<td><code>labctl redteam ...</code></td>
+<td><code>ws-engineering</code> en el paso 4</td>
+<td>Ejercicios educativos con gateway/PLC fijos</td>
+<td>No permite IP, puerto, payload o ráfaga elegibles por el alumno</td>
+</tr>
+</tbody>
+</table>
+<p>El control global no se debe confundir con un cambio local: volver a noVNC de <code>ws-hmi</code> y ejecutar <code>labctl reset</code> no deshace <code>harden access</code> o <code>harden network</code> en el aula.</p>
+<h2 id="preparacion-limpia-y-coordinada">Preparación limpia y coordinada</h2>
+<h3 id="01-abrir-la-guia-local-y-comprobar-el-carril">0.1 Abrir la guía local y comprobar el carril</h3>
+<p>En noVNC de <code>ws-vendor</code>, abrir <strong>Terminal del laboratorio</strong> y ejecutar:</p>
+<pre><code class="language-sh">labctl guides
+</code></pre>
+<p><strong>Propósito:</strong> abrir la copia HTML/local de la guía y trabajar desde Firefox, sin depender del portal para las instrucciones.</p>
+<p><strong>Resultado esperado y significado:</strong> Firefox muestra las guías locales del laboratorio. La salida exacta de apertura puede variar; no es una evidencia de hardening.</p>
+<p><strong>Segunda evidencia:</strong> el título de esta guía aparece en el listado local de guías. Si el comando solo imprime ayuda o no abre Firefox, no sustituirlo por la consola del portal: mantener la terminal de noVNC y avisar al responsable de aula.</p>
+<h3 id="02-identidad-host-y-estado-inicial">0.2 Identidad, host y estado inicial</h3>
+<p>Ejecutar cada comando por separado en <code>ws-vendor</code>:</p>
+<pre><code class="language-sh">hostname
+</code></pre>
+<pre><code class="language-sh">id
+</code></pre>
+<pre><code class="language-sh">labctl status
+</code></pre>
+<pre><code class="language-sh">labctl inventory
+</code></pre>
+<pre><code class="language-sh">labctl baseline
+</code></pre>
+<p><strong>Propósito:</strong> dejar registrado qué estación y usuario ejecutan la práctica, y obtener una línea base local antes de tocar políticas.</p>
+<p><strong>Resultado esperado y significado:</strong></p>
+<ul>
+<li><code>hostname</code> debe identificar <code>ws-vendor</code>.</li>
+<li><code>id</code> debe mostrar el usuario de laboratorio <code>student</code> y sus grupos reales; no se requiere ni se debe pedir <code>sudo</code> general.</li>
+<li><code>labctl status</code> devuelve un objeto del endpoint con <code>host</code>, <code>role</code>, <code>policies</code>, <code>mode</code> y la versión disponible de <code>osquery</code>. Tras un aula limpia, las políticas del endpoint (<code>os</code>, <code>application</code>, <code>network</code>, <code>access</code>, <code>supply-chain</code>) deben estar desactivadas.</li>
+<li><code>labctl inventory</code> devuelve <code>source: osqueryi</code> y filas del inventario local.</li>
+<li><code>labctl baseline</code> devuelve <code>rows</code> de osquery para <code>/home/student/lab/controller.conf</code>; en una línea base nueva el archivo es legible por el estudiante y tiene modo <code>0666</code>. Los UID numéricos pueden variar según la imagen; no inventarlos.</li>
+</ul>
+<p>La salida de <code>baseline</code> es evidencia manual de <code>osqueryi</code>, no un certificado de seguridad. Un resultado vacío significa <strong>no observado</strong>, no ausencia absoluta de actividad.</p>
+<p><strong>Segunda evidencia:</strong> ejecutar el nuevo comando de solo lectura:</p>
+<pre><code class="language-sh">labctl classroom-state
+</code></pre>
+<p>Debe mostrar el gemelo del aula con <code>process</code>, <code>gateway</code>, <code>endpoints</code>, <code>policies</code>, <code>events</code>, <code>history</code>, <code>last_update</code> y <code>errors</code>. Tras una preparación limpia, comprobar que el proceso está nominal, que <code>policies.network</code> y <code>policies.access</code> son falsas y que los cinco endpoints están disponibles. No buscar un campo <code>event.outcome</code> en toda la respuesta: <code>classroom-state</code> es un estado agregado, no el wrapper de todos los comandos.</p>
+<p><strong>Si difiere:</strong> conservar las salidas, no comenzar el ataque emulado y no corregirlo con <code>labctl reset</code> en otra estación. Si el hostname no es <code>ws-vendor</code>, cambiar al noVNC correcto y repetir la identificación. Si hay una política global activa, un endpoint <code>unavailable</code>, un error del proceso o un gateway ya endurecido, coordinar un reset de aula antes de continuar.</p>
+<h3 id="03-restablecimiento-de-aula">0.3 Restablecimiento de aula</h3>
+<p>El responsable anuncia el reset a la cohorte y confirma que no hay otra sesión activa. Desde la terminal de <code>ws-vendor</code>, ejecutar el comando nuevo:</p>
+<pre><code class="language-sh">labctl reset-all
+</code></pre>
+<p><strong>Propósito:</strong> empezar con proceso, gateway, endpoints y políticas coordinados. Este reset mantiene la evidencia existente; no borrar volúmenes ni evidencias para “limpiar”.</p>
+<p><strong>Resultado esperado y significado:</strong> respuesta de reset de aula completado. El texto exacto y los campos pueden variar según el wrapper implementado por el padre; no asumir que la respuesta es un evento de endpoint.</p>
+<p><strong>Segunda evidencia:</strong> repetir:</p>
+<pre><code class="language-sh">labctl classroom-state
+</code></pre>
+<p>y luego:</p>
+<pre><code class="language-sh">labctl status
+</code></pre>
+<p>Confirmar de nuevo el estado nominal y las políticas desactivadas en <code>ws-vendor</code> y en el estado agregado.</p>
+<p><strong>Si difiere:</strong> no llamar a <code>labctl reset</code> en cada estación como sustituto. Un <code>reset-all</code> parcial o fallido puede haber dejado políticas aplicadas en algunos destinos; conservar la respuesta y coordinar con el responsable. No ejecutar <code>docker</code>, <code>docker compose down -v</code>, <code>git</code> ni comandos de firewall desde la estación.</p>
+<h2 id="acciones-paso-a-paso">Acciones paso a paso</h2>
+<h3 id="paso-1-observar-la-lateralidad-emulada-antes-de-la-barrera">Paso 1 — Observar la lateralidad emulada antes de la barrera</h3>
+<p><strong>Host y propósito.</strong> Permanecer en <code>ws-vendor</code>. Observar la acción de referencia antes de endurecer, sin cambiar el origen ni los objetivos.</p>
+<p>Ejecutar:</p>
+<pre><code class="language-sh">labctl simulate lateral
+</code></pre>
+<p><strong>Resultado esperado y significado:</strong> la salida contiene <code>targets</code> con dos resultados, uno para <code>ws-engineering</code> y otro para <code>ws-hmi</code>; en una línea base limpia cada resultado tiene <code>event.outcome: success</code> y un mensaje de marcador benigno. El agente crea solo el marcador de entrenamiento; no hay exploit ni robo de credenciales. La respuesta no es un benchmark de red.</p>
+<p><strong>Segunda evidencia:</strong></p>
+<pre><code class="language-sh">labctl classroom-state
+</code></pre>
+<p>Usar el estado para confirmar que ambos endpoints están disponibles y que <code>endpoints.ws-engineering.policies.network</code> y <code>endpoints.ws-hmi.policies.network</code> siguen desactivadas. Para confirmar los resultados de cada destino en observabilidad, en la misma Firefox local se puede consultar Discover con estos filtros separados:</p>
+<pre><code class="language-kql">event.dataset : &quot;lab.endpoint&quot; AND event.action : &quot;lateral&quot; AND host.name : &quot;ws-engineering&quot;
+</code></pre>
+<pre><code class="language-kql">event.dataset : &quot;lab.endpoint&quot; AND event.action : &quot;lateral&quot; AND host.name : &quot;ws-hmi&quot;
+</code></pre>
+<p><strong>Si difiere:</strong></p>
+<ul>
+<li>Si aparece <code>unreachable</code>, es indisponibilidad del destino, no un bloqueo. No marcar el control como eficaz.</li>
+<li>Si aparece <code>blocked</code> antes de aplicar políticas, el aula no está limpia o una política global ya estaba activa; conservar la salida y volver a <code>classroom-state</code>.</li>
+<li>Si solo un destino tiene resultado, no completar el criterio por inferencia: revisar disponibilidad y los dos eventos por host.</li>
+</ul>
+<h3 id="paso-2-limitar-el-acceso-del-proveedor">Paso 2 — Limitar el acceso del proveedor</h3>
+<p><strong>Host y propósito.</strong> Volver a comprobar que se está en <code>ws-vendor</code>. Activar el guard global que exige <code>ws-engineering</code> para la ruta educativa de escritura de deshielo.</p>
+<p>Ejecutar:</p>
+<pre><code class="language-sh">labctl harden access
+</code></pre>
+<p><strong>Resultado esperado y significado:</strong> la respuesta directa es un evento de control con <code>event.action: harden-access</code> y <code>event.outcome: success</code>. La salida directa <strong>no tiene por qué contener</strong> un campo <code>access: true</code>; no usar la ausencia de ese campo como diagnóstico. El panel marca <code>access</code> y activa el guard de los cinco agentes.</p>
+<p><strong>Segunda evidencia:</strong></p>
+<pre><code class="language-sh">labctl classroom-state
+</code></pre>
+<p>Comprobar <code>policies.access: true</code>
+También deben figurar <code>endpoints.ws-vendor.policies.access</code>, <code>endpoints.ws-engineering.policies.access</code>, <code>endpoints.ws-hmi.policies.access</code>, <code>endpoints.ws-corporate.policies.access</code> y <code>endpoints.ws-soc.policies.access</code> como verdaderas. La respuesta de <code>harden access</code> puede ser un evento directo y <code>classroom-state</code> puede ser un objeto agregado: son wrappers distintos.</p>
+<p>Como comprobación local adicional, sin cambiar de host:</p>
+<pre><code class="language-sh">labctl status
+</code></pre>
+<p>Debe mostrar <code>policies.access: true</code> en <code>ws-vendor</code>. El estado local demuestra el agente de esta estación; el agregado demuestra el alcance global.</p>
+<p><strong>Si difiere:</strong></p>
+<ul>
+<li>Si el evento no tiene <code>outcome: success</code>, conservar la salida y no asumir que se aplicó la política.</li>
+<li>Si <code>ws-vendor</code> es verdadero pero algún endpoint es <code>unavailable</code> o tiene <code>access: false</code>, el cambio global quedó incompleto o no es observable todavía. No sustituirlo por resets locales; consultar al responsable y guardar <code>classroom-state</code>.</li>
+<li>Si <code>access</code> sigue falso en todo el aula, comprobar que la acción se ejecutó desde el agente real de <code>ws-vendor</code> y que el panel está disponible. No atribuir todavía el futuro bloqueo a esta barrera.</li>
+</ul>
+<p><strong>Qué controla realmente:</strong> solo la ruta <code>simulate defrost</code> compara el hostname solicitante con <code>ws-engineering</code>. No es una identidad humana fuerte, no es MFA y no es un gate universal para nuevas órdenes Red/Purple Team.</p>
+<h3 id="paso-3-probar-la-solicitud-del-proveedor">Paso 3 — Probar la solicitud del proveedor</h3>
+<p><strong>Host y propósito.</strong> Permanecer en <code>ws-vendor</code> y repetir la acción del proveedor sin cambiar el objetivo. Probar que la solicitud se detiene en el guard de rol antes de llegar al protocolo.</p>
+<p>Ejecutar:</p>
+<pre><code class="language-sh">labctl simulate defrost
+</code></pre>
+<p><strong>Resultado esperado y significado:</strong> la respuesta es un evento con <code>event.action: defrost</code>, <code>event.outcome: blocked</code>, <code>host.name: ws-vendor</code> y un mensaje equivalente a <code>Training role gate: engineering only process write</code>. Al bloquearse en el panel por rol, la respuesta no debe contener un campo <code>packet</code>: no se llegó a Modbus ni se debe atribuir el resultado a Suricata.</p>
+<p><strong>Segunda evidencia:</strong></p>
+<pre><code class="language-sh">labctl classroom-state
+</code></pre>
+<p>Buscar en <code>events</code>/estado el evento de <code>defrost</code> para <code>ws-vendor</code> y confirmar que <code>policies.access</code> permanece verdadera. En Discover, si se usa la observabilidad opcional de la misma Firefox:</p>
+<pre><code class="language-kql">event.dataset : &quot;lab.control&quot; AND event.action : &quot;defrost&quot; AND host.name : &quot;ws-vendor&quot;
+</code></pre>
+<p>La captura puede contener lecturas FC03 generadas por el polling del aula; por eso no usar la mera presencia de un PCAP para afirmar que esta orden alcanzó el gateway.</p>
+<p><strong>Si difiere:</strong></p>
+<ul>
+<li>Si el resultado es <code>success</code> o aparece <code>packet</code>, detenerse: revisar <code>hostname</code>, <code>labctl status</code> y <code>classroom-state.policies.access</code>. Una ejecución en <code>ws-engineering</code> no es la prueba de proveedor.</li>
+<li>Si <code>access</code> es falso, repetir primero el paso 2 solo después de coordinar y conservar la salida fallida.</li>
+<li>Si hay <code>503</code>, endpoint no disponible o error de panel, registrar la indisponibilidad; no convertirla en <code>blocked</code>.</li>
+<li>Si el evento es <code>blocked</code> pero el mensaje corresponde a otra barrera, anotar la barrera efectiva. Este paso pretende demostrar el guard de rol, no una firma de red.</li>
+</ul>
+<h3 id="paso-4-filtrar-escrituras-en-el-gateway-sin-quitar-las-lecturas">Paso 4 — Filtrar escrituras en el gateway sin quitar las lecturas</h3>
+<p>Este paso separa dos hosts. La política se aplica globalmente desde <code>ws-vendor</code>; las solicitudes Modbus controladas se comprueban desde una terminal real de <code>ws-engineering</code> para conservar la procedencia declarada en la práctica. No ejecutar <code>labctl reset</code> al cambiar de noVNC.</p>
+<h4 id="41-activar-la-politica-global-de-red">4.1 Activar la política global de red</h4>
+<p><strong>Host y propósito.</strong> Volver a <code>ws-vendor</code>. Activar la denegación de escrituras en el gateway y el guard de marcadores de los agentes.</p>
+<p>Ejecutar:</p>
+<pre><code class="language-sh">labctl harden network
+</code></pre>
+<p><strong>Resultado esperado y significado:</strong> la respuesta es un evento con <code>event.action: harden-network</code> y <code>event.outcome: success</code>. La salida directa puede no incluir <code>network: true</code>; la política real se comprueba en el estado agregado. El gateway queda configurado para rechazar FC06 y FC16, mientras que el endpoint network guard bloquea marcadores laterales.</p>
+<p><strong>Segunda evidencia:</strong></p>
+<pre><code class="language-sh">labctl classroom-state
+</code></pre>
+<p>Comprobar <code>policies.network: true</code>, <code>gateway.deny_writes: true</code> y <code>endpoints.*.policies.network: true</code> para los endpoints disponibles. El contador <code>blocked_writes</code> es acumulativo y puede incluir pruebas anteriores; registrar su valor observado, no inventar una diferencia.</p>
+<p><strong>Si difiere:</strong> si algún endpoint está <code>unavailable</code>, el gateway no tiene <code>deny_writes: true</code> o el evento no fue <code>success</code>, conservar el estado y no pasar a la prueba de protocolo. La acción puede haber alcanzado algunos componentes antes de fallar; no inferir que la aplicación fue atómica. Coordinar la corrección global.</p>
+<h4 id="42-cambiar-al-carril-de-ingenieria-y-comprobar-identidad">4.2 Cambiar al carril de ingeniería y comprobar identidad</h4>
+<p>Abrir el noVNC de <code>ws-engineering</code>, abrir su <strong>Terminal del laboratorio</strong> y ejecutar por separado:</p>
+<pre><code class="language-sh">hostname
+</code></pre>
+<pre><code class="language-sh">id
+</code></pre>
+<pre><code class="language-sh">labctl status
+</code></pre>
+<p><strong>Propósito:</strong> comprobar que las pruebas de protocolo realmente salen del host de ingeniería y que el agente local está disponible.</p>
+<p><strong>Resultado esperado y significado:</strong> <code>hostname</code> identifica <code>ws-engineering</code>; <code>id</code> vuelve a mostrar el usuario local del laboratorio; <code>labctl status</code> muestra el endpoint disponible y <code>policies.network: true</code>. Los valores de versión, PID, timestamp y contadores son variables y no se deben fabricar.</p>
+<p><strong>Segunda evidencia:</strong> <code>labctl classroom-state</code> desde esta terminal debe mostrar el mismo <code>gateway.deny_writes: true</code> y el endpoint <code>ws-engineering</code> con <code>network: true</code>.</p>
+<p><strong>Si difiere:</strong> no ejecutar las pruebas como si fueran de ingeniería. Volver al noVNC correcto, repetir la comprobación y, si el endpoint está indisponible, guardar el estado como fallo de disponibilidad.</p>
+<h4 id="43-probar-fc06-write-single-register">4.3 Probar FC06 (Write Single Register)</h4>
+<p><strong>Propósito:</strong> verificar el rechazo de una escritura FC06 en el gateway después del hardening.</p>
+<p>Ejecutar en <code>ws-engineering</code>:</p>
+<pre><code class="language-sh">labctl redteam modbus-write
+</code></pre>
+<p><strong>Resultado esperado y significado:</strong> la respuesta contiene un evento <code>lab.control</code> con acción equivalente a <code>redteam-modbus-write</code> y <code>outcome: blocked</code>. En <code>result</code>, la respuesta real TCP tiene <code>exception: true</code> y la fuente indica que fue una solicitud/respuesta Modbus a través del gateway fijo. No hay IP, puerto ni payload libre: es la operación educativa fija del código.</p>
+<p><strong>Segunda evidencia:</strong> en la misma terminal:</p>
+<pre><code class="language-sh">curl -sS http://panel:8000/api/packets
+</code></pre>
+<p>Correlacionar el paquete FC06 por la ventana UTC y la respuesta de excepción. Como fuente adicional, Discover puede filtrar:</p>
+<pre><code class="language-kql">event.dataset : &quot;lab.control&quot; AND event.action : &quot;gateway-write&quot; AND host.name : &quot;gateway&quot;
+</code></pre>
+<p>El evento del gateway debe mostrar una decisión <code>blocked</code> para FC06. La respuesta de <code>labctl</code> y el evento del gateway son fuentes distintas; <code>lab.endpoint</code> no sustituye a ninguna de ellas.</p>
+<p><strong>Si difiere:</strong></p>
+<ul>
+<li>Si <code>outcome</code> es <code>success</code> o <code>result.exception</code> es falso, no marcar FC06 como bloqueado. Confirmar que se ejecutó <code>harden network</code>, que <code>gateway.deny_writes</code> es verdadero y que la terminal es <code>ws-engineering</code>.</li>
+<li>Si no hay paquete, usar el evento del gateway y el estado; una ausencia de captura no transforma un éxito en un bloqueo.</li>
+<li>Si hay <code>503</code>, <code>unreachable</code> o respuesta truncada, es un problema de servicio/captura, no evidencia de control eficaz.</li>
+</ul>
+<h4 id="44-probar-fc16-write-multiple-registers">4.4 Probar FC16 (Write Multiple Registers)</h4>
+<p><strong>Propósito:</strong> comprobar que el mismo guard global cubre la variante de escritura múltiple, sin confundirla con una ráfaga.</p>
+<p>Ejecutar en <code>ws-engineering</code>:</p>
+<pre><code class="language-sh">labctl redteam modbus-fc16
+</code></pre>
+<p><strong>Resultado esperado y significado:</strong> el evento de control equivalente a <code>redteam-modbus-fc16</code> tiene <code>outcome: blocked</code> y <code>result.exception: true</code>. La operación está fijada a una escritura educativa de un registro; no es un flood ni una prueba de denegación de servicio.</p>
+<p><strong>Segunda evidencia:</strong> volver a consultar:</p>
+<pre><code class="language-sh">curl -sS http://panel:8000/api/packets
+</code></pre>
+<p>y filtrar en Kibana el mismo evento <code>gateway-write</code> por la ventana UTC, identificando el mensaje FC16 y <code>event.outcome: blocked</code>.</p>
+<p><strong>Si difiere:</strong> si FC16 pasa mientras FC06 está bloqueado, guardar ambas respuestas y revisar <code>gateway.deny_writes</code> y el evento del gateway. No concluir que la red está endurecida por una sola función. Si el resultado es <code>unreachable</code>, no llamarlo <code>blocked</code>.</p>
+<h4 id="45-comprobar-que-fc03-read-sigue-permitido">4.5 Comprobar que FC03 Read sigue permitido</h4>
+<p><strong>Propósito:</strong> demostrar la diferencia entre filtrar escrituras y eliminar la conectividad del gateway.</p>
+<p>Ejecutar en <code>ws-engineering</code>:</p>
+<pre><code class="language-sh">labctl redteam baseline
+</code></pre>
+<p><strong>Resultado esperado y significado:</strong> el evento equivalente a <code>redteam-baseline</code> tiene <code>outcome: success</code>; <code>result.function</code> es <code>3</code>, <code>result.exception</code> es falso y la fuente describe una respuesta TCP real. La lectura sigue permitida. Que el contador de lecturas cambie no es una alarma: el panel también genera polling.</p>
+<p><strong>Segunda evidencia:</strong></p>
+<pre><code class="language-sh">curl -sS http://panel:8000/api/packets
+</code></pre>
+<p>Correlacionar la solicitud FC03 y su respuesta normal por el timestamp y el resultado hexadecimal devuelto por <code>labctl</code>. En Kibana, <code>event.dataset: "lab.control"</code> puede mostrar el evento del ejercicio; la traza de paquetes es la fuente específica del protocolo.</p>
+<p><strong>Si difiere:</strong> si FC03 se bloquea, el gateway puede estar indisponible o se aplicó una política distinta de la prevista. Revisar <code>gateway.deny_writes</code>, conservar el PCAP/paquetes y no declarar “lectura preservada”. Si FC03 pasa pero la respuesta no es del gateway fijo, detenerse: no usar destinos externos.</p>
+<p>Al terminar las tres pruebas, cerrar la terminal de <code>ws-engineering</code> y volver al noVNC de <code>ws-vendor</code>. No restablecer el endpoint de ingeniería: la política es global y la siguiente prueba necesita los guards activos.</p>
+<h3 id="paso-5-repetir-exactamente-la-lateralidad">Paso 5 — Repetir exactamente la lateralidad</h3>
+<p><strong>Host y propósito.</strong> Volver a <code>ws-vendor</code>. Repetir el mismo comando del paso 1, con los mismos destinos fijos, después de <code>harden access</code> y <code>harden network</code>.</p>
+<p>Ejecutar:</p>
+<pre><code class="language-sh">labctl simulate lateral
+</code></pre>
+<p><strong>Resultado esperado y significado:</strong> <code>targets</code> contiene dos resultados, para <code>ws-engineering</code> y <code>ws-hmi</code>; cada resultado tiene <code>event.outcome: blocked</code> y un mensaje de guard de allowlist interna. La salida superior no necesariamente tiene un <code>outcome</code> global: leer cada elemento de <code>targets</code>. La acción <code>lateral-attempt</code> local puede registrarse como intento realizado, pero eso no contradice que ambos destinos hayan bloqueado el marcador.</p>
+<p><strong>Segunda evidencia:</strong></p>
+<pre><code class="language-sh">labctl classroom-state
+</code></pre>
+<p>Confirmar que los dos endpoints siguen disponibles y con <code>policies.network: true</code> (y <code>access: true</code>). En Discover, separar los hosts; no filtrar todo por HMI:</p>
+<pre><code class="language-kql">event.dataset : &quot;lab.endpoint&quot; AND event.action : &quot;lateral&quot; AND host.name : &quot;ws-engineering&quot;
+</code></pre>
+<pre><code class="language-kql">event.dataset : &quot;lab.endpoint&quot; AND event.action : &quot;lateral&quot; AND host.name : &quot;ws-hmi&quot;
+</code></pre>
+<p><strong>Si difiere:</strong></p>
+<ul>
+<li>Un resultado <code>success</code> indica que ese agente no tenía el guard aplicado o que se está observando otra ventana/host; no completar el criterio con el otro destino.</li>
+<li><code>unreachable</code> significa indisponibilidad, no bloqueo.</li>
+<li>Si la salida tiene dos bloqueos pero <code>classroom-state</code> muestra una política falsa, conservar ambas fuentes y diagnosticar la discrepancia de observabilidad antes de concluir.</li>
+</ul>
+<h2 id="verificacion-local-y-observabilidad">Verificación local y observabilidad</h2>
+<h3 id="consultas-linuxosquery-en-la-estacion-observada">Consultas Linux/osquery en la estación observada</h3>
+<p>Estas consultas se ejecutan en la Terminal del noVNC del host observado. <code>osqueryi</code> es una consulta manual e independiente de <code>osqueryd</code>; no esperar que el valor, PID o timestamp de una consulta manual coincida con el siguiente registro programado.</p>
+<p>Sistema del endpoint:</p>
+<pre><code class="language-sh">osqueryi --json &quot;SELECT name,version,platform FROM os_version;&quot;
+</code></pre>
+<p><strong>Resultado y significado:</strong> filas de la versión local; confirma qué endpoint se consultó, no el estado del gateway. Si está vacío, registrar <code>no observado</code>.</p>
+<p>Procesos del laboratorio:</p>
+<pre><code class="language-sh">osqueryi --json &quot;SELECT pid,name,path,cmdline FROM processes WHERE cmdline LIKE '%retail-%';&quot;
+</code></pre>
+<p><strong>Resultado y significado:</strong> lista procesos locales cuyo comando contiene <code>retail-</code>. En este taller no se ejecuta malware real; una fila, si apareciera por otro ejercicio, es solo un proceso de entrenamiento. No inventar PID.</p>
+<p>Usuarios:</p>
+<pre><code class="language-sh">osqueryi --json &quot;SELECT uid,username,shell FROM users;&quot;
+</code></pre>
+<p><strong>Resultado y significado:</strong> cuentas y shells visibles en ese endpoint; no prueba autorización de proveedor en el panel.</p>
+<p>Puertos en escucha:</p>
+<pre><code class="language-sh">osqueryi --json &quot;SELECT pid,port,address,protocol FROM listening_ports;&quot;
+</code></pre>
+<p><strong>Resultado y significado:</strong> escucha local observada por osquery. No equivale a un escaneo de red.</p>
+<p>Permisos de configuración:</p>
+<pre><code class="language-sh">osqueryi --json &quot;SELECT path,mode,uid,gid FROM file WHERE path='/home/student/lab/controller.conf';&quot;
+</code></pre>
+<p><strong>Resultado y significado:</strong> evidencia local del modo/propietario del archivo. Para esta guía la línea base esperada es <code>0666</code>; el hardening de OS que convertiría el archivo en <code>0640 root:student</code> pertenece a otro control y no se debe atribuir a <code>harden network</code>.</p>
+<p>Hash manual del firmware educativo:</p>
+<pre><code class="language-sh">osqueryi --json &quot;SELECT path,sha256 FROM hash WHERE path='/home/student/lab/firmware.bin';&quot;
+</code></pre>
+<p><strong>Resultado y significado:</strong> hash observado en el endpoint consultado. No inventar el hash ni afirmar que <code>osqueryd</code> monitoriza <code>firmware.bin</code>: la consulta manual es una evidencia distinta de <code>config_integrity</code>.</p>
+<p>Un resultado vacío en cualquiera de estas consultas es <code>no observado</code>, no una prueba de ausencia absoluta. Las consultas programadas del collector pueden tener latencia de cinco segundos más collector/Logstash y refresco de Kibana.</p>
+<h3 id="kibana-opcional">Kibana opcional</h3>
+<p>La observación visual es opcional y se hace desde la misma Firefox local, usando el host interno, no <code>127.0.0.1</code>:</p>
+<ul>
+<li>Panel/estado: <code>http://panel:8000</code>.</li>
+<li>Kibana: <code>http://kibana:5601/app/dashboards#/view/retail-overview</code>.</li>
+</ul>
+<p>En Discover seleccionar el data view <code>retail-ot-*</code>, una ventana reciente (por ejemplo, los últimos 15 minutos) y refresco de 5 segundos. Copiar KQL, no SQL. Filtros base:</p>
+<pre><code class="language-kql">event.dataset : &quot;osquery&quot; AND host.name : &quot;ws-vendor&quot;
+</code></pre>
+<pre><code class="language-kql">event.dataset : &quot;lab.endpoint&quot; AND host.name : &quot;ws-vendor&quot;
+</code></pre>
+<pre><code class="language-kql">event.dataset : &quot;lab.control&quot;
+</code></pre>
+<pre><code class="language-kql">event.dataset : &quot;suricata&quot; AND event.action : &quot;alert&quot;
+</code></pre>
+<p><code>lab.control</code> puede tener como <code>host.name</code> a PLC, gateway o endpoint solicitante según la fuente; no filtrar todo por HMI. Suricata usa el host <code>sensor</code>. Los eventos osqueryd de configuración incluyen <code>osquery.columns</code> y el nombre <code>config_integrity</code>. Un bloqueo por rol del paso 3 no debe explicarse como una alerta Suricata.</p>
+<h2 id="evidencia-entregable-y-cierre">Evidencia entregable y cierre</h2>
+<h3 id="guardar-sin-escribir-en-el-collector">Guardar sin escribir en el collector</h3>
+<p>Antes de cerrar la sesión, y <strong>antes del reset final</strong>, desde la terminal de cada carril guardar la evidencia en el directorio del alumno:</p>
+<pre><code class="language-sh">mkdir -p ~/lab/evidencias/taller-05
+</code></pre>
+<p>En <code>ws-engineering</code>, después de las pruebas Modbus:</p>
+<pre><code class="language-sh">labctl evidence &gt; ~/lab/evidencias/taller-05/ws-engineering-evidence.json
+</code></pre>
+<p>En <code>ws-vendor</code>, después del paso 5:</p>
+<pre><code class="language-sh">labctl evidence &gt; ~/lab/evidencias/taller-05/ws-vendor-evidence.json
+</code></pre>
+<p>Desde <code>ws-vendor</code>, guardar el estado agregado y los paquetes disponibles:</p>
+<pre><code class="language-sh">labctl classroom-state &gt; ~/lab/evidencias/taller-05/classroom-state-final.json
+</code></pre>
+<pre><code class="language-sh">curl -sS http://panel:8000/api/packets &gt; ~/lab/evidencias/taller-05/modbus-packets.json
+</code></pre>
+<p>Los comandos anteriores guardan datos generados, no hashes/PIDs inventados. Registrar junto a ellos: comando, hostname, usuario, hora UTC que aparece en los eventos, resultado permitido/bloqueado, efecto observable, fuente exacta y limitación. No redireccionar a <code>/evidence</code> del collector; la ruta <code>/evidence/osquery/osqueryd.results.log</code> que pueda aparecer en <code>labctl evidence</code> es solo una referencia de lectura del agente.</p>
+<p>Si se necesita un PCAP real, usar únicamente el endpoint fijo del panel y solo si está listo; un <code>404 Capture is not yet ready</code> se registra como captura no disponible, no como PCAP vacío ni como prueba de bloqueo. No usar capturas de pantalla inventadas.</p>
+<h3 id="criterios-de-exito">Criterios de éxito</h3>
+<table>
+<thead>
+<tr>
+<th>Criterio</th>
+<th>Evidencia mínima</th>
+<th>Significado y límite</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Lateralidad de referencia</td>
+<td>Paso 1: dos destinos fijos observados</td>
+<td>Solo marcador del training network; no lateralidad productiva</td>
+</tr>
+<tr>
+<td>Guard de proveedor</td>
+<td>Paso 2 estado global y paso 3 <code>defrost</code> de <code>ws-vendor</code> bloqueado sin <code>packet</code></td>
+<td>Guard de hostname en una ruta; no MFA ni identidad humana robusta</td>
+</tr>
+<tr>
+<td>FC06 bloqueado</td>
+<td>Paso 4.3: excepción TCP, evento <code>gateway-write</code> bloqueado</td>
+<td>Política de gateway en la maqueta; no firewall transparente</td>
+</tr>
+<tr>
+<td>FC16 bloqueado</td>
+<td>Paso 4.4: excepción TCP, evento de gateway bloqueado</td>
+<td>Cubre la otra escritura fija; no es DoS</td>
+</tr>
+<tr>
+<td>FC03 preservado</td>
+<td>Paso 4.5: función 3 y respuesta normal</td>
+<td>Lectura de este gateway educativo, no disponibilidad universal</td>
+</tr>
+<tr>
+<td>Lateralidad después</td>
+<td>Paso 5: <code>ws-engineering</code> y <code>ws-hmi</code> bloqueados por separado</td>
+<td>Guardas de agentes; no elimina conectividad ni acciones administrativas fuera de banda</td>
+</tr>
+</tbody>
+</table>
+<h3 id="solucion-razonada">Solución razonada</h3>
+<p>La resolución correcta es comprobar el estado inicial, reproducir benignamente, aplicar exactamente la barrera, repetir la misma acción sin cambiar origen/objetivo y contrastar dos fuentes. Si una salida no coincide, conservarla y diagnosticar; nunca reemplazarla por la salida esperada.</p>
+<h3 id="restablecimiento-final">Restablecimiento final</h3>
+<p>Después de guardar la evidencia, anunciar a la cohorte el cierre y ejecutar desde <code>ws-vendor</code>:</p>
+<pre><code class="language-sh">labctl reset-all
+</code></pre>
+<p><strong>Propósito:</strong> dejar proceso, gateway y endpoints listos para la siguiente práctica sin borrar la evidencia. Es una operación coordinada que afecta a otros alumnos. Si no hay autorización de aula o el comando no está disponible, no sustituirlo por una cadena de resets locales: dejar constancia y pedir al responsable que coordine el reset.</p>
+<p>No ejecutar <code>docker compose down -v</code>: elimina volúmenes y evidencia. <code>docker compose down</code> tampoco es una acción de la terminal del laboratorio para resolver este taller.</p>
+<h2 id="limites-mapeo-y-uso-responsable">Límites, mapeo y uso responsable</h2>
+<ul>
+<li>Solo aula aislada y autorizada. No conectar a PLC, HMI, RTU, gateway o tiendas reales.</li>
+<li>No hay malware operativo, explotación, cifrado, escaneo, direcciones externas configurables ni credenciales de producción. Los artefactos educativos están bajo <code>/home/student/lab</code>.</li>
+<li>Un marcador lateral y una simulación de proceso no prueban una APT. Una ejecución temporal de 45 segundos, si aparece en otro ejercicio, tampoco lo demuestra.</li>
+<li>El hardening de este taller está acotado a un guard de ejecución de agente, una política de gateway de aplicación y una lista de roles/hosts para una ruta fija. No equivale a SELinux/AppArmor, GPO, firewall de red transparente, protección endpoint completa, SIS ni certificación IEC 62443.</li>
+<li>La red de administración pedagógica permite acciones fuera de banda y es una excepción explícita del diseño; <code>harden network</code> no elimina esa excepción.</li>
+<li>El modelo de proceso y el PLC son ficticios y educativos; no calcular salud alimentaria real a partir de sus ticks o temperatura simulada.</li>
+<li>La referencia normativa del material incluye <strong>MITRE ATT&amp;CK for ICS</strong>, <strong>IEC 62443</strong> y el contexto chileno de la <strong>Ley 21.663</strong>. Este ejercicio no acredita cumplimiento, SL-T/SL-A, certificación ni obligaciones de notificación a ANCI.</li>
+</ul>
+<h3 id="mitre-attck-for-ics-iec-62443">MITRE ATT&amp;CK for ICS / IEC 62443</h3>
+<p>La lateralidad de este taller está representada mediante marcadores hacia destinos internos fijos; no hay exploit. T0836 solo sería aplicable a órdenes reales del proceso, que aquí no existen.</p>
+<p>El diseño se relaciona pedagógicamente con FR1, FR2 y FR5 de IEC 62443. El SL-T debe definirse mediante análisis de riesgo de cada zona y activo. SL-A requiere evaluación, diseño y evidencia mucho más amplios: no se obtiene pulsando estos controles ni observando siete eventos.</p>
+<h3 id="antipatron-contextual-y-accion-posterior">Antipatrón contextual y acción posterior</h3>
+<p>Para discusión en plantas y tiendas chilenas, no como observación atribuida a una organización: acceso compartido de proveedor sin ventana, copia de configuración sin hash y cambios del HMI sin validación del proceso. El siguiente día hábil: identificar al dueño del activo, documentar cambio y reversión, probar primero fuera de producción y acordar una ventana con operaciones. No bloquear remotamente una planta sin evaluar la seguridad física.</p>
+<p>El tutorial complementario de observabilidad se encuentra como <code>docs/tutorial-observabilidad.md</code> dentro del laboratorio. Es material de apoyo; este taller no depende de volver al portal ni de ejecutar pruebas automáticas en paralelo.</p>

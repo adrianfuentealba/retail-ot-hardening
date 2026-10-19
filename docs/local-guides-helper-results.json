@@ -1,0 +1,1 @@
+{"passed": true, "checks": ["classroom-state uses read-only GET", "reset-all delegates global POST", "reset retains endpoint-local behavior"], "notice": "Transporte mockeado; no se ejecut\u00f3 reset de aula ni prueba ofensiva."}

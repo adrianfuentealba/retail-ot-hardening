@@ -1,0 +1,89 @@
+<h1 id="ejercicio-de-respuesta-y-notificacion-chile">Ejercicio de respuesta y notificación: Chile</h1>
+<p>Borrador de aula, <strong>no se envía a ANCI</strong>. No todo supermercado es automáticamente prestador de servicio esencial u OIV. Verificar actividades concretas, resoluciones y sujeto obligado antes de aplicar plazos. La cantidad de OIV es dinámica: no usar “~250” como un dato vigente certificado.</p>
+<p>Según FAQ oficial ANCI, para sujetos obligados e incidentes potencialmente significativos: alerta temprana tan pronto sea posible y máximo 3 horas desde conocimiento; actualización máximo 72 horas; informe final máximo 15 días corridos desde envío de alerta. Revisar reglamento y caso OIV afectación de servicio esencial para excepción de 24 horas; fuentes secundarias lo describen, no confundirlo con regla general. Confirmar plan de acción y cómputos en reglamento vigente antes de uso real. No sustituir validación legal con este taller.</p>
+<p>El marco contempla multas que pueden llegar a 40.000 UTM para infracciones gravísimas de OIV, no multa automática por cualquier incidente. Texto legal y obligación dependen de conducta y clasificación. Ley 21.459: mantener autorización del aula y no operar infraestructura ajena. Ley 21.719: considerar minimización de datos y fecha de vigencia aplicable; no se presume vigente todo su régimen al 12-10-2026.</p>
+<h2 id="plantilla-copiar-y-completar">Plantilla copiar y completar</h2>
+<pre><code class="language-text">BORRADOR EDUCATIVO — NO ENVIAR
+Institución ficticia: Retail SCL-01
+Sujeto obligado / fundamento: [por verificar; no asumir OIV]
+Responsable y delegado: [roles ficticios]
+Hora de conocimiento (UTC y local):
+Hora estimada de inicio / incertidumbre:
+Activos: PLC-R01, ws-hmi, gateway
+Hechos confirmados por evidencia:
+- [hora, fuente, paquete o evento, acción]
+Hipótesis no confirmadas:
+Impacto de proceso: [temperatura y cuarentena didácticas]
+Impacto de servicio y salud: [simulado; no extrapolar]
+Medidas aplicadas y resultado probado:
+Indicadores de entrenamiento: [hash marcador, hostname interno]
+Próxima actualización / plazo aplicable:
+Custodia de PCAP y bitácora:
+</code></pre>
+<h2 id="raci-de-aula">RACI de aula</h2>
+<table>
+<thead>
+<tr>
+<th>Decisión</th>
+<th>Operación tienda</th>
+<th>Ingeniería OT</th>
+<th>SOC</th>
+<th>CISO/delegado</th>
+<th>Jurídico</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Validar impacto físico/stock</td>
+<td>A/R</td>
+<td>C</td>
+<td>I</td>
+<td>I</td>
+<td>I</td>
+</tr>
+<tr>
+<td>Aplicar control del PLC</td>
+<td>A</td>
+<td>R</td>
+<td>C</td>
+<td>I</td>
+<td>I</td>
+</tr>
+<tr>
+<td>Preservar PCAP/eventos</td>
+<td>C</td>
+<td>C</td>
+<td>R</td>
+<td>A</td>
+<td>I</td>
+</tr>
+<tr>
+<td>Recuperar proceso</td>
+<td>A</td>
+<td>R</td>
+<td>C</td>
+<td>I</td>
+<td>I</td>
+</tr>
+<tr>
+<td>Determinar obligación de reporte</td>
+<td>C</td>
+<td>C</td>
+<td>C</td>
+<td>A</td>
+<td>R</td>
+</tr>
+<tr>
+<td>Aprobar y enviar reporte real</td>
+<td>C</td>
+<td>C</td>
+<td>C</td>
+<td>A/R</td>
+<td>C</td>
+</tr>
+</tbody>
+</table>
+<p>No enviar una notificación real como parte del laboratorio. No concluir que recuperar frío permite vender stock comprometido. Evaluar cuarentena con responsable sanitario real en producción.</p>
+<p>Fuente oficial: https://anci.gob.cl/preguntas-frecuentes/preguntas-frecuentes-portal-anci/
+Texto ley: https://www.bcn.cl/leychile/navegar?idNorma=1202434
+Reglamento y excepción de plazos (referencia secundaria a contrastar): https://www.az.cl/en/framework-cybersecurity-law-key-points-of-the-incident-reporting-regulation/</p>

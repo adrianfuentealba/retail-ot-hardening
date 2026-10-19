@@ -1,0 +1,70 @@
+<h1 id="anatomy-activo-cpu-senales-y-contramedidas">Anatomy activo: CPU, señales y contramedidas</h1>
+<h2 id="como-usarlo">Cómo usarlo</h2>
+<p>En el portal, seleccionar un activo y pulsar <strong>Explorar anatomía</strong>. El despiece de Anatomy permite pulsar la CPU, I/O, alimentación, interfaces o tapa/memoria; también funciona con Tab y Enter/Espacio. Separar componentes para acceder a piezas ocultas. El selector de componente es una alternativa accesible.</p>
+<p>En escritorio ancho el inspector queda en el lado derecho; el supermercado y su telemetría siguen visibles a la izquierda. En pantallas pequeñas el inspector se apila y tiene scroll propio. Los cambios de estado son compartidos por toda la cohorte: no ejecutar dos prácticas independientes sobre el mismo PLC.</p>
+<p><strong>Entender</strong> explica la pieza. <strong>Código CPU</strong> muestra el archivo real <code>plc/control_logic.py</code>, servido por <code>/api/anatomy</code>; no es una captura de código ni pseudocódigo inventado. <strong>Conectar / Probar</strong> cambia señales o aplica una política al backend que alimenta el mismo canvas.</p>
+<h2 id="cpu-logica-de-control">CPU / Lógica de control</h2>
+<p>La entrada remota pasa por <code>validate_change()</code> y <code>apply_changes()</code> antes de mutar parámetros. FC06, FC16 y Write OPC UA comparten esa validación. FC16 valida todas las direcciones primero: una operación rechazada no deja medio cambio aplicado.</p>
+<p><code>control_cycle()</code> ejecuta el recorrido del modelo:</p>
+<ol>
+<li>AI0: temperatura física del simulador más sesgo, o sin valor al desconectar.</li>
+<li>Validación de rango y coherencia contra referencia ideal, únicamente si se endureció la entrada.</li>
+<li>Histéresis del compresor y decisión de deshielo.</li>
+<li>DO0/DO1/DO2 y estado de alarma.</li>
+<li>Evolución térmica, exposición acelerada y cuarentena irreversible hasta reset de aula.</li>
+</ol>
+<p>La consigna es un parámetro de ingeniería, no una medición. Cifrar el transporte no hace segura una consigna 50 °C. El interlock impide el cambio incluso cuando el usuario de ingeniería tiene Write legítimo.</p>
+<h2 id="entradas-salidas">Entradas / salidas</h2>
+<table>
+<thead>
+<tr>
+<th>Canal conceptual</th>
+<th>Dispositivo a conectar</th>
+<th>Interpretación didáctica</th>
+<th>Hardening</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AI0</td>
+<td>PT100 con módulo RTD compatible, o transmisor 4–20 mA con módulo AI apropiado</td>
+<td>Temperatura de cámara</td>
+<td>Dominio de calibración restringido; lectura válida y diagnóstico</td>
+</tr>
+<tr>
+<td>DI0</td>
+<td>Contacto de puerta</td>
+<td>Cerrado normal; abrir agrega carga y alarma</td>
+<td>Validar estado e integrar procedimiento operativo</td>
+</tr>
+<tr>
+<td>DO0</td>
+<td>Relé de mando hacia contactor de compresor</td>
+<td>Compresor ON/OFF</td>
+<td>Interlocks, feedback y protección de potencia en instalación real</td>
+</tr>
+<tr>
+<td>DO1</td>
+<td>Relé/contactor de deshielo</td>
+<td>Deshielo ficticio cuando consigna &gt;6</td>
+<td>Límites de parámetros; no habilitar deshielo por cualquier orden remota</td>
+</tr>
+<tr>
+<td>DO2</td>
+<td>Señal de alarma a HMI/sirena</td>
+<td>Alarma por respaldo o puerta</td>
+<td>Registrar, mantener canal de alarma y verificar atención operacional</td>
+</tr>
+</tbody>
+</table>
+<p>PT100 y 4–20 mA <strong>no se conectan indistintamente</strong> al mismo módulo sin configuración/hardware correctos. La relación ilustrativa para rango −30…50 °C es <code>I=4+16*(T+30)/80 mA</code>. No existe corriente física en Docker. No conectar potencia del compresor al PLC; el dibujo no define tensión, fabricante, conexión eléctrica ni reemplaza planos verificados.</p>
+<h3 id="experimento-ai0">Experimento AI0</h3>
+<p>Desde I/O → Conectar / Probar, desactivar el sensor. Sin protección, el modelo no conoce una señal y detiene compresor. Aplicar <strong>Proteger entrada</strong>, que restaura el sensor y activa guard. Desconectar nuevamente: aparece respaldo del modelo y alarma. Reconectar: retorna señal primaria.</p>
+<p>El banco de señales usa <code>/api/anatomy/wiring</code>, una <strong>API pedagógica fuera de banda</strong>. No demuestra un atacante tocando cableado físico. <code>harden inputs</code> bloquea calibración remota por protocolos, no el banco del instructor.</p>
+<p>El respaldo conoce la temperatura ideal del propio simulador. En planta real debe sustituirse por redundancia física y modos degradados analizados con operaciones. No afirmar SIS certificado, SIL, fail-safe universal ni protección de todas las fallas.</p>
+<h2 id="interfaces-y-memoria">Interfaces y memoria</h2>
+<p>Modbus TCP 502, ocho registros de mapa fijo; UA TCP 4840 con nodestrings del aula. En módulo 10 se comparan denylist incompleta, allowlist, presupuesto Write y validación del PLC. OPC UA distingue None/SignAndEncrypt, identidad y permiso por nodo.</p>
+<p>La pestaña de memoria explica revisión de fuente/configuración y firmware ficticio con manifiesto; no acepta cargas de código ni compila lógica arbitraria desde el navegador. Las identidades <code>engineer</code> y <code>observer</code> y los certificados compartidos están documentados para aprendizaje local, no son secretos reutilizables de producción.</p>
+<h2 id="evidencia-esperada">Evidencia esperada</h2>
+<p>El inspector debe mostrar estado de fuente y proceso; el gemelo debe variar después de una entrada/orden real del modelo; logs PLC y respuestas Modbus/UA deben acreditar aceptación/denegación. El click solo cambia la vista; nunca es prueba de control aplicado. La UI no sustituye PCAP, osquery ni logs de servidor.</p>
+<p>Ver <a href="index.html?guide=10">módulo 10 y solución</a> y <a href="index.html?guide=ref-arquitectura">arquitectura</a>. Ley 21.459: mantener autorización y límites del aula. Ley 21.663: documentar impacto y evidencia antes de borradores de notificación; no hay envío real. Referencias IEC 62443 FR2/FR3/FR5/FR7 son objetivos pedagógicos, no certificación.</p>

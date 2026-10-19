@@ -1,0 +1,299 @@
+<h1 id="02-linux-permisos-y-minimo-privilegio">02 · Linux: permisos y mínimo privilegio</h1>
+<blockquote>
+<p><strong>Taller local del laboratorio Retail OT.</strong> Este documento es autosuficiente: las instrucciones se ejecutan en la terminal real de la estación noVNC indicada y la guía se consulta en el Firefox local. No es necesario volver al portal para saber qué hacer.</p>
+</blockquote>
+<h2 id="ficha-del-taller">Ficha del taller</h2>
+<ul>
+<li><strong>Estación recomendada:</strong> <code>ws-hmi</code>, rol HMI. Abrir su escritorio en noVNC y hacer doble clic en <strong>Terminal del laboratorio</strong>.</li>
+<li><strong>Usuario esperado:</strong> <code>student</code>, sin <code>sudo</code> general. Las comprobaciones de archivo y las consultas <code>osqueryi</code> se ejecutan localmente en esa estación.</li>
+<li><strong>Objetivos medibles:</strong>
+  1. observar el estado inicial de <code>controller.conf</code> (<code>0666</code>, propietario del estudiante);
+  2. aplicar el cambio real a <code>0640</code>, propietario <code>root</code> y grupo <code>student</code>;
+  3. demostrar que el estudiante conserva lectura, pero no escritura;
+  4. distinguir el permiso DAC del archivo del guard de ejecución del agente;
+  5. comparar una actividad benigna permitida con el mismo intento bloqueado y entregar dos fuentes de evidencia.</li>
+<li><strong>Límite:</strong> se descarga solamente un marcador de texto interno y se crea <code>sleep 45</code>; no hay malware operativo, explotación, cifrado, escaneo ni conexión a activos reales.</li>
+</ul>
+<h3 id="como-pegar-comandos">Cómo pegar comandos</h3>
+<p>La guía debe estar abierta en el Firefox local mediante <code>labctl guides</code> o mediante el lanzador local que entregue el aula. Copiar un bloque sin el <code>$</code> del prompt ni una salida JSON y pegarlo en la <strong>Terminal del laboratorio</strong> con <code>Ctrl+Shift+V</code> de xfce4-terminal. No usar el portapapeles del anfitrión ni una consola web como sustituto de la terminal. Ejecutar cada bloque por separado y conservar la salida real; los PID, timestamps, tamaños, <code>_id</code> y hashes son variables y <strong>no se deben inventar</strong>.</p>
+<h2 id="alcance-estacion-actual-frente-a-aula-completa">Alcance: estación actual frente a aula completa</h2>
+<table>
+<thead>
+<tr>
+<th>Acción</th>
+<th>Alcance real</th>
+<th>Qué no demuestra</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>hostname</code>, <code>id</code>, <code>labctl status</code>, <code>inventory</code>, <code>baseline</code>, <code>detect</code>, <code>simulate malware</code>, <code>harden os</code>, <code>harden application</code>, <code>reset</code>, <code>evidence</code>, <code>osqueryi</code>, <code>stat</code></td>
+<td>Solo el endpoint donde está la terminal</td>
+<td>No inspecciona mágicamente otra estación ni cambia PLC/gateway</td>
+</tr>
+<tr>
+<td><code>labctl classroom-state</code></td>
+<td>Lectura del gemelo de aula desde el panel; no cambia estado</td>
+<td>No es una segunda detección independiente del endpoint</td>
+</tr>
+<tr>
+<td><code>labctl reset-all</code></td>
+<td>Restablece políticas/proceso y endpoints del aula completa y conserva evidencia</td>
+<td>Afecta a los demás alumnos; requiere coordinación previa</td>
+</tr>
+<tr>
+<td>Firefox con Kibana</td>
+<td>Comprobación visual opcional de los documentos ya colectados</td>
+<td>No ejecuta comandos en la estación</td>
+</tr>
+</tbody>
+</table>
+<p><code>labctl reset</code> es únicamente el reset del endpoint actual. Para una línea base de toda el aula debe usarse <code>labctl reset-all</code>, implementado por el coordinador, y avisar antes a quienes compartan el entorno. No se debe ejecutar <code>docker</code>, <code>git</code>, <code>sudo chmod</code>, <code>sudo iptables</code> ni comandos de host desde esta terminal. Si la infraestructura no está disponible, el coordinador corrige el entorno fuera de la estación; no se reemplaza este procedimiento con <code>docker compose exec</code>.</p>
+<h2 id="preparacion-limpia-y-coordinada">Preparación limpia y coordinada</h2>
+<h3 id="01-abrir-la-guia-y-acordar-el-reset-de-aula">0.1 Abrir la guía y acordar el reset de aula</h3>
+<p><strong>Propósito.</strong> Asegurar que la guía es la copia local y que nadie pierde el estado de otra práctica.</p>
+<pre><code class="language-sh">labctl guides
+</code></pre>
+<p><strong>Resultado esperado y significado.</strong> El comando abre o presenta las guías HTML/locales entregadas por el aula. No se usa su salida como evidencia técnica. <code>labctl guides</code>, <code>labctl classroom-state</code> y <code>labctl reset-all</code> son comodidades coordinadas por el padre; no asumir un formato JSON que la implementación no haya mostrado.</p>
+<p><strong>Segunda comprobación.</strong> Confirmar visualmente en Firefox que el título local es <code>02 · Linux: permisos y mínimo privilegio</code>; no usar el portal como fuente de instrucciones.</p>
+<p><strong>Si difiere.</strong> Si se abre la interfaz del portal o no aparece una guía local, no continuar con una guía vieja: avisar al coordinador para corregir el lanzador local. No cambiar rutas ni instalar herramientas.</p>
+<h3 id="02-restablecer-el-aula-solo-con-coordinacion">0.2 Restablecer el aula, solo con coordinación</h3>
+<p><strong>Propósito.</strong> Partir de políticas y procesos conocidos en las cinco estaciones sin borrar la evidencia histórica.</p>
+<pre><code class="language-sh">labctl reset-all
+</code></pre>
+<p><strong>Resultado esperado y significado.</strong> La respuesta real del comando debe confirmar que el reset de aula fue aceptado. El reset conserva eventos, PCAP y marcadores; no es una limpieza forense ni un borrado de índices.</p>
+<p><strong>Segunda comprobación.</strong></p>
+<pre><code class="language-sh">labctl classroom-state
+</code></pre>
+<p>El JSON debe incluir, al menos, las secciones del panel <code>/api/state</code>: <code>process</code>, <code>gateway</code>, <code>endpoints</code>, <code>policies</code>, <code>events</code>, <code>history</code>, <code>last_update</code> y <code>errors</code>. En la línea base, las políticas globales deben estar desactivadas y <code>ws-hmi</code> debe estar disponible; los valores de temperatura, contadores y timestamps se registran tal como aparezcan.</p>
+<p><strong>Si difiere.</strong> Si <code>reset-all</code> es rechazado, si hay otro escenario activo o si <code>errors</code> indica un componente caído, detenerse y coordinar. No repetir el reset de forma ciega: afecta a toda la cohorte. Un <code>labctl reset</code> posterior solo corregiría <code>ws-hmi</code>, no la discrepancia global.</p>
+<h3 id="03-identificar-host-usuario-y-hora">0.3 Identificar host, usuario y hora</h3>
+<p><strong>Propósito.</strong> Evitar atribuir una evidencia de HMI a otra estación y fijar la hora UTC de la comparación.</p>
+<pre><code class="language-sh">hostname
+</code></pre>
+<p><strong>Resultado esperado y significado.</strong> Debe ser <code>ws-hmi</code> para esta ejecución. El nombre es la identidad del endpoint, no el nombre del portal.</p>
+<p><strong>Segunda comprobación.</strong></p>
+<pre><code class="language-sh">id
+</code></pre>
+<p>Se espera un usuario <code>student</code> (normalmente UID 1000) y sus grupos locales; no asumir más privilegios por el hecho de poder solicitar una acción a <code>labctl</code>.</p>
+<p><strong>Si difiere.</strong> Si el host es <code>ws-engineering</code>, <code>ws-vendor</code>, <code>ws-corporate</code> o <code>ws-soc</code>, no adaptar la evidencia manualmente: cambiar a la estación <code>ws-hmi</code> recomendada y repetir esta identificación. Si el usuario no es <code>student</code>, detenerse y pedir corrección del escritorio.</p>
+<pre><code class="language-sh">date -u +%Y-%m-%dT%H:%M:%SZ
+</code></pre>
+<p>Registrar la salida junto con cada resultado. No sustituirla por una hora escrita a mano.</p>
+<h3 id="04-crear-el-expediente-local-y-tomar-linea-base">0.4 Crear el expediente local y tomar línea base</h3>
+<p><strong>Propósito.</strong> Guardar las salidas del taller en el espacio permitido del estudiante, no en el volumen del collector.</p>
+<pre><code class="language-sh">mkdir -p ~/lab/evidencias/taller-02
+</code></pre>
+<p><strong>Resultado esperado y significado.</strong> Se crea o reutiliza <code>~/lab/evidencias/taller-02</code>. No se escribe en <code>/evidence</code>; ese directorio pertenece al collector y solo se referencia mediante lecturas autorizadas.</p>
+<p><strong>Segunda comprobación.</strong></p>
+<pre><code class="language-sh">labctl status
+</code></pre>
+<p>El resultado es la respuesta directa de <code>/health</code> del agente: <code>host</code>, <code>role</code>, <code>policies</code>, <code>mode</code> y versión de <code>osquery</code>. En una línea base limpia, <code>host</code> es <code>ws-hmi</code>, las políticas locales están en <code>false</code> y el modo de <code>controller.conf</code> es <code>0o666</code>.</p>
+<p><strong>Si difiere.</strong> Un modo <code>0o640</code>, <code>application: true</code>, <code>os: true</code> o un host distinto indica estado heredado o estación equivocada. No lo borres como si fuera evidencia: coordina el reset y vuelve a capturar <code>status</code>.</p>
+<pre><code class="language-sh">labctl inventory
+</code></pre>
+<p><strong>Resultado esperado y significado.</strong> La respuesta tiene el envoltorio real <code>{"source":"osqueryi","rows":[...]}</code>; <code>rows</code> es el inventario local de <code>system_info</code>. No asumir que todas las acciones de <code>labctl</code> tienen <code>.event.outcome</code>.</p>
+<p><strong>Segunda comprobación.</strong></p>
+<pre><code class="language-sh">osqueryi --json &quot;SELECT hostname,cpu_type,physical_memory FROM system_info;&quot;
+</code></pre>
+<p>Los campos deben identificar la misma estación y máquina. Los valores de CPU y memoria pueden variar y se conservan literalmente.</p>
+<p><strong>Si difiere.</strong> Si <code>inventory</code> funciona pero la consulta manual está vacía o falla, registrar la salida y revisar que se está en la terminal local de <code>ws-hmi</code>; <code>osqueryi</code> manual es independiente del <code>osqueryd</code> programado. No declarar que el host está limpio por una consulta vacía.</p>
+<pre><code class="language-sh">labctl baseline
+</code></pre>
+<p><strong>Resultado esperado y significado.</strong> El agente devuelve un objeto con <code>event</code>, <code>rows</code> y <code>policies</code>; <code>rows</code> consulta el modo y UID de <code>/home/student/lab/controller.conf</code>. El evento de consulta es evidencia de que se hizo una lectura manual, no un certificado de seguridad.</p>
+<p><strong>Segunda comprobación.</strong></p>
+<pre><code class="language-sh">stat -c 'mode=%a owner=%U group=%G uid=%u gid=%g path=%n' /home/student/lab/controller.conf
+</code></pre>
+<p>En la línea base se espera <code>mode=666</code>, dueño del estudiante y el path exacto. Conservar el resultado real, incluidos nombres y UID/GID.</p>
+<p><strong>Si difiere.</strong> Verificar el path con <code>hostname</code> y repetir <code>stat</code>; si el archivo no existe, <code>labctl status</code> tampoco será una línea base válida. Si el modo ya es restringido, no forzar <code>chmod</code>: coordinar <code>reset-all</code> y registrar el estado anómalo.</p>
+<h2 id="acciones-paso-a-paso">Acciones paso a paso</h2>
+<h3 id="1-reproducir-actividad-benigna-antes-del-control">1. Reproducir actividad benigna antes del control</h3>
+<p><strong>Propósito.</strong> Establecer el antes: un endpoint sin las políticas de este taller acepta el flujo educativo y el agente crea un marcador local más un proceso <code>sleep</code> identificado.</p>
+<pre><code class="language-sh">labctl simulate malware
+</code></pre>
+<p><strong>Resultado esperado y significado.</strong> La respuesta directa contiene <code>event.action: "malware-emulation"</code> y <code>event.outcome: "success"</code>, con un mensaje que identifica un marcador benigno y <code>sleep 45</code>. El archivo queda en <code>/home/student/lab/downloads/retail-marker.txt</code>. Esto no es malware ni prueba una intrusión real.</p>
+<p><strong>Segunda evidencia: proceso local.</strong> Ejecutarla inmediatamente, porque el proceso es temporal:</p>
+<pre><code class="language-sh">osqueryi --json &quot;SELECT pid,name,cmdline,uid FROM processes WHERE name='sleep' AND cmdline LIKE '%retail-benign-malware%';&quot;
+</code></pre>
+<p>La fila observada debe corresponder a <code>sleep</code>, mostrar el <code>cmdline</code> del escenario y el UID real. El PID no se predetermina.</p>
+<p><strong>Segunda evidencia: archivo descargado.</strong></p>
+<pre><code class="language-sh">osqueryi --json &quot;SELECT path,mode,uid,size FROM file WHERE path='/home/student/lab/downloads/retail-marker.txt';&quot;
+</code></pre>
+<p>La fila acredita la presencia del marcador y su tamaño real; no asumir propietario, modo ni tamaño.</p>
+<p><strong>Si difiere.</strong></p>
+<ul>
+<li>Si el evento ya aparece <code>blocked</code>, capturar <code>labctl status</code> y <code>classroom-state</code>: puede haber quedado una política de <code>os</code> o <code>application</code>; coordinar reset local/aula antes de repetir.</li>
+<li>Si la consulta de procesos queda vacía, anotarlo como <strong>no observado en esa consulta</strong>, no como ausencia absoluta: el <code>sleep 45</code> pudo terminar. Repetir solo después de una línea base coordinada y lanzar la consulta inmediatamente.</li>
+<li>Si falta el marcador o hay error de conexión, conservar el mensaje de error y comprobar <code>labctl status</code>; no descargar el artefacto desde otra URL.</li>
+</ul>
+<h3 id="2-demostrar-por-separado-el-guard-de-aplicacion">2. Demostrar por separado el guard de aplicación</h3>
+<p><strong>Propósito.</strong> Aislar el control de ejecución del permiso de archivo. Esta ronda usa solo <code>ws-hmi</code>; el reset local no restablece PLC, gateway ni otras estaciones.</p>
+<pre><code class="language-sh">labctl reset
+</code></pre>
+<p><strong>Resultado esperado y significado.</strong> El evento <code>reset</code> confirma reset del endpoint actual, conserva evidencia y deja el archivo en la línea base vulnerable. No interpretar esta salida como reset de aula.</p>
+<p><strong>Segunda comprobación.</strong></p>
+<pre><code class="language-sh">labctl status
+</code></pre>
+<p>Se espera <code>application: false</code>, <code>os: false</code> y modo <code>0o666</code>. Si el proceso anterior sigue registrado, el agente intenta terminarlo durante el reset.</p>
+<p><strong>Si difiere.</strong> Si otra estación necesita reset o hay una sesión concurrente, detenerse y usar la coordinación de <code>reset-all</code>; no afectar a otros alumnos desde esta guía.</p>
+<pre><code class="language-sh">labctl harden application
+</code></pre>
+<p><strong>Resultado esperado y significado.</strong> La respuesta contiene un evento <code>harden-application</code> con resultado <code>success</code>; el guard local queda activado y termina procesos benignos registrados por el agente. El modo de <code>controller.conf</code> <strong>no cambia</strong> por esta acción.</p>
+<p><strong>Segunda comprobación.</strong></p>
+<pre><code class="language-sh">stat -c 'mode=%a owner=%U group=%G uid=%u gid=%g path=%n' /home/student/lab/controller.conf
+</code></pre>
+<p>Debe continuar en <code>0666</code> y con su propietario de línea base. Esta es la evidencia diferencial que separa guard de ejecución y permiso DAC.</p>
+<p><strong>Si difiere.</strong> Si el modo cambió, no atribuirlo a <code>harden application</code>: revisar si se ejecutó antes <code>harden os</code>, si el reset fue realmente local y conservar ambas salidas para diagnóstico.</p>
+<pre><code class="language-sh">labctl simulate malware
+</code></pre>
+<p><strong>Resultado esperado y significado.</strong> El evento <code>malware-emulation</code> queda en <code>blocked</code>. El marcador de texto puede descargarse todavía, porque el agente lo obtiene antes de evaluar el guard; no debe iniciarse un nuevo <code>sleep</code> del escenario. El guard es una barrera del lanzador conocido, no un antivirus global.</p>
+<p><strong>Segunda evidencia.</strong></p>
+<pre><code class="language-sh">osqueryi --json &quot;SELECT pid,name,cmdline,uid FROM processes WHERE name='sleep' AND cmdline LIKE '%retail-benign-malware%';&quot;
+</code></pre>
+<p>Después del control no debe observarse un proceso nuevo de ese cmdline. Una fila antigua puede desaparecer en el siguiente ciclo o estar terminada; correlacionar siempre con la hora del evento y no inventar PID.</p>
+<p><strong>Si difiere.</strong> Si aparece un <code>sleep</code> nuevo, revisar <code>labctl status</code> para confirmar <code>application: true</code>, comprobar que se ejecutó exactamente <code>labctl simulate malware</code> y no otro comando, y repetir solo tras <code>labctl reset</code> coordinado. No afirmar bloqueo total de la ejecución de Linux.</p>
+<h3 id="3-aplicar-permisos-minimos-al-archivo-de-configuracion">3. Aplicar permisos mínimos al archivo de configuración</h3>
+<p><strong>Propósito.</strong> Cambiar solo el permiso del artefacto y su propietario/grupo mediante el agente autorizado, sin otorgar <code>sudo</code> al estudiante.</p>
+<pre><code class="language-sh">labctl reset
+</code></pre>
+<p><strong>Resultado esperado y significado.</strong> Se vuelve a una línea base local para que el siguiente cambio sea atribuible a <code>harden os</code>; la evidencia anterior no se borra.</p>
+<p><strong>Segunda comprobación.</strong></p>
+<pre><code class="language-sh">stat -c 'mode=%a owner=%U group=%G uid=%u gid=%g path=%n' /home/student/lab/controller.conf
+</code></pre>
+<p>Debe mostrar el modo y dueño de la línea base. Si no, detener la comparación y corregir el estado antes de aplicar la política.</p>
+<pre><code class="language-sh">labctl harden os
+</code></pre>
+<p><strong>Resultado esperado y significado.</strong> La respuesta directa contiene <code>event.action: "harden-os"</code> y <code>event.outcome: "success"</code>. El agente hace <code>chmod 0640</code> y asigna propietario UID 0 (<code>root</code>) y grupo UID 1000 (<code>student</code>); además, en este agente la política <code>os</code> activa el guard que se verá en el reintento. Esta última función de guard es del escenario, no una propiedad automática de todos los archivos <code>0640</code>.</p>
+<p><strong>Segunda evidencia: <code>stat</code>.</strong></p>
+<pre><code class="language-sh">stat -c 'mode=%a owner=%U group=%G uid=%u gid=%g path=%n' /home/student/lab/controller.conf
+</code></pre>
+<p>El resultado esperado es <code>mode=640 owner=root group=student uid=0 gid=1000</code> para el path exacto. Los nombres pueden depender de la resolución local; los UID/GID son la comprobación objetiva.</p>
+<p><strong>Segunda evidencia: osquery manual.</strong></p>
+<pre><code class="language-sh">osqueryi --json &quot;SELECT path,mode,uid,gid FROM file WHERE path='/home/student/lab/controller.conf';&quot;
+</code></pre>
+<p>Debe devolver una fila para el mismo path y los UID/GID nuevos. La representación de <code>mode</code> puede ser serializada de forma distinta por la versión, por lo que se interpreta en octal junto con <code>stat</code>; no reemplazar la salida real por un número inventado.</p>
+<p><strong>Si difiere.</strong></p>
+<ul>
+<li>Si <code>labctl harden os</code> falla, conservar el error y revisar <code>labctl status</code>; no ejecutar <code>sudo chmod</code> ni corregir a mano.</li>
+<li>Si <code>stat</code> no es <code>0640:root:student</code>, verificar host, path y que no se haya ejecutado <code>reset</code> después de hardening.</li>
+<li>Si osquery no devuelve filas, registrar <strong>no observado</strong>, repetir la consulta en la estación correcta y usar <code>stat</code> como evidencia local; una consulta vacía no prueba ausencia del archivo.</li>
+</ul>
+<h3 id="4-verificar-que-el-estudiante-puede-leer-pero-no-escribir">4. Verificar que el estudiante puede leer, pero no escribir</h3>
+<p><strong>Propósito.</strong> Probar el efecto práctico de <code>0640 root:student</code>: lectura por grupo, escritura denegada para <code>student</code>.</p>
+<pre><code class="language-sh">cat /home/student/lab/controller.conf
+</code></pre>
+<p><strong>Resultado esperado y significado.</strong> El comando puede leer el contenido actual como <code>student</code>. No usar ni mostrar contenido inventado; guardar literalmente lo que exista. La lectura no implica permiso de modificar.</p>
+<p><strong>Segunda comprobación.</strong></p>
+<pre><code class="language-sh">printf 'student-write-test\n' &gt;&gt; /home/student/lab/controller.conf
+</code></pre>
+<p>Debe fallar con un mensaje de <code>Permission denied</code> y no modificar el archivo. No anteponer <code>sudo</code>.</p>
+<p><strong>Si difiere.</strong> Si la escritura funciona, capturar inmediatamente <code>id</code>, <code>stat</code> y <code>labctl status</code>: puede ser otro usuario, otro host, un modo distinto o un cambio fuera de la guía. Si el archivo no es legible, comprobar grupo/UID con <code>id</code> y <code>stat</code>; no relajar el modo para “hacer pasar” el taller. Si el texto del error cambia, importa el código/efecto real: la prueba debe ser no escritura.</p>
+<pre><code class="language-sh">stat -c 'mode=%a owner=%U group=%G uid=%u gid=%g size=%s mtime=%Y path=%n' /home/student/lab/controller.conf
+</code></pre>
+<p><strong>Resultado esperado y significado.</strong> El modo, dueño, grupo y tamaño deben seguir iguales después del intento denegado. <code>mtime</code> y <code>size</code> son valores variables: registrar la salida real y no fabricar una marca temporal.</p>
+<h3 id="5-comprobar-el-guard-de-ejecucion-despues-del-hardening">5. Comprobar el guard de ejecución después del hardening</h3>
+<p><strong>Propósito.</strong> Repetir exactamente el mismo intento de la línea base, sin cambiar objetivo, para separar el bloqueo del agente del cambio de DAC.</p>
+<pre><code class="language-sh">labctl simulate malware
+</code></pre>
+<p><strong>Resultado esperado y significado.</strong> La acción devuelve <code>event.action: "malware-emulation"</code> con <code>event.outcome: "blocked"</code>. El texto del marcador puede quedar visible en <code>downloads</code>; esto no contradice el bloqueo porque el guard ocurre después de la descarga. No se debe iniciar un <code>sleep</code> nuevo del escenario.</p>
+<p><strong>Segunda evidencia.</strong></p>
+<pre><code class="language-sh">osqueryi --json &quot;SELECT pid,name,cmdline,uid FROM processes WHERE name='sleep' AND cmdline LIKE '%retail-benign-malware%';&quot;
+</code></pre>
+<p>Registrar si no hay fila o si solo quedan procesos antiguos terminados; correlacionar la hora y no concluir a partir de un PID no observado.</p>
+<p><strong>Si difiere.</strong> Si sale <code>success</code>, comprobar <code>labctl status</code> y que <code>os: true</code> o <code>application: true</code>; una política no aplicada requiere repetir el hardening, no editar el archivo. Si <code>status</code> está correcto pero aparece un proceso, conservar ambos resultados para el coordinador: el guard de este agente solo cubre el flujo y proceso benignos registrados, no cualquier proceso del sistema.</p>
+<h3 id="6-recoger-deteccion-programada-y-evidencia-independiente">6. Recoger detección programada y evidencia independiente</h3>
+<p><strong>Propósito.</strong> Comparar la lectura manual con <code>osqueryd</code> programado y demostrar el cambio de integridad sin confundir fuentes.</p>
+<pre><code class="language-sh">labctl detect
+</code></pre>
+<p><strong>Resultado esperado y significado.</strong> El resultado real contiene <code>event</code>, <code>rows</code> y <code>policies</code>; <code>rows</code> vuelve a mostrar el archivo local después de aplicar <code>0640</code>. Es una consulta manual del agente, aunque se llame <code>detect</code>.</p>
+<p><strong>Segunda evidencia local.</strong></p>
+<pre><code class="language-sh">osqueryi --json &quot;SELECT path,mode,uid,gid FROM file WHERE path='/home/student/lab/controller.conf';&quot;
+</code></pre>
+<p>Comparar path, modo y UID/GID con la salida de <code>stat</code>. Registrar literalmente cualquier diferencia entre las tres fuentes.</p>
+<p><strong>Si difiere.</strong> Recordar que <code>osqueryi</code> y <code>osqueryd</code> no son el mismo proceso: la consulta manual no obliga a que el evento programado ya esté indexado. Revisar host, hora UTC y ventana de búsqueda; no llamar “ausencia” a una fila todavía no observada.</p>
+<h4 id="consultas-manuales-de-solo-lectura">Consultas manuales de solo lectura</h4>
+<p>Cada consulta se ejecuta en <code>ws-hmi</code>, no en SOC para inspeccionar mágicamente otro contenedor. Las siguientes conservan las comprobaciones útiles del taller; sus valores son variables:</p>
+<pre><code class="language-sh">osqueryi --json &quot;SELECT name,version,platform FROM os_version;&quot;
+</code></pre>
+<p>Identifica la versión local de Linux/osquery.</p>
+<pre><code class="language-sh">osqueryi --json &quot;SELECT pid,name,path,cmdline FROM processes WHERE cmdline LIKE '%retail-%';&quot;
+</code></pre>
+<p>Busca procesos del escenario; un resultado vacío significa solamente no observado en esa consulta.</p>
+<pre><code class="language-sh">osqueryi --json &quot;SELECT uid,username,shell FROM users;&quot;
+</code></pre>
+<p>Acredita el mapa de usuarios disponible en el endpoint.</p>
+<pre><code class="language-sh">osqueryi --json &quot;SELECT pid,port,address,protocol FROM listening_ports;&quot;
+</code></pre>
+<p>Acredita listeners locales; no es prueba de que un puerto sea seguro o de que exista conectividad desde otra zona.</p>
+<pre><code class="language-sh">osqueryi --json &quot;SELECT path,sha256 FROM hash WHERE path='/home/student/lab/firmware.bin';&quot;
+</code></pre>
+<p>Es una lectura manual de hash con valor variable. Este taller no altera firmware y <code>osqueryd</code> no programa automáticamente esa consulta: no inventar ni comparar contra un hash escrito de memoria.</p>
+<h2 id="observabilidad-opcional-desde-firefox-local">Observabilidad opcional desde Firefox local</h2>
+<p>La observación visual no reemplaza las salidas de la terminal. En la misma Firefox del escritorio se puede abrir el panel interno <code>http://panel:8000</code> y Kibana interno <code>http://kibana:5601</code>; no usar <code>localhost</code> de la estación como si fuera el panel. En Kibana, elegir la data view <code>retail-ot-*</code>, una ventana que incluya la hora UTC capturada y refresco de la interfaz. Pegar <strong>KQL</strong>, no SQL.</p>
+<h3 id="agente-y-estado-del-endpoint">Agente y estado del endpoint</h3>
+<pre><code class="language-kql">event.dataset : &quot;lab.endpoint&quot; AND host.name : &quot;ws-hmi&quot;
+</code></pre>
+<p>Debe permitir localizar <code>malware-emulation</code>, <code>harden-os</code>, <code>harden-application</code> y <code>reset</code>, con su <code>event.outcome</code> real. <code>lab.endpoint</code> es el registro del agente, no una detección independiente de osquery o Suricata.</p>
+<h3 id="osquery-y-cambio-de-configuracion">Osquery y cambio de configuración</h3>
+<pre><code class="language-kql">host.name : &quot;ws-hmi&quot; AND event.dataset : &quot;osquery&quot; AND osquery.name : &quot;config_integrity&quot;
+</code></pre>
+<p>Revisar las filas <code>added</code>/<code>removed</code> y sus <code>osquery.columns</code> para modo, UID/GID y, si está presente, hash. Cambiar permisos no implica cambiar el hash del contenido. Si la consulta devuelve documentos de otro host, corregir el filtro; si no devuelve todavía documentos, anotar “no observado en la ventana” y usar la evidencia local.</p>
+<pre><code class="language-kql">host.name : &quot;ws-hmi&quot; AND event.dataset : &quot;osquery&quot; AND osquery.name : &quot;processes&quot;
+</code></pre>
+<p>Correlacionar el cmdline del <code>sleep</code> benigno con la hora de la primera prueba y su ausencia posterior. El collector, Logstash y el refresco de Kibana añaden latencia; no convertir una consulta vacía en una afirmación absoluta.</p>
+<h3 id="fuentes-no-pertinentes-para-aprobar-este-taller">Fuentes no pertinentes para aprobar este taller</h3>
+<pre><code class="language-kql">event.dataset : &quot;lab.control&quot;
+</code></pre>
+<p>Es una consulta del proceso PLC/gateway; puede no aportar documentos para permisos Linux y no prueba <code>0640</code>.</p>
+<pre><code class="language-kql">event.dataset : &quot;suricata&quot; AND event.action : &quot;alert&quot;
+</code></pre>
+<p>Suricata usa el host <code>sensor</code>; una alerta de red no prueba un permiso de archivo local. Los PCAP tampoco reemplazan <code>stat</code> u osquery.</p>
+<h2 id="evidencia-entregable-y-cierre">Evidencia entregable y cierre</h2>
+<h3 id="7-guardar-el-expediente-de-la-estacion">7. Guardar el expediente de la estación</h3>
+<p><strong>Propósito.</strong> Entregar la secuencia real con host, resultado y límites, sin editar los logs del collector.</p>
+<pre><code class="language-sh">labctl evidence | tee ~/lab/evidencias/taller-02/labctl-evidence.json
+</code></pre>
+<p><strong>Resultado esperado y significado.</strong> La respuesta contiene el <code>host</code>, los últimos eventos del agente y una referencia a <code>osquery_logs</code>, normalmente <code>/evidence/osquery/osqueryd.results.log</code>. La ruta del collector es una referencia de lectura; no redireccionar datos hacia ella ni modificarla.</p>
+<p><strong>Segunda fuente.</strong> Conservar en el mismo expediente las salidas reales de <code>hostname</code>, <code>id</code>, <code>status</code>, <code>baseline</code>, <code>detect</code>, <code>stat</code>, las consultas osquery y la prueba <code>Permission denied</code>. En Kibana, si está disponible, guardar las filas filtradas por <code>host.name</code>, acción, resultado y hora UTC; no usar una captura inventada ni tratar el botón como aprobación.</p>
+<p><strong>Si difiere.</strong> Si <code>labctl evidence</code> falla, conservar el error, repetir <code>labctl status</code> y consultar al coordinador. No reconstruir eventos desde el resultado esperado. Un <code>reset</code> posterior conserva estos eventos y marcadores.</p>
+<h3 id="8-confirmar-y-cerrar-con-coordinacion">8. Confirmar y cerrar con coordinación</h3>
+<p>Antes de cerrar, revisar que el expediente contiene como mínimo:</p>
+<ul>
+<li>línea base: <code>ws-hmi</code>, usuario <code>student</code>, <code>controller.conf</code> en <code>0666</code>;</li>
+<li>actividad inicial permitida con marcador y, si se observó, el proceso benigno real;</li>
+<li>hardening de aplicación con modo aún <code>0666</code> y reintento bloqueado;</li>
+<li>hardening de OS con <code>0640</code>, <code>root:student</code>, UID/GID reales;</li>
+<li>lectura permitida y escritura real denegada como <code>student</code>;</li>
+<li>reintento bloqueado, consulta de proceso y <code>config_integrity</code> cuando haya sido observado;</li>
+<li>dos fuentes adecuadas para cada afirmación y una limitación explícita.</li>
+</ul>
+<p>Consultar el gemelo una última vez, sin cambiarlo:</p>
+<pre><code class="language-sh">labctl classroom-state
+</code></pre>
+<p><strong>Resultado esperado y significado.</strong> Se conserva una instantánea final del aula con eventos e historial. No interpretar <code>process</code>, <code>gateway</code> o <code>endpoints</code> como evidencia de permisos del archivo: son fuentes de contexto.</p>
+<p>Después de guardar la evidencia, coordinar el reset de aula para no dejar controles activados a la siguiente práctica:</p>
+<pre><code class="language-sh">labctl reset-all
+</code></pre>
+<p><strong>Segunda comprobación.</strong></p>
+<pre><code class="language-sh">labctl classroom-state
+</code></pre>
+<p>El estado de políticas y endpoints debe reflejar la respuesta real del reset, mientras los eventos históricos y el expediente local permanecen. No ejecutar <code>docker compose down -v</code>: eliminaría volúmenes y evidencia. Si solo se necesita limpiar <code>ws-hmi</code> en una repetición aislada y el coordinador lo autoriza, <code>labctl reset</code> es local y nunca equivale a <code>reset-all</code>.</p>
+<h2 id="criterios-de-exito-y-solucion-razonada">Criterios de éxito y solución razonada</h2>
+<p>La solución completa es: <strong>reset de aula coordinado → identificar <code>ws-hmi</code>/<code>student</code> → línea base → <code>simulate malware</code> permitido → reset local → <code>harden application</code> y reintento bloqueado sin cambiar el modo → reset local → <code>harden os</code> → comprobar <code>0640 root:student</code> con <code>stat</code> y osquery → probar lectura y escritura denegada → repetir la emulación y comprobar bloqueo → recoger evidencia y reset de aula coordinado</strong>.</p>
+<p>Se aprueba técnicamente solo cuando se comparan resultados reales, no cuando un botón cambia de color:</p>
+<ul>
+<li><strong>Permiso de archivo:</strong> la barrera real es DAC de Linux sobre <code>controller.conf</code>; <code>0640 root:student</code> permite lectura al grupo y evita la escritura del usuario <code>student</code>.</li>
+<li><strong>Guard de aplicación:</strong> la barrera real es el agente del laboratorio para el lanzador y proceso benignos registrados; puede dejar el marcador descargado. No es antivirus, allowlisting global, SELinux, AppArmor ni protección completa de endpoint.</li>
+<li><strong>Osquery:</strong> la consulta manual demuestra lo que el endpoint devuelve en ese instante; <code>osqueryd</code> programado y Kibana son otra fuente, con su propia latencia. Un evento <code>lab.endpoint</code> no es independiente de ese agente.</li>
+<li><strong>Configuración:</strong> un cambio de permisos puede producir <code>config_integrity</code> aunque el contenido y su hash no cambien.</li>
+</ul>
+<p>Si una salida no coincide, conservarla y diagnosticar en este orden: <strong>host/usuario → política efectiva (<code>status</code>/<code>classroom-state</code>) → path y modo (<code>stat</code>) → consulta osquery → ventana y fuente de observabilidad</strong>. No sustituir una salida distinta por la esperada ni inventar PID, hash, timestamp o <code>_id</code>.</p>
+<h2 id="limites-uso-responsable-y-referencias-de-control">Límites, uso responsable y referencias de control</h2>
+<p>Solo se permite el aula aislada y autorizada. No conectar a PLC, HMI, RTU, tiendas ni redes reales. El archivo bajo <code>/home/student/lab</code> es un artefacto de entrenamiento. La simulación de <code>sleep 45</code> no demuestra una APT ni impacto ICS.</p>
+<p><strong>MITRE ATT&amp;CK for ICS.</strong> El taller ejercita emulación controlada de actividad en endpoint; no se asigna una técnica ICS de impacto porque no cambia el proceso físico.</p>
+<p><strong>IEC 62443.</strong> La práctica ilustra FR2 (control de uso) y FR3 (integridad del sistema) a nivel de requisitos fundacionales y diseño pedagógico. El alcance no calcula un SL-T ni acredita SL-A; una secuencia de botones no es certificación.</p>
+<p><strong>Ley 21.663.</strong> El expediente conserva hechos, fuente, host, hora UTC y limitaciones para el análisis interno del aula. No se envían notificaciones reales a ANCI ni se atribuye el ejemplo a una organización.</p>
+<p><strong>Antipatrón contextual.</strong> Un acceso compartido de proveedor sin ventana, una copia de configuración sin hash y cambios del HMI sin validación del proceso son situaciones para discutir, no observaciones atribuidas a una empresa. El lunes: identificar al dueño del activo, documentar cambio y reversión, probar fuera de producción y acordar una ventana con operaciones; no bloquear remotamente una planta sin evaluar la seguridad física.</p>
+<p>Para observabilidad general puede consultarse el tutorial local <a href="index.html?guide=ref-tutorial-observabilidad">cinco estaciones, osquery y Elastic paso a paso</a>, siempre desde la guía local y sin ejecutar verificaciones automáticas en paralelo con una práctica activa.</p>
+<h2 id="delimitacion-frente-a-otros-talleres">Delimitación frente a otros talleres</h2>
+<p>Este documento resuelve únicamente el taller <strong>02</strong>. No sustituye las prácticas OPC UA/Modbus del módulo 10 ni el desafío 09 de controles multi-host; esas guías deben separar sus propios hosts, controles y fuentes. Aquí no se ejecutan <code>harden network</code>, <code>harden access</code>, simulaciones laterales, firmware, PLC ni OPC UA: mezclar esos escenarios rompería la atribución de evidencia de permisos Linux.</p>

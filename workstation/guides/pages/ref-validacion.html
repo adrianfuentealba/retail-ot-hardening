@@ -1,0 +1,122 @@
+<h1 id="validacion-del-perfil-ampliado-retail-ot">Validación del perfil ampliado Retail OT</h1>
+<p><strong>La cadena cinco estaciones → collector → Logstash → Elasticsearch → Kibana está ejecutándose y pasó las pruebas.</strong> Módulo 10 y regresión verificados el 13-10-2026; observabilidad 58/58 corresponde a la suite anterior del 13-10-2026T02:53:06Z. Ver <code>validacion-modulo-10.md</code>.</p>
+<h2 id="resultados-comprobados">Resultados comprobados</h2>
+<table>
+<thead>
+<tr>
+<th>Suite</th>
+<th>Resultado</th>
+<th>Evidencia</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Escenarios/hardening e integración</td>
+<td>39/39 PASS</td>
+<td><code>verification-results.json</code></td>
+</tr>
+<tr>
+<td>Observabilidad fresca y accesos</td>
+<td>58/58 PASS</td>
+<td><code>observability-verification-results.json</code></td>
+</tr>
+<tr>
+<td>Contrato y lógica del módulo 10</td>
+<td>13/13 PASS</td>
+<td><code>tests/</code></td>
+</tr>
+<tr>
+<td>Red/Purple Team y Anatomy backend</td>
+<td>28/28 PASS</td>
+<td><code>redteam-verification-results.json</code></td>
+</tr>
+<tr>
+<td>Núcleo OT (validación anterior)</td>
+<td>13/13 PASS</td>
+<td><code>core-verification-results.json</code></td>
+</tr>
+</tbody>
+</table>
+<p>Pruebas de escenarios: cinco versiones osquery reales, SQL local, noVNC HTML, permisos <code>0640 root</code>, proceso benigno, bloqueo de ejecución, dos marcadores laterales permitidos/bloqueados, FC06 aceptado y rechazo PLC/pasarela, OPC UA Write None y Read SignAndEncrypt con Write denegado, archivo firmware ficticio, payload Tshark/PCAP, eventos de cinco hosts, Suricata indexada y dashboard importado.</p>
+<p>Pruebas reforzadas: <strong>cinco WebSocket→VNC reales con saludo RFB</strong>, proceso <code>sleep</code> real observado por osqueryd y registro del agente en eventos NUEVOS, bloqueo NUEVO indexado por host, escritura de configuración rechazada para usuario <code>student</code>, pipeline Logstash con salida positiva, general de seis paneles, cinco búsquedas guardadas y cinco dashboards con filtro de host.</p>
+<p>Python compila y JavaScript pasa <code>node --check</code>. Elasticsearch se observó <strong>green</strong>. Bootstrap importó 18 objetos sin errores. Se comprobó visualmente XFCE/noVNC con usuario <code>student</code>, host HMI y versión osquery; dashboard general con gráficos de activos/fuentes y documentos; dashboard HMI filtrado. No se afirma auditoría visual de todos los tamaños ni validación funcional amd64.</p>
+<h2 id="latencia-medida-de-esta-ejecucion">Latencia medida de esta ejecución</h2>
+<p>Tiempo acción→consulta ES que observa <strong>ambos</strong> documentos, no SLA ni MTTD. El refresco visual de Kibana añade hasta su siguiente ciclo (configurado en 5 s). Las mediciones incluyen polling y comandos de verificación.</p>
+<table>
+<thead>
+<tr>
+<th>Endpoint</th>
+<th>Segundos</th>
+<th>ID agente</th>
+<th>ID osquery</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ws-corporate</td>
+<td>8.06</td>
+<td><code>R_4sM6EBtGY_hDSKeE0a</code></td>
+<td><code>S_4sM6EBtGY_hDSKgE0Y</code></td>
+</tr>
+<tr>
+<td>ws-vendor</td>
+<td>3.58</td>
+<td><code>Yf4sM6EBtGY_hDSKt032</code></td>
+<td><code>Y_4sM6EBtGY_hDSKt033</code></td>
+</tr>
+<tr>
+<td>ws-engineering</td>
+<td>8.12</td>
+<td><code>ef4sM6EBtGY_hDSK503X</code></td>
+<td><code>gf4sM6EBtGY_hDSK903Z</code></td>
+</tr>
+<tr>
+<td>ws-hmi</td>
+<td>3.68</td>
+<td><code>lf4tM6EBtGY_hDSKL02L</code></td>
+<td><code>l_4tM6EBtGY_hDSKL02T</code></td>
+</tr>
+<tr>
+<td>ws-soc</td>
+<td>8.1</td>
+<td><code>tv4tM6EBtGY_hDSKX02L</code></td>
+<td><code>uf4tM6EBtGY_hDSKZ01y</code></td>
+</tr>
+</tbody>
+</table>
+<p>Rango 3.58–8.12 s; media 6.31 s. Los IDs documentan las filas de esta ejecución local, no existen por adelantado en una nueva instalación. No confundir un registro osqueryi manual con los logs osqueryd programados.</p>
+<h2 id="plataforma-y-versiones">Plataforma y versiones</h2>
+<ul>
+<li>Docker Desktop sobre macOS, contenedores <strong>Linux ARM64</strong>, 16 vCPU y aproximadamente 62.4 GiB disponibles al motor durante inspección; sin alterar recursos ni configuración del anfitrión.</li>
+<li>XFCE/noVNC 1.3.0, osquery 5.23.1; paquetes oficiales ARM64/amd64 incluidos con SHA256.</li>
+<li>Elasticsearch/Logstash/Kibana 8.17.3; Suricata 7.0.3; asyncua 1.1.5; bibliotecas visuales locales.</li>
+<li>Se resolvieron los timeouts de registry al reintentar; no se modificó DNS, VPN, Docker Desktop ni se montó socket Docker dentro de contenedores.</li>
+</ul>
+<h2 id="correcciones-realizadas-al-cerrar-la-integracion">Correcciones realizadas al cerrar la integración</h2>
+<ol>
+<li>Construcción efectiva del endpoint con osquery local y arranque XFCE/noVNC.</li>
+<li>Parámetro logger osquery en CLI; propietario de lanzadores de escritorio corregido; metadatos noVNC para evitar 404 del paquete.</li>
+<li>Collector espera bootstrap y Logstash healthy; snapshots osquery preservados completos; codecs JSON lines sin advertencias ECS por conexión.</li>
+<li>Dashboard general con dos gráficos + cuatro fuentes, y cinco dashboards por host, todos importables desde NDJSON.</li>
+<li>Prueba de paquetes corregida: visor es una ventana móvil de 60 payloads; ahora genera y observa FC06 reciente. El primer intento fue 38/39 por ventana antigua; tras corrección, 39/39.</li>
+<li>Prueba reforzada evita auto-coincidencia de osqueryi: exige columna <code>name=sleep</code> y timestamp nuevo. Verifica bloqueo indexado y permiso Linux con alumno no privilegiado.</li>
+<li>Tutorial completo, enlaces en portal y pruebas reutilizables.</li>
+</ol>
+<h2 id="reproducir">Reproducir</h2>
+<pre><code class="language-sh">docker compose up -d
+docker compose ps -a
+python3 scripts/verify-lab.py
+python3 scripts/verify-observability.py
+</code></pre>
+<p>Ejecutar pruebas <strong>una tras otra</strong>, nunca simultáneas ni durante un taller activo: ambas restablecen proceso y políticas sin eliminar evidencia. <code>bootstrap</code> finalizado 0 es normal. Revisar <code>tutorial-observabilidad.md</code> para los pasos como alumno y <code>operacion-y-diagnostico.md</code> ante errores.</p>
+<p>NoVNC <code>6081–6085</code>, portal <code>8090</code>, Kibana <code>5601</code> solo loopback. PLC/gateway/ES/Logstash no publicados al anfitrión. El perfil queda activo localmente; <code>docker compose down</code> detiene conservando volúmenes.</p>
+<h2 id="limites-que-permanecen">Límites que permanecen</h2>
+<ul>
+<li>Cinco endpoints son cinco roles, no cinco procesos térmicos independientes de supermercados.</li>
+<li>Malware/lateralidad/firmware son emulaciones benignas por APIs internas fijas. El guard de ejecución no es antivirus ni allowlisting global; pasarela de aplicación no es firewall kernel transparente. No hay MFA real ni explotación APT.</li>
+<li>Modbus es real pero PLC/térmica/stock son modelos de aula; no extrapolar a salud ni seguridad industrial.</li>
+<li>OPC UA usa certificado/clave compartidos de laboratorio; None permanece por defecto/taller 06; módulo 10 permite retirarlo y añade autorización en servidor por identidades públicas de aula. No PKI independiente ni autenticación empresarial.</li>
+<li>osquery hace consultas programadas, no auditd/eBPF ni detección infalible. TCP de collector tiene límites de duplicación/pérdida en fallos; no promete entrega exactly-once ni custodia certificada.</li>
+<li>ELK/noVNC sin autenticación es únicamente aceptable como aula local aislada. No se certifica IEC 62443 ni SL-A. El repositorio base es público en GitHub; los servicios se ejecutan solo localmente.</li>
+<li>ARM64 probado; amd64 tiene dependencias preparadas, pero aún no se ejecutó esa matriz de plataforma. No se han ejecutado talleres humanos completos ni prueba de carga de una cohorte.</li>
+</ul>

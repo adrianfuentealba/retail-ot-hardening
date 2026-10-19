@@ -61,3 +61,11 @@ Capturas reales de servicios Docker locales, sin imágenes generadas ni datos fi
 
 ![Lectura de sensor falsa, compresor detenido y señal divergente visible en el gemelo.](screenshots/14-redteam-sensor-impacto.png)
 
+
+## Guías locales noVNC
+
+![Lectura ordenada, comandos copiables y resultados esperados](screenshots/15-guias-locales-resultados.png)
+
+![Firefox y Terminal en Linux: comando copiado, pegado y ejecutado como student](screenshots/16-novnc-guia-y-terminal.png)
+
+Capturas de las estaciones QA; no se recreó el aula activa para obtenerlas. [Actualización y validación](validacion-guias-locales.md).

@@ -1,0 +1,78 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "name": "local identity is HMI student",
+      "passed": true
+    },
+    {
+      "name": "guide 01 has steps/results/copy buttons",
+      "passed": true
+    },
+    {
+      "name": "guide 02 has steps/results/copy buttons",
+      "passed": true
+    },
+    {
+      "name": "guide 03 has steps/results/copy buttons",
+      "passed": true
+    },
+    {
+      "name": "guide 04 has steps/results/copy buttons",
+      "passed": true
+    },
+    {
+      "name": "guide 05 has steps/results/copy buttons",
+      "passed": true
+    },
+    {
+      "name": "guide 06 has steps/results/copy buttons",
+      "passed": true
+    },
+    {
+      "name": "guide 07 has steps/results/copy buttons",
+      "passed": true
+    },
+    {
+      "name": "guide 08 has steps/results/copy buttons",
+      "passed": true
+    },
+    {
+      "name": "guide 09 has steps/results/copy buttons",
+      "passed": true
+    },
+    {
+      "name": "guide 10 has steps/results/copy buttons",
+      "passed": true
+    },
+    {
+      "name": "host mismatch warning shown for engineering guide",
+      "passed": true
+    },
+    {
+      "name": "copy is exact command without prompt",
+      "passed": true
+    },
+    {
+      "name": "no copy button for result/reference blocks",
+      "passed": true
+    },
+    {
+      "name": "font size toggle works",
+      "passed": true
+    },
+    {
+      "name": "navigation search filters guides",
+      "passed": true
+    },
+    {
+      "name": "no JavaScript exceptions",
+      "passed": true
+    },
+    {
+      "name": "narrow layout has no horizontal overflow",
+      "passed": true
+    }
+  ],
+  "notice": "UI de guía servida por HMI QA. Clipboard de Chromium se verificó además del ensayo separado X11 dentro de Linux."
+}

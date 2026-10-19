@@ -12,7 +12,7 @@ Requisitos: Docker Engine/Desktop con Compose v2 o superior, navegador WebGL y 1
 
 ```sh
 cd retail-ot-hardening
-docker compose up -d
+docker compose up -d --build
 docker compose ps
 ```
 
@@ -31,6 +31,31 @@ Abrir:
 | SOC | http://127.0.0.1:6085/vnc.html?autoconnect=true&resize=remote | ws-soc |
 
 noVNC/ELK no tienen autenticación: decisión explícita solo para aula local. No equivale a MFA ni hardening de producción. Un usuario local con acceso a estos puertos puede operar el aula.
+
+## Guías completas dentro de cada noVNC
+
+**Nuevo:** los talleres 01–10, desafío y seis prácticas Red/Purple Team tienen explicación ampliada, resultados esperados, comprobación independiente y diagnóstico. En los cinco escritorios hay un icono **Guías paso a paso — Retail OT**. Desde Terminal:
+
+```sh
+labctl guides
+# Abrir directamente módulo 10
+labctl guides 10
+```
+
+Firefox de la estación → **Copiar** → Terminal de la misma estación → **Ctrl+Shift+V**, revisar y Enter. Sin copiar al anfitrión ni regresar al portal. El HTML/CSS/JS y los Markdown están incluidos en cada imagen; sin CDN. Un aviso indica si la guía requiere otro rol. Los bloques de resultados no se copian como comandos.
+
+`labctl classroom-state` consulta el PLC/gateway desde Terminal. `labctl reset` sigue siendo local; `labctl reset-all` es global y requiere coordinación. Los comandos de proceso siguen usando la orquestación interna de `labctl`: no se cambió el origen de tráfico.
+
+[Empieza aquí dentro de noVNC](docs/inicio-desde-novnc.md) · [Actualización y validación de guías](docs/validacion-guias-locales.md).
+
+**Instalación existente:** pausar la práctica y conservar evidencia manual del home antes de recrear estaciones. Estos comandos son del anfitrión Docker, no del noVNC:
+
+```sh
+git pull --ff-only origin main
+docker compose up -d --build --no-deps ws-corporate ws-vendor ws-engineering ws-hmi ws-soc panel
+```
+
+No se solicitan recreaciones de PLC/gateway/Elastic/sensor; las estaciones y el portal sí se recrean. No usar `down -v`. Pruebas nuevas: 20 unitarias/contrato, 5 roles QA, 18 de UI y copiado/pegado real en Linux. Las suites anteriores de protocolos no se repitieron durante clase activa.
 
 ## Primera demostración
 

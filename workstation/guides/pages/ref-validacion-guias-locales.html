@@ -1,0 +1,74 @@
+<h1 id="guias-locales-novnc-actualizacion-y-validacion">Guías locales noVNC · Actualización y validación</h1>
+<h2 id="que-se-entrega">Qué se entrega</h2>
+<p>Los diez talleres se ampliaron con preparación por host, propósito, comandos cortos copiables, resultados esperados, significado, segunda evidencia, diagnóstico, criterios y solución. El desafío 09 separa los roles; el módulo 10 desarrolla sus seis prácticas. No se asignan duraciones ni velocidad objetivo.</p>
+<p>Cada imagen de estación incluye una guía de inicio, talleres, solución y referencias: HTML/CSS/JS y copias Markdown locales, generados desde <code>exercises/</code> y <code>docs/</code>. No usa CDN, dependencias del navegador ni lectura de guías desde el portal. <strong>Guías paso a paso — Retail OT</strong> abre Firefox en <code>http://127.0.0.1:8010/guides/</code> dentro de Linux; la misma URL en el anfitrión no tiene ese significado.</p>
+<p><code>labctl guides</code> abre el inicio; <code>labctl guides 10</code> abre módulo 10. Los nuevos <code>classroom-state</code> y <code>reset-all</code> delegan respectivamente consulta GET y reset global al orquestador. <code>reset</code> conserva alcance local. Mantener orquestación por labctl fue una decisión explícita: no se movió la generación de tráfico de protocolo al origen de cada estación. Las guías no ejecutan comandos automáticamente.</p>
+<h2 id="actualizar-una-instalacion-existente">Actualizar una instalación existente</h2>
+<p><strong>Pausar el trabajo de los alumnos antes de recrear estaciones.</strong> Cerrar y guardar documentos y evidencia manual de <code>~/lab/evidencias/</code>, ya que el home de la estación no está montado en volumen persistente. Los volúmenes automáticos de evidencia/Elastic se conservan; no ejecutar <code>down -v</code>. Tampoco usar reset-all como sustituto de una actualización.</p>
+<p>Los siguientes comandos se ejecutan en el <strong>anfitrión que tiene Docker</strong>, no dentro del noVNC:</p>
+<pre><code class="language-bash">cd retail-ot-hardening
+git pull --ff-only origin main
+docker compose up -d --build --no-deps ws-corporate ws-vendor ws-engineering ws-hmi ws-soc panel
+docker compose ps -a
+</code></pre>
+<p>Esto construye las imágenes actualizadas y recrea las cinco estaciones y el portal para que sus guías coincidan. No solicita recrear PLC/gateway/Elastic/sensor. Las políticas del agente y su home pueden perderse al recrear cada endpoint; coordinar la práctica antes de actualizar. Para un aula nueva:</p>
+<pre><code class="language-bash">git clone https://github.com/vtomasv/retail-ot-hardening.git
+cd retail-ot-hardening
+docker compose up -d --build
+</code></pre>
+<p>Dentro de cada noVNC, abrir <strong>Guías paso a paso</strong> o ejecutar en Terminal:</p>
+<pre><code class="language-bash">labctl guides
+</code></pre>
+<p>Resultado esperado: Firefox muestra identidad local, índice de talleres y bloques verdes de comandos con Copiar. Ctrl+Shift+V en Terminal, revisión y Enter. Si XFCE pide confiar en el lanzador, verificar que sea Guias.desktop incluido en el laboratorio. Los bloques de resultados no tienen Copiar. Selección manual en Firefox/Ctrl+C es alternativa si el portapapeles web no se habilita.</p>
+<h2 id="validacion-del-19-10-2026">Validación del 19-10-2026</h2>
+<table>
+<thead>
+<tr>
+<th>Prueba</th>
+<th>Resultado</th>
+<th>Evidencia</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Contrato, lógica y guías compiladas</td>
+<td>20/20 PASS</td>
+<td><code>tests/</code></td>
+</tr>
+<tr>
+<td>Guías/identidad/CLI student en cinco roles</td>
+<td>5/5 PASS</td>
+<td><code>local-guides-runtime-results.json</code></td>
+</tr>
+<tr>
+<td>Navegación de diez talleres, advertencia de rol, copiado, fuentes/resultados y ancho</td>
+<td>18/18 PASS</td>
+<td><code>local-guides-ui-results.json</code></td>
+</tr>
+<tr>
+<td>Firefox Linux → clipboard X11 → Terminal student → ejecución de hostname/id</td>
+<td>PASS</td>
+<td><code>local-guides-clipboard-results.json</code>, captura 16</td>
+</tr>
+<tr>
+<td>Rutas de helper y reset local/global</td>
+<td>3/3 PASS, transporte simulado</td>
+<td><code>local-guides-helper-results.json</code></td>
+</tr>
+</tbody>
+</table>
+<p>Se probaron contenedores QA con nombres DNS y puertos diferentes a los del aula. Los cinco usan la imagen de estación candidata, mismo usuario student y cinco roles. La lectura y el estado del aula se probaron sin escribir en PLC/gateway. <strong>No se reiniciaron las estaciones de clase ni se ejecutó un reset global real.</strong> La publicación del código no actualiza automáticamente las máquinas ya abiertas: aplicar los comandos anteriores durante una pausa.</p>
+<p>En el ensayo X11 el botón Copiar escribió <code>hostname</code> e <code>id</code>, sin prompt, en el clipboard Linux; Ctrl+Shift+V los pegó y se ejecutaron después de revisar/pulsar Enter. Terminal devolvió ws-hmi y uid/gid de student. No se usó portapapeles del anfitrión ni pivote al portal. Las capturas son de la interfaz real, sin composición o datos inventados.</p>
+<p>La prueba como student detectó permisos de lectura insuficientes de labctl en la imagen candidata. Dockerfile ahora fija <code>755</code>, independiente del modo del archivo al crear el contexto. La verificación de runtime exige <code>labctl status</code> como student en los cinco roles, no solo HTTP de root.</p>
+<p>Las suites ofensivas/defensivas 28/28 y 39/39 y observabilidad 58/58 son evidencia previa; no se volvieron a ejecutar durante la clase activa. No se afirma validación humana exhaustiva de todos los pasos ni nueva matriz amd64. ARM64 de Docker Desktop ejecutado; límites de física, certificados compartidos y guards de entrenamiento permanecen.</p>
+<h2 id="regenerar-cuando-se-editan-fuentes">Regenerar cuando se editan fuentes</h2>
+<p>Solo el autor necesita la dependencia de compilación; los alumnos reciben HTML listo. Desde el anfitrión del repositorio, usar un entorno virtual propio:</p>
+<pre><code class="language-bash">python3 -m venv .work/guides-venv
+.work/guides-venv/bin/python -m pip install -r scripts/requirements-guides.txt
+.work/guides-venv/bin/python scripts/build-local-guides.py
+python3 -m unittest discover -s tests -v
+</code></pre>
+<p>Los hashes del manifest deben coincidir con todas las fuentes. Si los tests indican desincronización, regenerar antes de construir. No editar HTML generado a mano. Durante una pausa, comprobar la instalación actualizada con:</p>
+<pre><code class="language-bash">python3 scripts/verify-local-guides.py
+</code></pre>
+<p>Es una comprobación de lectura; no ejecuta escenarios ni reset. Para aprender el flujo completo, leer <a href="index.html?guide=00">Empieza aquí</a>. Para respuesta legal/seguridad, conservar las referencias de cada taller: exclusivamente aula autorizada, sin envío real a ANCI ni exposición pública de los puertos.</p>

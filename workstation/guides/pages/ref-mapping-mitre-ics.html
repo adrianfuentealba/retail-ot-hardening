@@ -1,0 +1,68 @@
+<h1 id="mapeo-de-conductas-y-controles">Mapeo de conductas y controles</h1>
+<table>
+<thead>
+<tr>
+<th>Taller</th>
+<th>Conducta representada</th>
+<th>MITRE ICS</th>
+<th>Referencia IEC 62443</th>
+<th>Evidencia</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>01</td>
+<td>Inventario defensivo</td>
+<td>No asignación adversaria</td>
+<td>FR6/FR7</td>
+<td>osquery + FC03</td>
+</tr>
+<tr>
+<td>02–03</td>
+<td>Proceso benigno y permiso inseguro</td>
+<td>No demuestra APT ni explotación</td>
+<td>FR2/FR3</td>
+<td>file, processes, endpoint</td>
+</tr>
+<tr>
+<td>04</td>
+<td>Cambio de consigna y deshielo</td>
+<td>T0836 Modify Parameter; T0831 Manipulation of Control</td>
+<td>FR3/FR7</td>
+<td>FC06, readback, PCAP, EVE</td>
+</tr>
+<tr>
+<td>05</td>
+<td>Marcadores entre agentes / Write acotado</td>
+<td>Lateralidad representada, no exploit; T0836 si Write</td>
+<td>FR1/FR2/FR5</td>
+<td>guard + rechazo gateway</td>
+</tr>
+<tr>
+<td>06</td>
+<td>OPC UA Write consigna</td>
+<td>T0836 Modify Parameter</td>
+<td>FR2/FR3/FR4</td>
+<td>respuesta Write/Read y captura</td>
+</tr>
+<tr>
+<td>07</td>
+<td>Archivo firmware ficticio</td>
+<td>No atribución técnica de compromiso real</td>
+<td>FR3; 62443-4-1 como ciclo de desarrollo</td>
+<td>hash y eventos</td>
+</tr>
+<tr>
+<td>08–09</td>
+<td>Impacto de proceso y recuperación</td>
+<td>T0836/T0831 solo en maqueta</td>
+<td>FR6/FR7</td>
+<td>expediente y cuarentena</td>
+</tr>
+</tbody>
+</table>
+<p>FR1 identificación/autenticación; FR2 control de uso; FR3 integridad; FR4 confidencialidad; FR5 flujo de datos restringido; FR6 respuesta oportuna a eventos; FR7 disponibilidad de recursos. Las referencias son pedagógicas, no certificación ni cumplimiento de cada SR. El guard basado en hostname no satisface autenticación robusta por sí solo.</p>
+<p>IEC 62443-3-2 informa evaluación de riesgo y zonas/conductos; 3-3 requisitos del sistema; 2-1 programa de seguridad del asset owner; 2-3 gestión de parches como referencia; 4-1 ciclo seguro del proveedor y 4-2 componentes. No se reproduce el texto normativo de pago. SL-T se define por riesgo de cada zona; SL-A requiere evaluación sustentada. Un entorno Docker aislado y siete barreras no establecen un SL numérico.</p>
+<p>NIST SP 800-82 Rev.3 prioriza características OT de seguridad física, rendimiento y confiabilidad. Planificar reversión y validación del proceso antes de aplicar controles en producción. MITRE no prueba autoría ni causalidad de los dos incidentes periodísticos.</p>
+<h2 id="modulo-10">Módulo 10</h2>
+<p>FC06/FC16 y OPC UA Write de consigna representan T0836 Modify Parameter y, en el modelo térmico, T0831 Manipulation of Control. Sesgo del sensor representa información falsa al controlador (referencia T0856 Spoof Reporting), no inyección sobre un lazo físico. Ráfaga finita representa abuso acotado de órdenes; no se declara DoS probado. Las barreras implementadas se describen en <a href="index.html?guide=10">guía y solución</a>, con FR1/FR2/FR3/FR4/FR5/FR7 según control. No se infiere SL-A.</p>

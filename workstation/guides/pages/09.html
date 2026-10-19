@@ -1,0 +1,564 @@
+<h1 id="09-desafio-integrador-turno-de-madrugada">09 · Desafío integrador: turno de madrugada</h1>
+<blockquote>
+<p><strong>Aula compartida, exclusivamente educativa y aislada.</strong> SCL-01 es una tienda simulada: las cinco estaciones no representan cinco tiendas ni cinco procesos térmicos independientes.</p>
+</blockquote>
+<p>Esta guía es autosuficiente. Se trabaja desde la <strong>Terminal real del noVNC recomendado</strong>, con esta guía abierta en <strong>Firefox local</strong>. No es necesario volver al portal para seguir instrucciones. El navegador solo sirve para leer la guía y, de forma opcional, observar el panel local o Kibana; todas las acciones y evidencias se toman desde la Terminal.</p>
+<h2 id="1-encargo-y-resultado-que-se-debe-demostrar">1. Encargo y resultado que se debe demostrar</h2>
+<p>SCL-01 presenta un aumento térmico y actividad benigna en un endpoint al mismo tiempo. No hay evidencia suficiente para atribuir ambos hechos a una campaña única. El objetivo es proteger la operación, demostrar <strong>siete barreras</strong>, separar evidencia local de evidencia global y entregar un expediente razonado:</p>
+<ol>
+<li>inventario, topología y excepción de administración;</li>
+<li>línea base y ataques educativos controlados antes del endurecimiento;</li>
+<li>dos fuentes independientes para la escritura Modbus y su bloqueo;</li>
+<li>permisos, allowlist de aplicación y detención del proceso benigno en cada endpoint que se proteja;</li>
+<li>OPC UA seguro y <code>Write</code> rechazado, sin afirmar que se eliminó todo canal <code>None</code>;</li>
+<li>integridad del archivo ficticio y límites de la evidencia de firma/PKI;</li>
+<li>recuperación operacional, con cuarentena conservada, más un borrador de aplicabilidad y RACI de Ley 21.663.</li>
+</ol>
+<p>La rúbrica del taller es de 100 puntos: inventario/topología/excepción (20), dos evidencias de escritura y bloqueo (20), permisos/allowlist/proceso (20), OPC UA (15), integridad ficticia y límites de PKI (10), recuperación y cuarentena (10), y borrador Ley 21.663/RACI (5). <strong>No hay certificación IEC/SL-A</strong> y no se inventa una alerta cuando falta evidencia.</p>
+<h3 id="los-siete-controles">Los siete controles</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">Nº</th>
+<th>Comando</th>
+<th>Alcance real</th>
+<th>Barrera que se demuestra</th>
+<th>Qué no demuestra</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">1</td>
+<td><code>labctl harden os</code></td>
+<td>Endpoint actual</td>
+<td><code>controller.conf</code> pasa a <code>0640</code>, propietario <code>root:student</code></td>
+<td>No endurece HMI, PLC ni las demás estaciones</td>
+</tr>
+<tr>
+<td style="text-align: right;">2</td>
+<td><code>labctl harden application</code></td>
+<td>Endpoint actual</td>
+<td>El lanzador local detiene el proceso benigno registrado y bloquea una nueva emulación</td>
+<td>No es un antivirus global</td>
+</tr>
+<tr>
+<td style="text-align: right;">3</td>
+<td><code>labctl harden plc</code></td>
+<td>Proceso/PLC del aula</td>
+<td>La consigna queda limitada a <code>0–6 °C</code> y vuelve a nominal</td>
+<td>No reemplaza una recuperación ni una cuarentena</td>
+</tr>
+<tr>
+<td style="text-align: right;">4</td>
+<td><code>labctl harden network</code></td>
+<td>Gateway y guardas de los endpoints fijos</td>
+<td>Bloquea FC06/FC16 en el gateway y marcadores laterales</td>
+<td>No elimina la conectividad ni prueba aislamiento de producción</td>
+</tr>
+<tr>
+<td style="text-align: right;">5</td>
+<td><code>labctl harden access</code></td>
+<td>Política global del aula</td>
+<td>La ruta <code>simulate defrost</code> acepta el rol <code>ws-engineering</code> y rechaza otros hosts</td>
+<td>No es MFA ni una compuerta universal para comandos Red/Purple Team</td>
+</tr>
+<tr>
+<td style="text-align: right;">6</td>
+<td><code>labctl harden opcua</code></td>
+<td>Variable OPC UA del proceso</td>
+<td>Cliente educativo con <code>SignAndEncrypt</code> y variable de solo lectura</td>
+<td>No prueba PKI empresarial ni retiro universal de <code>None</code></td>
+</tr>
+<tr>
+<td style="text-align: right;">7</td>
+<td><code>labctl harden supply-chain</code></td>
+<td>Archivo ficticio del endpoint actual</td>
+<td>Restaura la referencia y rechaza el mismo candidato alterado</td>
+<td>No es firma de firmware productivo</td>
+</tr>
+</tbody>
+</table>
+<p><code>labctl recover</code> es una <strong>respuesta operacional</strong>, no un octavo control: detiene marcadores disponibles y recupera la operación del modelo, pero no libera stock ni sustituye el endurecimiento.</p>
+<h2 id="2-estaciones-alcance-y-orden-de-trabajo">2. Estaciones, alcance y orden de trabajo</h2>
+<p>Los comandos de endpoint operan en la estación donde está la Terminal. Cambiar de escritorio no ocurre automáticamente al ejecutar un comando.</p>
+<table>
+<thead>
+<tr>
+<th>Host fijo</th>
+<th>Uso en este desafío</th>
+<th>Acciones permitidas/recomendadas</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ws-engineering</code></td>
+<td>Estación principal para preparar el escenario, aplicar controles del proceso y probar la excepción de administración</td>
+<td>Ejecutar aquí las acciones globales y el endpoint local de ingeniería</td>
+</tr>
+<tr>
+<td><code>ws-hmi</code></td>
+<td>Segundo endpoint para probar que las políticas locales no se heredan</td>
+<td>Repetir aquí <code>harden os</code>, <code>harden application</code> y <code>harden supply-chain</code> si la HMI también queda dentro del alcance</td>
+</tr>
+<tr>
+<td><code>ws-vendor</code></td>
+<td>Prueba negativa de rol después de <code>harden access</code></td>
+<td>Ejecutar solo la prueba de <code>simulate defrost</code>; no usarlo para afirmar que ingeniería está protegida</td>
+</tr>
+<tr>
+<td><code>ws-soc</code></td>
+<td>Observación y consulta de evidencia</td>
+<td>Puede consultar <code>labctl classroom-state</code>; no hace falta mutar políticas</td>
+</tr>
+<tr>
+<td><code>ws-corporate</code></td>
+<td>Host fijo del aula, fuera de la ruta principal del escenario</td>
+<td>No confundirlo con una quinta tienda</td>
+</tr>
+</tbody>
+</table>
+<p>Los controles de <strong>proceso/gateway</strong> (<code>harden plc</code>, <code>harden network</code>, <code>harden access</code>, <code>harden opcua</code>) se invocan desde <code>ws-engineering</code> y son globales según el panel. Los controles de <strong>endpoint</strong> (<code>os</code>, <code>application</code>, <code>supply-chain</code>) solo afectan al endpoint actual, aunque el panel muestre el gemelo de todos. Un <code>labctl reset</code> en HMI no equivale a endurecer ingeniería.</p>
+<p><code>labctl reset-all</code> es un reset coordinado del aula completa, conserva la evidencia y afecta a otros alumnos. No se ejecuta durante la sesión de otra persona. <code>labctl classroom-state</code> es solo lectura del gemelo (<code>process</code>, <code>gateway</code>, <code>endpoints</code>, <code>policies</code>, eventos e historial). <code>labctl guides</code> abre la guía HTML <strong>local</strong>, no la interfaz del portal.</p>
+<h2 id="3-referencias-y-limites-de-interpretacion">3. Referencias y límites de interpretación</h2>
+<p>El ejercicio usa MITRE ATT&amp;CK for ICS como vocabulario para cambios no autorizados de proceso, ejecución de artefactos y movimiento lateral; IEC 62443 como marco de zonas/conduits, mínimo privilegio, control de acceso, integridad y monitoreo; y Ley 21.663 como contexto para documentar aplicabilidad, roles y evidencia. Este mapeo es didáctico: <strong>no declara cumplimiento, certificación, nivel SL, notificación efectiva ni una obligación legal concreta</strong>.</p>
+<table>
+<thead>
+<tr>
+<th>Hecho del desafío</th>
+<th>MITRE ATT&amp;CK for ICS, uso didáctico</th>
+<th>IEC 62443, uso didáctico</th>
+<th>Evidencia que sí se entrega</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Consigna FC06/FC16 antes y después</td>
+<td>Cambio remoto de parámetro/comando</td>
+<td>Restricción de comunicaciones y mínimo privilegio</td>
+<td>Respuesta TCP real, evento del panel y estado del gateway/PLC</td>
+</tr>
+<tr>
+<td>Emulación de malware benigno</td>
+<td>Ejecución de archivo/proceso en endpoint</td>
+<td>Control de aplicación y defensa del componente</td>
+<td>Evento local, <code>pgrep</code>, política y evidencia de endpoint</td>
+</tr>
+<tr>
+<td>Marcadores entre hosts fijos</td>
+<td>Movimiento lateral en red de entrenamiento</td>
+<td>Segmentación/contención del conduit educativo</td>
+<td>Resultados por target y políticas de endpoints</td>
+</tr>
+<tr>
+<td>OPC UA <code>Write</code></td>
+<td>Cambio de variable de proceso</td>
+<td>Canal protegido y autorización de variable</td>
+<td><code>security</code>, <code>before</code>, <code>readback</code>, estado del proceso</td>
+</tr>
+<tr>
+<td>Firmware ficticio alterado</td>
+<td>Manipulación de software de control</td>
+<td>Integridad del componente y cadena de suministro</td>
+<td><code>sha256sum</code> antes/después, evento de rechazo</td>
+</tr>
+</tbody>
+</table>
+<p>El borrador Ley 21.663 se guarda como material de aula, no se envía a ANCI ni a ninguna autoridad. La aplicabilidad real y cualquier notificación requieren una revisión jurídica y organizacional separada.</p>
+<h2 id="4-evidencia-copiado-y-forma-de-leer-las-salidas">4. Evidencia, copiado y forma de leer las salidas</h2>
+<ul>
+<li>En Firefox local pulsa <strong>Copiar</strong> en esta guía y pega en <code>xfce4-terminal</code> con <code>Ctrl+Shift+V</code>. No uses el portapapeles del anfitrión, no copies el <code>$</code> del prompt y no pegues salidas JSON en la shell. Como alternativa, selecciona el comando en Firefox y usa <code>Ctrl+C</code> dentro del navegador/Terminal local.</li>
+<li>Cada bloque siguiente es para la Terminal del host indicado. Ejecuta <strong>un comando por vez</strong> y deja que termine antes de continuar. No se indican tiempos de resolución.</li>
+<li>Todas las evidencias del alumno se guardan en <code>~/lab/evidencias/taller-09/</code>, que en estas estaciones corresponde a <code>/home/student/lab/evidencias/taller-09/</code>. No redirijas datos al <code>/evidence</code> del collector.</li>
+<li>Timestamps, versión de <code>osquery</code>, host, PID, hash y cualquier valor de estado son variables. Se conservan literalmente tal como aparezcan; no se reemplazan por números de ejemplo.</li>
+<li><code>labctl status</code> devuelve directamente el estado del endpoint actual. <code>baseline</code> y <code>detect</code> devuelven un envoltorio con <code>event</code>, <code>rows</code> y <code>policies</code>. <code>simulate defrost</code> devuelve <code>event</code> y <code>packet</code>. <code>simulate lateral</code> devuelve <code>targets</code>. <code>simulate opcua</code> devuelve <code>event</code>, <code>security</code>, <code>before</code> y <code>readback</code>. No supongas que todas las respuestas tienen <code>.event.outcome</code> en la misma ruta.</li>
+<li>El <code>event</code> de <code>labctl evidence</code> es la bitácora local del endpoint; <code>osquery_logs</code> es una ruta informativa del collector. El evento del panel, el estado del PLC/gateway, <code>osqueryi</code>, <code>stat</code>, <code>pgrep</code>, <code>sha256sum</code> y los paquetes son fuentes distintas.</li>
+<li>La observación visual opcional puede hacerse en la misma Firefox con <code>http://panel:8000/</code> y <code>http://kibana:5601/</code>. No hace falta una captura de pantalla inventada: la evidencia principal son los archivos JSON/texto guardados en la ruta anterior.</li>
+</ul>
+<h2 id="5-procedimiento-completo">5. Procedimiento completo</h2>
+<h3 id="paso-0-abrir-la-guia-local-y-confirmar-la-estacion-recomendada">Paso 0 — Abrir la guía local y confirmar la estación recomendada</h3>
+<p><strong>Propósito.</strong> Trabajar con la copia local de la guía, no con el portal, y comenzar en <code>ws-engineering</code>.</p>
+<p><strong>Dónde.</strong> Cambia el noVNC al escritorio <code>ws-engineering</code>, abre su Terminal y ejecuta:</p>
+<pre><code class="language-sh">labctl guides
+</code></pre>
+<p><strong>Resultado esperado y significado.</strong> Firefox abre la guía HTML local del aula. La Terminal sigue siendo el lugar de ejecución; si se abre el portal, ciérralo y vuelve a la guía local.</p>
+<p><strong>Segunda evidencia.</strong> En la Terminal guarda la identidad de la estación:</p>
+<pre><code class="language-sh">hostname | tee ~/lab/evidencias/taller-09/00-hostname-before.txt
+</code></pre>
+<p>Debe registrarse el host fijo que aparece, sin sustituirlo por <code>ws-engineering</code> si no coincide.</p>
+<p><strong>Si difiere.</strong> Si <code>labctl guides</code> aún no existe, la implementación del padre no está disponible: no sustituyas el comando por una URL del portal. Si <code>hostname</code> no es <code>ws-engineering</code>, cambia de escritorio antes de mutar el aula.</p>
+<h3 id="paso-1-crear-el-expediente-local">Paso 1 — Crear el expediente local</h3>
+<p><strong>Propósito.</strong> Separar las evidencias del alumno del collector y dar un lugar único al informe.</p>
+<p><strong>Acción exacta, en <code>ws-engineering</code>:</strong></p>
+<pre><code class="language-sh">mkdir -p ~/lab/evidencias/taller-09
+</code></pre>
+<p><strong>Resultado esperado y significado.</strong> El comando termina sin error; la carpeta queda bajo <code>/home/student/lab</code> y no bajo <code>/evidence</code>.</p>
+<p><strong>Segunda evidencia.</strong></p>
+<pre><code class="language-sh">stat -c '%A %a %U:%G %n' ~/lab/evidencias/taller-09 | tee ~/lab/evidencias/taller-09/01-evidence-dir.txt
+</code></pre>
+<p>Debe mostrar una carpeta accesible al usuario de la Terminal. El texto de permisos puede variar según la imagen, pero la ruta debe ser exactamente la del taller.</p>
+<p><strong>Si difiere.</strong> Si no se puede crear la carpeta, verifica que la Terminal sea del usuario del laboratorio y que no se esté usando <code>sudo</code>; no cambies permisos del sistema. Informa el error y no redirijas al collector.</p>
+<h3 id="paso-2-restablecer-el-aula-solo-con-coordinacion">Paso 2 — Restablecer el aula, solo con coordinación</h3>
+<p><strong>Propósito.</strong> Iniciar desde un estado común y evitar que políticas o procesos de otro alumno falseen la línea base. Este reset es global y conserva evidencia.</p>
+<p><strong>Precondición.</strong> Confirma en el canal del aula que ningún otro alumno está ejecutando una práctica. Solo entonces, en <code>ws-engineering</code>:</p>
+<pre><code class="language-sh">labctl reset-all | tee ~/lab/evidencias/taller-09/02-reset-all.json
+</code></pre>
+<p><strong>Resultado esperado y significado.</strong> JSON de la operación de aula completa; se espera que políticas/proceso/endpoints queden disponibles para una línea base, pero la evidencia anterior no se borra.</p>
+<p><strong>Segunda evidencia.</strong></p>
+<pre><code class="language-sh">labctl classroom-state | tee ~/lab/evidencias/taller-09/03-classroom-after-reset.json
+</code></pre>
+<p>Revisa los campos <code>process</code>, <code>gateway</code>, <code>endpoints</code> y <code>policies</code>. No uses <code>labctl status</code> de un solo host para declarar que el aula completa se restableció.</p>
+<p><strong>Si difiere.</strong> Si <code>reset-all</code> informa que no está disponible, detén el taller: no lo sustituyas por cinco <code>labctl reset</code> sin coordinación. Si algún endpoint aparece <code>unavailable</code>, conserva el JSON, cambia al host recomendado o informa al responsable del aula. Recuerda que <code>reset</code> no restaura por sí solo el firmware original.</p>
+<h3 id="paso-3-capturar-host-usuario-estado-local-e-inventario">Paso 3 — Capturar host, usuario, estado local e inventario</h3>
+<p><strong>Propósito.</strong> Probar quién ejecuta cada acción y distinguir estado local de estado global.</p>
+<p><strong>Acción 1, en la misma Terminal:</strong></p>
+<pre><code class="language-sh">hostname | tee ~/lab/evidencias/taller-09/04-hostname.txt
+</code></pre>
+<p><strong>Resultado esperado y significado.</strong> Un nombre de host fijo del laboratorio; es la estación desde la que se ejecutan los siguientes comandos.</p>
+<p><strong>Segunda evidencia/diagnóstico.</strong> Si no es <code>ws-engineering</code>, cambia de noVNC y repite el comando; no intentes corregirlo con variables de entorno.</p>
+<p><strong>Acción 2:</strong></p>
+<pre><code class="language-sh">id | tee ~/lab/evidencias/taller-09/05-id.txt
+</code></pre>
+<p><strong>Resultado esperado y significado.</strong> Identidad del usuario del laboratorio, normalmente <code>student</code>, sin asumir permisos administrativos generales.</p>
+<p><strong>Segunda evidencia/diagnóstico.</strong></p>
+<pre><code class="language-sh">labctl status | tee ~/lab/evidencias/taller-09/06-status-initial.json
+</code></pre>
+<p>El resultado debe incluir <code>host</code>, <code>role</code>, <code>policies</code>, <code>mode</code> y <code>osquery</code>. <code>mode</code> refleja solo el <code>controller.conf</code> de esta estación. Si el host/rol no corresponde, cambia al escritorio correcto; si una política ya está activa, conserva el JSON y coordina otro <code>reset-all</code> antes de continuar.</p>
+<p><strong>Acción 3:</strong></p>
+<pre><code class="language-sh">labctl inventory | tee ~/lab/evidencias/taller-09/07-inventory.json
+</code></pre>
+<p><strong>Resultado esperado y significado.</strong> JSON con <code>source: osqueryi</code> y filas de <code>system_info</code>; es el inventario local del endpoint, no una enumeración de producción.</p>
+<p><strong>Segunda evidencia/diagnóstico.</strong> Compara el <code>hostname</code> capturado con el campo <code>host</code> de <code>labctl status</code>. Si <code>inventory</code> falla, no instales herramientas: guarda el error y usa el estado del endpoint para explicar la limitación.</p>
+<h3 id="paso-4-preparar-una-linea-base-vulnerable-sin-perder-la-referencia-de-firmware">Paso 4 — Preparar una línea base vulnerable sin perder la referencia de firmware</h3>
+<p><strong>Propósito.</strong> <code>labctl reset</code> devuelve políticas y permisos del endpoint, pero <strong>no restaura <code>firmware.bin</code></strong>. Para que la emulación de firmware empiece desde la referencia, primero se usa <code>harden supply-chain</code> y después el reset local.</p>
+<p><strong>Dónde.</strong> En <code>ws-engineering</code> y luego en <code>ws-hmi</code>, una estación a la vez. En ingeniería:</p>
+<pre><code class="language-sh">labctl harden supply-chain | tee ~/lab/evidencias/taller-09/08-prep-engineering-supply-chain.json
+</code></pre>
+<p><strong>Resultado esperado y significado.</strong> Evento local de <code>harden-supply-chain</code> y restauración del contenido de referencia del archivo ficticio. Esta aplicación de hardening es solo preparación; todavía se hará <code>reset</code> para dejar vulnerables las políticas del escenario.</p>
+<p><strong>Segunda evidencia.</strong></p>
+<pre><code class="language-sh">sha256sum /home/student/lab/firmware.bin | tee ~/lab/evidencias/taller-09/09-firmware-reference-engineering.txt
+</code></pre>
+<p>Conserva el hash que aparezca, sin escribirlo en la guía ni inventar uno.</p>
+<p><strong>Acción de cierre de la preparación local:</strong></p>
+<pre><code class="language-sh">labctl reset | tee ~/lab/evidencias/taller-09/10-reset-engineering.json
+</code></pre>
+<p><strong>Resultado esperado y significado.</strong> Políticas del endpoint en falso, <code>controller.conf</code> vulnerable y evidencia conservada; el firmware queda en la referencia porque fue restaurado antes del reset.</p>
+<p><strong>Segunda evidencia/diagnóstico.</strong></p>
+<pre><code class="language-sh">labctl status | tee ~/lab/evidencias/taller-09/11-status-engineering-vulnerable.json
+</code></pre>
+<p>Debe reflejar las políticas locales desactivadas y modo vulnerable. Si el hash o el modo no coinciden con la línea base, no continúes: repite <code>harden supply-chain</code> y luego <code>reset</code> en esa estación, dejando ambos eventos registrados.</p>
+<p><strong>Repetición en HMI.</strong> Cambia al escritorio <code>ws-hmi</code> y ejecuta exactamente <code>labctl harden supply-chain</code>, <code>sha256sum /home/student/lab/firmware.bin</code> y <code>labctl reset</code>, guardando los archivos con prefijo <code>hmi-</code>. Después vuelve a <code>ws-engineering</code>. Esta repetición es necesaria si la HMI forma parte del alcance; un reset de ingeniería no modifica la HMI.</p>
+<h3 id="paso-5-linea-base-del-endpoint-y-permisos-reales">Paso 5 — Línea base del endpoint y permisos reales</h3>
+<p><strong>Propósito.</strong> Documentar el archivo de ingeniería antes del ataque y probar que la consulta manual de <code>osqueryi</code> no se confunde con una consulta programada de <code>osqueryd</code>.</p>
+<p><strong>Dónde.</strong> <code>ws-engineering</code>, después de volver del escritorio HMI.</p>
+<p><strong>Acción exacta:</strong></p>
+<pre><code class="language-sh">labctl baseline | tee ~/lab/evidencias/taller-09/12-baseline-engineering.json
+</code></pre>
+<p><strong>Resultado esperado y significado.</strong> En <code>rows</code> aparece la consulta del <code>controller.conf</code>; en una línea base recién preparada se espera modo <code>0666</code> y usuario <code>1000</code>/<code>student</code>. El envoltorio también incluye un <code>event</code> manual y <code>policies</code> locales.</p>
+<p><strong>Segunda evidencia:</strong></p>
+<pre><code class="language-sh">stat -c '%A %a %U:%G %n' /home/student/lab/controller.conf | tee ~/lab/evidencias/taller-09/13-controller-before.stat
+</code></pre>
+<p>Debe confirmar los permisos/propietario observados. <code>stat</code> es evidencia independiente de la fila de <code>osqueryi</code>.</p>
+<p><strong>Si difiere.</strong> Un modo ya endurecido significa que la preparación no fue vulnerable o que otro alumno actuó sobre la estación; conserva ambos resultados y coordina <code>reset-all</code>. No concluyas que <code>ws-hmi</code> o el PLC tienen el mismo estado.</p>
+<h3 id="paso-6-ataque-controlado-de-consigna-antes-del-hardening">Paso 6 — Ataque controlado de consigna antes del hardening</h3>
+<p><strong>Propósito.</strong> Registrar el aumento de consigna que se debe bloquear. La ruta fija envía una petición Modbus TCP real al gateway; no se usan IP, puertos ni payloads libres.</p>
+<p><strong>Acción exacta, aún en <code>ws-engineering</code>:</strong></p>
+<pre><code class="language-sh">labctl simulate defrost | tee ~/lab/evidencias/taller-09/14-defrost-before.json
+</code></pre>
+<p><strong>Resultado esperado y significado.</strong> En el estado vulnerable, la respuesta normalmente contiene <code>event</code> con acción <code>defrost</code> y un <code>packet</code> con <code>protocol: Modbus TCP</code>, <code>function: 6</code>, <code>source: actual TCP response</code> y <code>exception: false</code>; el valor solicitado por la simulación es 50. Estos son campos esperados del escenario, no una salida capturada por adelantado.</p>
+<p><strong>Segunda evidencia:</strong></p>
+<pre><code class="language-sh">curl http://panel:8000/api/packets | tee ~/lab/evidencias/taller-09/15-packets-before.json
+</code></pre>
+<p>Busca una entrada de lectura/escritura compatible y conserva el paquete tal como lo devuelva el panel. La lectura FC03 periódica puede seguir apareciendo aunque la escritura sea permitida.</p>
+<p><strong>Si difiere.</strong> Si ya aparece <code>blocked</code>, consulta <code>labctl classroom-state</code>: puede haber quedado activa una política de gateway/PLC o el host no ser ingeniería. Si el <code>packet</code> no tiene <code>source: actual TCP response</code>, guarda el error y no lo presentes como prueba de red.</p>
+<h3 id="paso-7-actividad-benigna-del-endpoint-y-su-evidencia-temporal">Paso 7 — Actividad benigna del endpoint y su evidencia temporal</h3>
+<p><strong>Propósito.</strong> Registrar el marcador de malware educativo y no confundir la ausencia posterior de un proceso temporal con un bloqueo.</p>
+<p><strong>Acción exacta:</strong></p>
+<pre><code class="language-sh">labctl simulate malware | tee ~/lab/evidencias/taller-09/16-malware-before.json
+</code></pre>
+<p><strong>Resultado esperado y significado.</strong> En la línea base, <code>event.action</code> es <code>malware-emulation</code>, <code>outcome</code> es <code>success</code> y el mensaje deja claro que es un marcador benigno y un <code>sleep</code> de 45 segundos; no se cifra nada ni se ejecuta malware real.</p>
+<p><strong>Segunda evidencia:</strong></p>
+<pre><code class="language-sh">pgrep -af '[r]etail-benign-malware' | tee ~/lab/evidencias/taller-09/17-malware-process-before.txt || true
+</code></pre>
+<p>Si el proceso sigue vivo, su PID y línea de comando son evidencia capturada y deben conservarse sin inventar valores. Si no aparece, el proceso temporal puede haber terminado: no lo presentes como bloqueo.</p>
+<p><strong>Si difiere.</strong> Si no aparece y aún no se aplicó <code>harden application</code> ni <code>harden os</code>, ejecuta de nuevo <code>labctl simulate malware</code> en coordinación y repite <code>pgrep</code> inmediatamente. Si el evento ya es <code>blocked</code>, verifica <code>labctl status</code> y <code>classroom-state</code> antes de atribuir la causa.</p>
+<h3 id="paso-8-movimiento-lateral-educativo-antes-de-las-guardas">Paso 8 — Movimiento lateral educativo antes de las guardas</h3>
+<p><strong>Propósito.</strong> Mostrar que el ejercicio usa solo los dos destinos fijos y que un marcador benigno no es explotación ni robo de credenciales.</p>
+<p><strong>Acción exacta:</strong></p>
+<pre><code class="language-sh">labctl simulate lateral | tee ~/lab/evidencias/taller-09/18-lateral-before.json
+</code></pre>
+<p><strong>Resultado esperado y significado.</strong> <code>targets</code> contiene únicamente <code>ws-engineering</code> y <code>ws-hmi</code>; en una línea base disponible, cada respuesta puede tener <code>event.action: lateral</code> y <code>outcome: success</code> con mensaje de marcador de entrenamiento.</p>
+<p><strong>Segunda evidencia:</strong></p>
+<pre><code class="language-sh">labctl classroom-state | tee ~/lab/evidencias/taller-09/19-classroom-lateral-before.json
+</code></pre>
+<p>Confirma en <code>endpoints</code> el host y el rol de cada destino. No confundas <code>unreachable</code> con <code>blocked</code>: son diagnósticos diferentes.</p>
+<p><strong>Si difiere.</strong> Si aparece <code>blocked</code>, una guardia global ya estaba activa. Si aparece <code>unreachable</code>, conserva el detalle y no declares éxito ni aislamiento; el endpoint fijo puede no estar listo.</p>
+<h3 id="paso-9-opc-ua-antes-de-proteger-canal-y-variable">Paso 9 — OPC UA antes de proteger canal y variable</h3>
+<p><strong>Propósito.</strong> Capturar el contraste que luego se probará: el cliente educativo usa <code>None</code> y puede escribir en la variable antes del hardening.</p>
+<p><strong>Acción exacta:</strong></p>
+<pre><code class="language-sh">labctl simulate opcua | tee ~/lab/evidencias/taller-09/20-opcua-before.json
+</code></pre>
+<p><strong>Resultado esperado y significado.</strong> En un proceso vulnerable se esperan campos <code>security: None</code>, <code>event.action: opcua-write</code>, un resultado de escritura permitido y <code>readback</code> igual al valor solicitado por la simulación. El campo <code>before</code> debe conservarse tal como aparezca; el modelo nominal recién reiniciado parte de 2, pero la evidencia real manda.</p>
+<p><strong>Segunda evidencia:</strong></p>
+<pre><code class="language-sh">labctl classroom-state | tee ~/lab/evidencias/taller-09/21-classroom-opcua-before.json
+</code></pre>
+<p>Compara el estado <code>process</code> con <code>before</code>/<code>readback</code>. Esta segunda lectura no reemplaza la respuesta del cliente OPC UA.</p>
+<p><strong>Si difiere.</strong> Si el cliente no conecta, guarda el tipo de error y revisa <code>process</code>/<code>gateway</code>; no declares que el Write fue bloqueado. Si ya aparece <code>SignAndEncrypt</code> o <code>blocked</code>, la línea base no estaba vulnerable y debe coordinarse un reset del aula.</p>
+<h3 id="paso-10-firmware-ficticio-antes-de-la-integridad">Paso 10 — Firmware ficticio antes de la integridad</h3>
+<p><strong>Propósito.</strong> Demostrar que el archivo es una referencia educativa que cambia y luego puede rechazarse por hash, sin afirmar firma de firmware productivo.</p>
+<p><strong>Acción 1:</strong></p>
+<pre><code class="language-sh">sha256sum /home/student/lab/firmware.bin | tee ~/lab/evidencias/taller-09/22-firmware-before-hash.txt
+</code></pre>
+<p><strong>Resultado esperado y significado.</strong> Un hash capturado de la referencia preparada en el Paso 4. No se copia un hash de ejemplo desde esta guía.</p>
+<p><strong>Acción 2:</strong></p>
+<pre><code class="language-sh">labctl simulate firmware | tee ~/lab/evidencias/taller-09/23-firmware-altered.json
+</code></pre>
+<p><strong>Resultado esperado y significado.</strong> Evento local <code>firmware</code> con <code>outcome: success</code>; el texto del archivo ficticio se altera y no se instala firmware ejecutable.</p>
+<p><strong>Acción 3:</strong></p>
+<pre><code class="language-sh">sha256sum /home/student/lab/firmware.bin | tee ~/lab/evidencias/taller-09/24-firmware-altered-hash.txt
+</code></pre>
+<p><strong>Segunda evidencia y diagnóstico.</strong> El hash debe diferir del <code>22-firmware-before-hash.txt</code>. Si no difiere, el archivo no estaba en la referencia o la emulación no se ejecutó; conserva la salida y no inventes una alteración.</p>
+<h3 id="paso-11-expediente-inicial-hechos-hipotesis-y-fuentes">Paso 11 — Expediente inicial: hechos, hipótesis y fuentes</h3>
+<p><strong>Propósito.</strong> Separar hechos observados de hipótesis antes de cambiar la operación. No se edita el repositorio ni se escribe en <code>/lab/docs</code>.</p>
+<p><strong>Acción exacta para crear una plantilla local:</strong></p>
+<pre><code class="language-sh">cat &gt; ~/lab/evidencias/taller-09/respuesta-chile.md &lt;&lt;'EOF'
+# SCL-01 — hechos, hipótesis y borrador Ley 21.663
+
+## Hechos observados
+- Host y usuario: completar desde 00/04/05.
+- Línea base de controller.conf: completar desde 12/13.
+- Consigna Modbus y paquete: completar desde 14/15.
+- Actividad benigna y proceso: completar desde 16/17.
+- Targets laterales: completar desde 18/19.
+- OPC UA: completar desde 20/21.
+- Firmware ficticio y hashes: completar desde 22/23/24.
+
+## Hipótesis no confirmadas
+- No atribuir el aumento térmico y el marcador benigno a una campaña única sin evidencia adicional.
+- No inferir inocuidad alimentaria a partir de los ticks del simulador.
+- No inferir PKI empresarial, certificación IEC/SL-A ni eliminación universal de OPC UA None.
+
+## Aplicabilidad y RACI de aula
+- Aplicabilidad: pendiente de validación jurídica y organizacional; este borrador no se envía a autoridades.
+- R: operador/ingeniería ejecuta contención y recuperación.
+- A: responsable de operación retail/OT acepta riesgo y cierre.
+- C: SOC, proveedor y mantenimiento aportan evidencia y diagnóstico.
+- I: cumplimiento, legal y dirección reciben el expediente según procedimiento interno.
+
+## Decisiones y límites
+- Mantener stock afectado en cuarentena hasta una decisión autorizada.
+- No afirmar que un marcador benigno es malware real.
+- Conservar evidencia aunque se haga reset coordinado posterior.
+EOF
+</code></pre>
+<p><strong>Resultado esperado y significado.</strong> Se crea un borrador local con campos para completar, sin hashes, PID ni timestamps inventados. Completa los campos con los archivos JSON/texto ya capturados.</p>
+<p><strong>Segunda evidencia.</strong></p>
+<pre><code class="language-sh">stat -c '%A %a %U:%G %n' ~/lab/evidencias/taller-09/respuesta-chile.md | tee ~/lab/evidencias/taller-09/25-respuesta-stat.txt
+</code></pre>
+<p><strong>Si difiere.</strong> Si el heredoc se pegó con el prompt <code>$</code> o quedó incompleto, abre el archivo con un editor local y corrige solo el expediente bajo <code>~/lab/evidencias/taller-09/</code>. No escribas en el repo.</p>
+<h2 id="6-aplicar-los-siete-controles-uno-por-uno">6. Aplicar los siete controles, uno por uno</h2>
+<h3 id="paso-12-control-1-endurecer-permisos-del-endpoint-de-ingenieria">Paso 12 — Control 1: endurecer permisos del endpoint de ingeniería</h3>
+<p><strong>Propósito.</strong> Quitar la escritura pública del archivo de ingeniería sin afirmar que se endurecieron otras estaciones.</p>
+<p><strong>Dónde.</strong> Volver/continuar en <code>ws-engineering</code>.</p>
+<p><strong>Acción exacta:</strong></p>
+<pre><code class="language-sh">labctl harden os | tee ~/lab/evidencias/taller-09/26-engineering-harden-os.json
+</code></pre>
+<p><strong>Resultado esperado y significado.</strong> Evento local <code>harden-os</code> exitoso. El agente cambia realmente <code>controller.conf</code> a modo <code>0640</code> y propietario <code>root:student</code>.</p>
+<p><strong>Segunda evidencia:</strong></p>
+<pre><code class="language-sh">osqueryi --json &quot;SELECT path,mode,uid FROM file WHERE path='/home/student/lab/controller.conf';&quot; | tee ~/lab/evidencias/taller-09/27-engineering-controller-osquery-after.json
+</code></pre>
+<p>Complementa con:</p>
+<pre><code class="language-sh">stat -c '%A %a %U:%G %n' /home/student/lab/controller.conf | tee ~/lab/evidencias/taller-09/28-engineering-controller-after.stat
+</code></pre>
+<p>La primera consulta debe mostrar el modo y UID observados; <code>stat</code> aporta grupo y propietario legibles. No inventes el formato exacto que use la imagen para <code>mode</code>.</p>
+<p><strong>Prueba de escritura y lectura con el usuario del laboratorio:</strong></p>
+<pre><code class="language-sh">bash -c &quot;printf '%s\n' '# unauthorized-append-test' &gt;&gt; /home/student/lab/controller.conf&quot; 2&gt;&amp;1 | tee ~/lab/evidencias/taller-09/28b-engineering-append-denied.txt || true
+</code></pre>
+<p>Debe aparecer <code>Permission denied</code>; no se debe modificar el archivo. La lectura sigue permitida:</p>
+<pre><code class="language-sh">cat /home/student/lab/controller.conf | tee ~/lab/evidencias/taller-09/28c-engineering-controller-readable.txt
+</code></pre>
+<p>El contenido leído es una segunda evidencia funcional de que el control quita escritura pública sin quitar lectura. Si el append no es denegado, detén la actividad, conserva el resultado y no intentes corregir permisos con <code>sudo</code>.</p>
+<p><strong>Si difiere.</strong> Si sigue <code>0666</code> o <code>student:student</code>, revisa que estés en ingeniería y guarda <code>labctl status</code>; no uses <code>sudo chmod</code>. Si la consulta de <code>osqueryi</code> difiere de <code>stat</code>, reporta ambas fuentes y no fuerces una conclusión.</p>
+<h3 id="paso-13-control-2-endurecer-el-lanzador-de-aplicacion-de-ingenieria">Paso 13 — Control 2: endurecer el lanzador de aplicación de ingeniería</h3>
+<p><strong>Propósito.</strong> Detener el proceso benigno registrado y bloquear una nueva emulación local.</p>
+<p><strong>Acción exacta:</strong></p>
+<pre><code class="language-sh">labctl harden application | tee ~/lab/evidencias/taller-09/29-engineering-harden-application.json
+</code></pre>
+<p><strong>Resultado esperado y significado.</strong> Evento local <code>harden-application</code> exitoso; el agente termina los procesos benignos que mantiene registrados y activa la política local.</p>
+<p><strong>Segunda evidencia:</strong></p>
+<pre><code class="language-sh">pgrep -af '[r]etail-benign-malware' | tee ~/lab/evidencias/taller-09/30-engineering-malware-after.txt || true
+</code></pre>
+<p>La salida esperada después de la contención no contiene ese proceso. La prueba fuerte de bloqueo se obtiene con:</p>
+<pre><code class="language-sh">labctl simulate malware | tee ~/lab/evidencias/taller-09/31-engineering-malware-regression.json
+</code></pre>
+<p>Debe aparecer <code>event.action: malware-emulation</code>, <code>outcome: blocked</code>, con mensaje de descarga del marcador y guardia local de ejecución.</p>
+<p><strong>Si difiere.</strong> Si el proceso ya había terminado antes de <code>harden application</code>, su ausencia no demuestra que la barrera lo mató: usa el evento/<code>pgrep</code> del Paso 7 y el rechazo de <code>31</code> como pruebas separadas. Si <code>31</code> no queda bloqueado, revisa <code>labctl status</code> local; <code>harden application</code> no es una política global.</p>
+<h3 id="paso-14-control-3-endurecer-el-limite-de-la-consigna-en-el-plc">Paso 14 — Control 3: endurecer el límite de la consigna en el PLC</h3>
+<p><strong>Propósito.</strong> Validar en el modelo que una escritura fuera de <code>0–6 °C</code> se rechaza antes de cambiar la consigna.</p>
+<p><strong>Acción exacta, en <code>ws-engineering</code>:</strong></p>
+<pre><code class="language-sh">labctl harden plc | tee ~/lab/evidencias/taller-09/32-harden-plc.json
+</code></pre>
+<p><strong>Resultado esperado y significado.</strong> Evento de panel <code>harden-plc</code> exitoso. El PLC aplica el guard de consigna y vuelve a nominal.</p>
+<p><strong>Segunda evidencia:</strong></p>
+<pre><code class="language-sh">labctl classroom-state | tee ~/lab/evidencias/taller-09/33-classroom-after-plc.json
+</code></pre>
+<p>En <code>process</code> busca el guard de PLC activo y un valor nominal; no calcules salud alimentaria desde <code>temperature</code> o <code>cycle</code>.</p>
+<p><strong>Si difiere.</strong> Si el evento de panel está presente pero el estado del proceso no cambia, conserva ambos JSON y no lo llames control efectivo. Si el endpoint no está disponible, no conviertas el modo demostración en ejecución real.</p>
+<h3 id="paso-15-aislar-la-evidencia-del-plc-antes-de-anadir-el-bloqueo-de-red">Paso 15 — Aislar la evidencia del PLC antes de añadir el bloqueo de red</h3>
+<p><strong>Propósito.</strong> Probar que el límite del PLC bloquea la misma FC06 incluso cuando el gateway todavía permite el paso.</p>
+<p><strong>Acción exacta:</strong></p>
+<pre><code class="language-sh">labctl simulate defrost | tee ~/lab/evidencias/taller-09/34-defrost-after-plc-before-network.json
+</code></pre>
+<p><strong>Resultado esperado y significado.</strong> Respuesta con <code>packet.function: 6</code> y <code>packet.exception: true</code>/evento <code>blocked</code>. La razón debe corresponder al límite del PLC, no a una afirmación genérica de red.</p>
+<p><strong>Segunda evidencia:</strong></p>
+<pre><code class="language-sh">curl http://panel:8000/api/packets | tee ~/lab/evidencias/taller-09/35-packets-after-plc.json
+</code></pre>
+<p>Relaciona el paquete con el evento del Paso 34 y con <code>process</code> del Paso 33. FC03 de lectura puede continuar.</p>
+<p><strong>Si difiere.</strong> Si el paquete no queda bloqueado, verifica <code>process.plc_guard</code> en el classroom state y que sigas en ingeniería. Si ya aparece un bloqueo de gateway, una política de red estaba activa antes: documenta esa limitación y no atribuyas causalidad exclusiva al PLC.</p>
+<h3 id="paso-16-control-4-endurecer-gateway-y-guardas-laterales">Paso 16 — Control 4: endurecer gateway y guardas laterales</h3>
+<p><strong>Propósito.</strong> Bloquear FC06/FC16 en el gateway y activar la guarda de marcadores en los endpoints fijos, conservando la conectividad de lectura.</p>
+<p><strong>Acción exacta, en ingeniería:</strong></p>
+<pre><code class="language-sh">labctl harden network | tee ~/lab/evidencias/taller-09/36-harden-network.json
+</code></pre>
+<p><strong>Resultado esperado y significado.</strong> Evento global <code>harden-network</code> exitoso. El gateway debe reflejar <code>deny_writes: true</code>; los endpoints reciben su política local <code>network</code>.</p>
+<p><strong>Segunda evidencia:</strong></p>
+<pre><code class="language-sh">labctl classroom-state | tee ~/lab/evidencias/taller-09/37-classroom-after-network.json
+</code></pre>
+<p>Revisa <code>gateway.deny_writes</code>, <code>gateway.blocked_writes</code> y <code>endpoints[*].policies.network</code>. Una lectura FC03 del panel puede continuar; el control no elimina conectividad.</p>
+<p><strong>Si difiere.</strong> Si solo cambia el endpoint actual, el comando no llegó al panel correcto: conserva la salida y usa <code>classroom-state</code>. Si no hay escritura bloqueada pero sí hay <code>deny_writes: true</code>, repite una prueba fija y captura su paquete; no uses un payload propio.</p>
+<h3 id="paso-17-control-5-habilitar-la-excepcion-de-administracion-y-probar-el-rol">Paso 17 — Control 5: habilitar la excepción de administración y probar el rol</h3>
+<p><strong>Propósito.</strong> Aplicar la única excepción declarada: la ruta fija <code>simulate defrost</code> solo admite <code>ws-engineering</code>. No se debe describir como MFA ni como gate universal.</p>
+<p><strong>Acción exacta, en <code>ws-engineering</code>:</strong></p>
+<pre><code class="language-sh">labctl harden access | tee ~/lab/evidencias/taller-09/38-harden-access.json
+</code></pre>
+<p><strong>Resultado esperado y significado.</strong> Evento global <code>harden-access</code> exitoso; todos los endpoints fijos reciben la política de acceso.</p>
+<p><strong>Segunda evidencia, desde <code>ws-engineering</code>:</strong> cambia al noVNC de <code>ws-vendor</code> y ejecuta:</p>
+<pre><code class="language-sh">labctl simulate defrost | tee ~/lab/evidencias/taller-09/39-vendor-defrost-role-blocked.json
+</code></pre>
+<p>La respuesta debe ser un evento <code>defrost</code> con <code>outcome: blocked</code> y mensaje de gate de rol de entrenamiento, sin que se use como evidencia de MFA. Desde <code>ws-engineering</code>, una prueba posterior llegará al gateway y demostrará el bloqueo de escritura por red.</p>
+<p><strong>Si difiere.</strong> Si <code>ws-vendor</code> aparece <code>unreachable</code>, no lo llames rechazo de rol. Comprueba el <code>hostname</code>, <code>classroom-state.policies.access</code> y la disponibilidad del endpoint. Si una HMI o vendor puede escribir por otra ruta, eso no contradice este control: el guard solo cubre la ruta fija <code>simulate defrost</code>.</p>
+<h3 id="paso-18-control-6-proteger-la-variable-opc-ua">Paso 18 — Control 6: proteger la variable OPC UA</h3>
+<p><strong>Propósito.</strong> Usar el cliente educativo con <code>SignAndEncrypt</code> y confirmar que el <code>Write</code> queda rechazado por la variable de solo lectura.</p>
+<p><strong>Dónde.</strong> Vuelve a <code>ws-engineering</code>; no ejecutes esta acción desde <code>ws-vendor</code>.</p>
+<p><strong>Acción exacta:</strong></p>
+<pre><code class="language-sh">labctl harden opcua | tee ~/lab/evidencias/taller-09/40-harden-opcua.json
+</code></pre>
+<p><strong>Resultado esperado y significado.</strong> Evento global <code>harden-opcua</code> exitoso. La variable se protege y el cliente de la simulación queda preparado para canal <code>SignAndEncrypt</code>.</p>
+<p><strong>Segunda evidencia y prueba:</strong></p>
+<pre><code class="language-sh">labctl simulate opcua | tee ~/lab/evidencias/taller-09/41-opcua-after.json
+</code></pre>
+<p>Debe conservar <code>security: SignAndEncrypt</code>, una operación <code>Write</code> con resultado <code>blocked</code> y <code>readback</code> sin el cambio solicitado. La respuesta es la evidencia del cliente; el <code>before</code> y el <code>readback</code> no se sustituyen por valores esperados.</p>
+<p><strong>Tercera comprobación de estado:</strong></p>
+<pre><code class="language-sh">labctl classroom-state | tee ~/lab/evidencias/taller-09/42-classroom-after-opcua.json
+</code></pre>
+<p>Verifica los flags OPC UA del <code>process</code> y relaciona el evento con la respuesta real. <strong>No afirmes que se eliminó <code>None</code> de todos los endpoints internos, que existe PKI empresarial o que hay certificación.</strong></p>
+<p><strong>Si difiere.</strong> Si <code>security</code> sigue siendo <code>None</code>, la política no quedó lista; conserva el error y el estado. Si el cliente falla antes de escribir, no lo presentes como <code>Write</code> rechazado: distingue error de conexión, rechazo de seguridad y rechazo de variable.</p>
+<h3 id="paso-19-control-7-restaurar-y-validar-la-cadena-de-suministro-ficticia">Paso 19 — Control 7: restaurar y validar la cadena de suministro ficticia</h3>
+<p><strong>Propósito.</strong> Restaurar la referencia del archivo y rechazar el mismo candidato alterado, dejando claro que el hash manual no equivale a una firma PKI.</p>
+<p><strong>Acción exacta, en <code>ws-engineering</code>:</strong></p>
+<pre><code class="language-sh">labctl harden supply-chain | tee ~/lab/evidencias/taller-09/43-harden-supply-chain.json
+</code></pre>
+<p><strong>Resultado esperado y significado.</strong> Evento local exitoso y <code>firmware.bin</code> restaurado a la referencia educativa.</p>
+<p><strong>Segunda evidencia:</strong></p>
+<pre><code class="language-sh">sha256sum /home/student/lab/firmware.bin | tee ~/lab/evidencias/taller-09/44-firmware-restored-hash.txt
+</code></pre>
+<p>El hash de <code>44</code> debe coincidir con el hash capturado en <code>22</code>, comparando los textos reales, no un valor de esta guía.</p>
+<p><strong>Prueba de regresión de la misma alteración:</strong></p>
+<pre><code class="language-sh">labctl simulate firmware | tee ~/lab/evidencias/taller-09/45-firmware-rejected.json
+</code></pre>
+<p>Debe aparecer <code>event.action: firmware</code>, <code>outcome: blocked</code> y mensaje de discrepancia SHA-256 del manifiesto ficticio. No se instala firmware ejecutable.</p>
+<p><strong>Si difiere.</strong> Si <code>44</code> no coincide con <code>22</code>, conserva ambos hashes y no declares restauración. Si <code>45</code> queda <code>success</code>, el estado local de <code>supply-chain</code> no está activo; revisa <code>labctl status</code> en ingeniería. Si solo se observa un hash manual, no lo presentes como firma digital ni certificación.</p>
+<h3 id="paso-20-repetir-los-tres-controles-locales-en-hmi">Paso 20 — Repetir los tres controles locales en HMI</h3>
+<p><strong>Propósito.</strong> Probar individualmente que el hardening de endpoint no se hereda desde ingeniería. Esta sección es obligatoria si la HMI se incluye en el alcance de SCL-01.</p>
+<p><strong>Dónde.</strong> Cambia al noVNC de <code>ws-hmi</code>; en cada bloque registra que el <code>hostname</code> sea HMI.</p>
+<p><strong>20.1 OS:</strong></p>
+<pre><code class="language-sh">labctl harden os | tee ~/lab/evidencias/taller-09/46-hmi-harden-os.json
+</code></pre>
+<p><strong>Esperado/segunda evidencia:</strong> <code>harden-os</code> local y, después:</p>
+<pre><code class="language-sh">osqueryi --json &quot;SELECT path,mode,uid FROM file WHERE path='/home/student/lab/controller.conf';&quot; | tee ~/lab/evidencias/taller-09/47-hmi-controller-osquery-after.json
+</code></pre>
+<p><code>stat -c '%A %a %U:%G %n' /home/student/lab/controller.conf</code> puede guardarse como segunda lectura adicional. Debe resultar <code>0640</code> y <code>root:student</code>; si no, la HMI sigue vulnerable aunque ingeniería esté protegida.</p>
+<p><strong>20.2 Aplicación:</strong></p>
+<pre><code class="language-sh">labctl harden application | tee ~/lab/evidencias/taller-09/48-hmi-harden-application.json
+</code></pre>
+<p><strong>Esperado/segunda evidencia:</strong> el evento local es exitoso. Como la HMI puede no tener un proceso registrado, la prueba de guardia es:</p>
+<pre><code class="language-sh">labctl simulate malware | tee ~/lab/evidencias/taller-09/49-hmi-malware-blocked.json
+</code></pre>
+<p>Debe resultar <code>blocked</code>. Si hubo un proceso previo, <code>pgrep -af '[r]etail-benign-malware' || true</code> se guarda sin inventar PID.</p>
+<p><strong>20.3 Cadena de suministro:</strong></p>
+<pre><code class="language-sh">labctl harden supply-chain | tee ~/lab/evidencias/taller-09/50-hmi-harden-supply-chain.json
+</code></pre>
+<p><strong>Esperado/segunda evidencia:</strong> el archivo HMI vuelve a referencia. Verifica y prueba el candidato:</p>
+<pre><code class="language-sh">sha256sum /home/student/lab/firmware.bin | tee ~/lab/evidencias/taller-09/51-hmi-firmware-reference-hash.txt
+</code></pre>
+<pre><code class="language-sh">labctl simulate firmware | tee ~/lab/evidencias/taller-09/52-hmi-firmware-blocked.json
+</code></pre>
+<p>El evento final debe quedar <code>blocked</code>. Los hashes de HMI y de ingeniería no tienen que ser escritos de memoria ni comparados entre hosts sin capturarlos.</p>
+<p><strong>Si difiere.</strong> Si alguno de los tres controles cambia también <code>ws-engineering</code>, se está confundiendo un comando local con uno global: usa <code>hostname</code> y <code>classroom-state</code>. Si HMI no está disponible, documenta el endpoint <code>unavailable</code> y no lo presentes como endurecido.</p>
+<h2 id="7-recuperacion-y-regresion-final">7. Recuperación y regresión final</h2>
+<h3 id="paso-21-recuperar-la-operacion-sin-liberar-stock">Paso 21 — Recuperar la operación sin liberar stock</h3>
+<p><strong>Propósito.</strong> Detener marcadores disponibles, volver a la consigna nominal y conservar la cuarentena.</p>
+<p><strong>Dónde.</strong> Vuelve a <code>ws-engineering</code>.</p>
+<p><strong>Acción exacta:</strong></p>
+<pre><code class="language-sh">labctl recover | tee ~/lab/evidencias/taller-09/53-recover.json
+</code></pre>
+<p><strong>Resultado esperado y significado.</strong> Evento <code>recover</code> exitoso: el modelo reanuda el enfriamiento, detiene procesos benignos que estén disponibles y deja el stock afectado en cuarentena. Recuperar no endurece por sí solo, no borra evidencia y no libera producto.</p>
+<p><strong>Segunda evidencia:</strong></p>
+<pre><code class="language-sh">labctl classroom-state | tee ~/lab/evidencias/taller-09/54-classroom-after-recover.json
+</code></pre>
+<p>Comprueba que el proceso vuelve hacia la consigna nominal, que los marcadores no siguen activos donde el endpoint respondió y que el indicador de producto afectado/quarantena no se interpreta como liberado. No calcules salud alimentaria real con <code>temperature</code>, <code>cycle</code> o ticks del simulador.</p>
+<p><strong>Si difiere.</strong> Si un endpoint aparece <code>unavailable</code>, el recuperador no pudo contenerlo: conserva el error y repite solo con ese host disponible, coordinando el aula. Si <code>spoiled</code>/cuarentena permanece, es el resultado esperado; <code>reset-all</code> puede rehabilitar el stock solo como operación de aula coordinada, no como recuperación real del producto.</p>
+<h3 id="paso-22-regresion-de-los-cinco-comportamientos-uno-por-uno">Paso 22 — Regresión de los cinco comportamientos, uno por uno</h3>
+<p>Ejecuta en <code>ws-engineering</code>, salvo la prueba HMI indicada. No agrupes las líneas en un bloque gigante.</p>
+<p><strong>22.1 Consigna/FC06:</strong></p>
+<pre><code class="language-sh">labctl simulate defrost | tee ~/lab/evidencias/taller-09/55-defrost-final.json
+</code></pre>
+<p><strong>Esperado/segunda evidencia/diagnóstico.</strong> <code>blocked</code>: en ingeniería debe verse la respuesta Modbus con excepción y el evento correspondiente. Confirma con <code>curl http://panel:8000/api/packets | tee ~/lab/evidencias/taller-09/55b-packets-final.json</code>. Si el mensaje atribuye el rechazo a la política de gateway, no lo atribuyas únicamente al PLC.</p>
+<p><strong>22.2 Emulación de aplicación:</strong></p>
+<pre><code class="language-sh">labctl simulate malware | tee ~/lab/evidencias/taller-09/56-malware-final.json
+</code></pre>
+<p><strong>Esperado/segunda evidencia/diagnóstico.</strong> <code>blocked</code>, con marcador local descargado pero sin ejecución; confirma con <code>pgrep -af '[r]etail-benign-malware' | tee ~/lab/evidencias/taller-09/56b-malware-final-process.txt || true</code>. Si no hay proceso, usa el evento <code>blocked</code>, no la mera ausencia de PID.</p>
+<p><strong>22.3 Lateral:</strong></p>
+<pre><code class="language-sh">labctl simulate lateral | tee ~/lab/evidencias/taller-09/57-lateral-final.json
+</code></pre>
+<p><strong>Esperado/segunda evidencia/diagnóstico.</strong> Los targets siguen siendo solo <code>ws-engineering</code> y <code>ws-hmi</code>, y sus eventos quedan <code>blocked</code> por las guardas. Confirma <code>endpoints[*].policies.network/access</code> con <code>labctl classroom-state | tee ~/lab/evidencias/taller-09/57b-classroom-lateral-final.json</code>. <code>unreachable</code> no equivale a <code>blocked</code>.</p>
+<p><strong>22.4 OPC UA:</strong></p>
+<pre><code class="language-sh">labctl simulate opcua | tee ~/lab/evidencias/taller-09/58-opcua-final.json
+</code></pre>
+<p><strong>Esperado/segunda evidencia/diagnóstico.</strong> <code>security: SignAndEncrypt</code>, operación <code>Write</code> <code>blocked</code> y <code>readback</code> sin el cambio; verifica los flags en <code>labctl classroom-state | tee ~/lab/evidencias/taller-09/58b-classroom-opcua-final.json</code>. Si falla la conexión, diagnostica conexión/seguridad antes de afirmar rechazo de escritura.</p>
+<p><strong>22.5 Firmware:</strong></p>
+<pre><code class="language-sh">labctl simulate firmware | tee ~/lab/evidencias/taller-09/59-firmware-final.json
+</code></pre>
+<p><strong>Esperado/segunda evidencia/diagnóstico.</strong> Candidato rechazado por discrepancia de referencia. Confirma que el hash del archivo sigue siendo el de referencia con <code>sha256sum /home/student/lab/firmware.bin | tee ~/lab/evidencias/taller-09/59b-firmware-final-hash.txt</code>; no escribas hashes esperados.</p>
+<p><strong>22.6 Estado local:</strong></p>
+<pre><code class="language-sh">labctl status | tee ~/lab/evidencias/taller-09/60-status-final-engineering.json
+</code></pre>
+<p><strong>Esperado/segunda evidencia/diagnóstico.</strong> El endpoint de ingeniería conserva <code>os</code>, <code>application</code> y <code>supply-chain</code> activos y el modo <code>0640</code>. <code>status</code> no enumera por sí solo las políticas globales: compáralo con <code>classroom-state</code>.</p>
+<p><strong>22.7 Evidencia local:</strong></p>
+<pre><code class="language-sh">labctl evidence | tee ~/lab/evidencias/taller-09/61-evidence-final-engineering.json
+</code></pre>
+<p><strong>Esperado/segunda evidencia/diagnóstico.</strong> Aparecen los últimos eventos locales y el campo informativo <code>osquery_logs</code>; se conserva evidencia aunque luego se haga un reset coordinado. Completa la segunda fuente global con <code>labctl classroom-state | tee ~/lab/evidencias/taller-09/62-classroom-final.json</code>.</p>
+<h2 id="8-cierre-y-criterios-de-entrega">8. Cierre y criterios de entrega</h2>
+<p>El expediente mínimo bajo <code>~/lab/evidencias/taller-09/</code> debe contener:</p>
+<ul>
+<li><code>hostname</code>, <code>id</code>, <code>status</code> e <code>inventory</code> de ingeniería;</li>
+<li>confirmación coordinada de <code>reset-all</code> y el estado posterior;</li>
+<li>línea base de <code>controller.conf</code>, <code>stat</code> y consulta <code>osqueryi</code> antes/después;</li>
+<li>eventos y procesos de malware benigno, sin PID inventado;</li>
+<li>paquetes Modbus reales antes y después, con FC03 distinguido de FC06/FC16;</li>
+<li>resultados por target del lateral fijo;</li>
+<li><code>security</code>, <code>before</code>, <code>readback</code> y estado OPC UA;</li>
+<li>hashes capturados antes, alterados y restaurados, sin valores inventados;</li>
+<li>evidencias locales separadas para HMI si fue incluida;</li>
+<li><code>recover</code>, estado final y <code>respuesta-chile.md</code> con hechos, hipótesis, límites, aplicabilidad y RACI.</li>
+</ul>
+<p>Antes de entregar, comprueba que el informe dice explícitamente:</p>
+<ul>
+<li><strong>Antes:</strong> la escritura FC06/artefacto/proceso/OPC UA/firmware podía avanzar en la línea base vulnerable, según las evidencias realmente capturadas.</li>
+<li><strong>Después:</strong> las siete barreras producen los rechazos descritos y sus fuentes independientes coinciden.</li>
+<li><strong>Límites:</strong> la simulación es educativa; no prueba una tienda adicional, una campaña única, un antivirus global, aislamiento de producción, MFA universal, PKI empresarial, firma de firmware productivo, inocuidad alimentaria, certificación IEC/SL-A ni obligación de notificar.</li>
+<li><strong>Recuperación:</strong> se detiene la actividad benigna y vuelve el proceso hacia nominal, pero el stock permanece en cuarentena hasta una decisión autorizada.</li>
+</ul>
+<p>No ejecutes <code>labctl reset-all</code> para “limpiar” antes de copiar el expediente: altera el estado y afecta a otros alumnos. Si el aula debe quedar disponible para el siguiente grupo, coordina el reset-all después de preservar los JSON/textos y registra esa operación como un evento de cierre.</p>
+<blockquote>
+<p><strong>Delimitación con Módulo 10.</strong> Las seis prácticas de Módulo 10 se realizan individualmente en su guía correspondiente. Este desafío 09 usa sus siete controles integrados, separa los hosts y no sustituye esas seis prácticas por un bloque Red/Purple Team genérico.</p>
+</blockquote>

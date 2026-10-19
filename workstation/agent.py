@@ -2,6 +2,7 @@ import os,time,json,subprocess,hashlib,asyncio
 from pathlib import Path
 import httpx,uvicorn
 from fastapi import FastAPI,HTTPException
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 HOST=os.getenv('HOSTNAME','workstation');ROLE=os.getenv('ROLE','hmi');ROOT=Path('/home/student/lab');LOG=Path('/evidence/endpoint.jsonl')
 ROOT.mkdir(parents=True,exist_ok=True);LOG.parent.mkdir(parents=True,exist_ok=True)
@@ -36,6 +37,11 @@ def contain():
 @app.post('/command')
 async def command(r:Request):
  c=r.command
+ if c in ['classroom-state','reset-all']:
+  async with httpx.AsyncClient(timeout=25) as client:
+   if c=='classroom-state':x=await client.get('http://panel:8000/api/state')
+   else:x=await client.post('http://panel:8000/api/reset')
+   x.raise_for_status();return x.json()
  if c in ['redteam baseline', 'redteam modbus-write', 'redteam modbus-fc16', 'redteam modbus-sensor', 'redteam modbus-burst', 'redteam opcua-anonymous', 'redteam opcua-observer', 'redteam opcua-engineer', 'redteam opcua-overrange', 'redteam opcua-browse', 'harden modbus', 'harden inputs', 'harden write-rate', 'harden opcua-rbac', 'harden opcua-channel', 'redteam fc06-only']:
   async with httpx.AsyncClient(timeout=18) as client:
    x=await client.post('http://panel:8000/api/action',json={'command':c,'host':HOST,'role':ROLE});x.raise_for_status();return x.json()
@@ -86,4 +92,5 @@ async def command(r:Request):
   async with httpx.AsyncClient(timeout=15) as client:
    x=await client.post('http://panel:8000/api/action',json={'command':c,'host':HOST,'role':ROLE});x.raise_for_status();return x.json()
  raise HTTPException(400,'Command not allowed')
+app.mount('/guides',StaticFiles(directory='/opt/retail/guides',html=True),name='local-guides')
 if __name__=='__main__':uvicorn.run(app,host='0.0.0.0',port=8010,log_level='warning')

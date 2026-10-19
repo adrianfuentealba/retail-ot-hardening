@@ -82,5 +82,15 @@
     "caption": "Lectura de sensor falsa, compresor detenido y señal divergente visible en el gemelo.",
     "url": "http://127.0.0.1:8090/labs/10",
     "source": "Captura real del laboratorio ampliado: sin composición ni telemetría inventada."
+  },
+  {
+    "file": "15-guias-locales-resultados.png",
+    "caption": "Guía local ampliada con propósito, comando, resultado y diagnóstico.",
+    "source": "Captura real de la HMI QA, sin montaje."
+  },
+  {
+    "file": "16-novnc-guia-y-terminal.png",
+    "caption": "Guía Firefox y Terminal student en noVNC con identidad real después del pegado.",
+    "source": "Captura real de escritorio Linux QA; sin portapapeles del anfitrión."
   }
 ]

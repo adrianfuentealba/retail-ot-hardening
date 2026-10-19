@@ -1,0 +1,263 @@
+[
+  {
+    "id": "00",
+    "title": "Empieza aquí · Trabaja dentro de noVNC",
+    "recommended": "any",
+    "file": "pages/00.html",
+    "source": "source/00.md",
+    "sha256": "32f14095e2e05f49cff1240fc06645137054c0f9fdd1743d643b7a573e5270e4",
+    "upstream": "docs/inicio-desde-novnc.md"
+  },
+  {
+    "id": "01",
+    "title": "01 · Inventario y línea base",
+    "recommended": "ws-hmi",
+    "file": "pages/01.html",
+    "source": "source/01.md",
+    "sha256": "eb049b466f603e45460c46471ef633dfb7220f5df2f240b5327cda9b132d09dd",
+    "upstream": "exercises/01-inventario-y-línea-base.md"
+  },
+  {
+    "id": "02",
+    "title": "02 · Linux: permisos y mínimo privilegio",
+    "recommended": "ws-hmi",
+    "file": "pages/02.html",
+    "source": "source/02.md",
+    "sha256": "9b0dbdebd846f60f48307dd46e8b50828c94ae0964dea4b38c33f1de7e24af3b",
+    "upstream": "exercises/02-linux-permisos-y-mínimo-privilegio.md"
+  },
+  {
+    "id": "03",
+    "title": "03 · HMI: allowlisting e integridad",
+    "recommended": "ws-hmi",
+    "file": "pages/03.html",
+    "source": "source/03.md",
+    "sha256": "9d36312b62d1431c94ac6000cc529ce341f57d18a1a96ce567cba71aa49d87ec",
+    "upstream": "exercises/03-hmi-allowlisting-e-integridad.md"
+  },
+  {
+    "id": "04",
+    "title": "04 · PLC: límites y protección del proceso",
+    "recommended": "ws-engineering",
+    "file": "pages/04.html",
+    "source": "source/04.md",
+    "sha256": "c4ca3f03adebf58c74fbe325729eca80e41ac083158e812031e7a73267cc8225",
+    "upstream": "exercises/04-plc-límites-y-protección-del-proceso.md"
+  },
+  {
+    "id": "05",
+    "title": "05 · Conductos y acceso del proveedor",
+    "recommended": "ws-vendor",
+    "file": "pages/05.html",
+    "source": "source/05.md",
+    "sha256": "28f5ff9d99d4e7da5dd303d28fa304e27d94b16a1c5d3562e2ed9b3ef325cfcc",
+    "upstream": "exercises/05-conductos-y-acceso-del-proveedor.md"
+  },
+  {
+    "id": "06",
+    "title": "06 · OPC UA: canal seguro y permisos",
+    "recommended": "ws-engineering",
+    "file": "pages/06.html",
+    "source": "source/06.md",
+    "sha256": "19e021fb0f3cbbc8b5425383111b8cff9fc605322775f8a90bc334e78af4ee8a",
+    "upstream": "exercises/06-opc-ua-canal-seguro-y-permisos.md"
+  },
+  {
+    "id": "07",
+    "title": "07 · Firmware y detección con osquery",
+    "recommended": "ws-engineering",
+    "file": "pages/07.html",
+    "source": "source/07.md",
+    "sha256": "140b32bcd935a4055ec3d53debb607ec249773238622c9e89c352b26799a7e26",
+    "upstream": "exercises/07-firmware-y-detección-osquery.md"
+  },
+  {
+    "id": "08",
+    "title": "08 · Contención y recuperación",
+    "recommended": "ws-hmi",
+    "file": "pages/08.html",
+    "source": "source/08.md",
+    "sha256": "c363dd335f01608ce1a7bbd3bc6913a7c34db5c6340dbc8c52670a19d5fcd662",
+    "upstream": "exercises/08-contención-y-recuperación.md"
+  },
+  {
+    "id": "09",
+    "title": "09 · Desafío integrador: turno de madrugada",
+    "recommended": "ws-engineering",
+    "file": "pages/09.html",
+    "source": "source/09.md",
+    "sha256": "825455073eb1ea512137b404cc9035a34ce3e463d6bf1982648a9997e0d1e9f9",
+    "upstream": "exercises/09-desafio-integrador.md"
+  },
+  {
+    "id": "10",
+    "title": "10 · Red / Purple Team: Modbus y OPC UA en supermercado retail",
+    "recommended": "ws-engineering",
+    "file": "pages/10.html",
+    "source": "source/10.md",
+    "sha256": "14ef67b1a7cd2e65881b42c551f1e93cccf7b5e885ae6ee10f9ea2bbf73750bd",
+    "upstream": "exercises/10-redteam-modbus-opcua.md"
+  },
+  {
+    "id": "solucion",
+    "title": "Guía de soluciones del docente",
+    "recommended": "reference",
+    "file": "pages/solucion.html",
+    "source": "source/solucion.md",
+    "sha256": "da4274dfe72f33976f26505881c47d05c214208dc02f4905041ed3c0fdb650fc",
+    "upstream": "exercises/solucion.md"
+  },
+  {
+    "id": "ref-anatomy-inspector-activo",
+    "title": "Anatomy activo: CPU, señales y contramedidas",
+    "recommended": "reference",
+    "file": "pages/ref-anatomy-inspector-activo.html",
+    "source": "source/ref-anatomy-inspector-activo.md",
+    "sha256": "e32c1788b7456d38124048adbf1a7ce2fde53db9dab334cd59996e31b9128f86",
+    "upstream": "docs/anatomy-inspector-activo.md"
+  },
+  {
+    "id": "ref-arbol-de-archivos",
+    "title": "Árbol de archivos",
+    "recommended": "reference",
+    "file": "pages/ref-arbol-de-archivos.html",
+    "source": "source/ref-arbol-de-archivos.md",
+    "sha256": "a7867752e907e2d4a46a3a537444cd0966153593fc1e902c5f97a52a333a9b0c",
+    "upstream": "docs/arbol-de-archivos.md"
+  },
+  {
+    "id": "ref-arquitectura",
+    "title": "Arquitectura y límites de Purdue",
+    "recommended": "reference",
+    "file": "pages/ref-arquitectura.html",
+    "source": "source/ref-arquitectura.md",
+    "sha256": "96edc30bd615702c58776ec852dc31a00d1a519790c8d18597a923afd8274225",
+    "upstream": "docs/arquitectura.md"
+  },
+  {
+    "id": "ref-contrato-laboratorio",
+    "title": "Contrato del laboratorio Retail OT",
+    "recommended": "reference",
+    "file": "pages/ref-contrato-laboratorio.html",
+    "source": "source/ref-contrato-laboratorio.md",
+    "sha256": "d24a843ad0a2ca84b1ea440a31a4ccc828663208659f1e5fdae129090bf0c7d9",
+    "upstream": "docs/contrato-laboratorio.md"
+  },
+  {
+    "id": "ref-diseno-modulo-redteam",
+    "title": "Módulo 10 — Red/Purple Team de protocolos e inspector activo",
+    "recommended": "reference",
+    "file": "pages/ref-diseno-modulo-redteam.html",
+    "source": "source/ref-diseno-modulo-redteam.md",
+    "sha256": "eb26d4f2d01c0ddfff2de61fed58028998fcdfb58a68875e09ada5843aaacead",
+    "upstream": "docs/diseno-modulo-redteam.md"
+  },
+  {
+    "id": "ref-escenarios-ataque",
+    "title": "Escenarios controlados de laboratorio",
+    "recommended": "reference",
+    "file": "pages/ref-escenarios-ataque.html",
+    "source": "source/ref-escenarios-ataque.md",
+    "sha256": "a88de3ff59c54d29eec341f19b4a32307966a754676f3f767b9b90391873091d",
+    "upstream": "docs/escenarios-ataque.md"
+  },
+  {
+    "id": "ref-fuentes",
+    "title": "Fuentes y procedencia",
+    "recommended": "reference",
+    "file": "pages/ref-fuentes.html",
+    "source": "source/ref-fuentes.md",
+    "sha256": "f052212223d6985af6290ff5304d11d68d6f8fc2f538b98a4e7ea0254fc310aa",
+    "upstream": "docs/fuentes.md"
+  },
+  {
+    "id": "ref-galeria",
+    "title": "Galería del laboratorio Retail OT",
+    "recommended": "reference",
+    "file": "pages/ref-galeria.html",
+    "source": "source/ref-galeria.md",
+    "sha256": "9ba2f36f9217971f063afe896b0dc7430f172837f3b700d4b4771ea07fd07324",
+    "upstream": "docs/galeria.md"
+  },
+  {
+    "id": "ref-mapa-implementacion-modulo-10",
+    "title": "Mapa de implementación del módulo 10",
+    "recommended": "reference",
+    "file": "pages/ref-mapa-implementacion-modulo-10.html",
+    "source": "source/ref-mapa-implementacion-modulo-10.md",
+    "sha256": "4cb4499af78be2f40bbaec99627504730be2ecca2c9eeda3e610eebab4dd7376",
+    "upstream": "docs/mapa-implementacion-modulo-10.md"
+  },
+  {
+    "id": "ref-mapping-mitre-ics",
+    "title": "Mapeo de conductas y controles",
+    "recommended": "reference",
+    "file": "pages/ref-mapping-mitre-ics.html",
+    "source": "source/ref-mapping-mitre-ics.md",
+    "sha256": "5c5e7d1d361596c6ca1ac296783db2858e38ddd469c95d3619cb29775ee55e7a",
+    "upstream": "docs/mapping-mitre-ics.md"
+  },
+  {
+    "id": "ref-operacion-y-diagnostico",
+    "title": "Operación y diagnóstico paso a paso",
+    "recommended": "reference",
+    "file": "pages/ref-operacion-y-diagnostico.html",
+    "source": "source/ref-operacion-y-diagnostico.md",
+    "sha256": "fded4ed43c9d9bb4a8a0199fb62cbac6242bcd29c3240c026014633bee4b1865",
+    "upstream": "docs/operacion-y-diagnostico.md"
+  },
+  {
+    "id": "ref-publicacion-propuesta",
+    "title": "Manifiesto de publicación aprobado",
+    "recommended": "reference",
+    "file": "pages/ref-publicacion-propuesta.html",
+    "source": "source/ref-publicacion-propuesta.md",
+    "sha256": "d71321721e3456dcbaee64874bb4f8811a3c55268339b263101d3b791e20af8c",
+    "upstream": "docs/publicacion-propuesta.md"
+  },
+  {
+    "id": "ref-respuesta-chile",
+    "title": "Ejercicio de respuesta y notificación: Chile",
+    "recommended": "reference",
+    "file": "pages/ref-respuesta-chile.html",
+    "source": "source/ref-respuesta-chile.md",
+    "sha256": "7022a7f8a9b0db53bad7e4b73d761f6db37154f30977472aeabb245478749684",
+    "upstream": "docs/respuesta-chile.md"
+  },
+  {
+    "id": "ref-tutorial-observabilidad",
+    "title": "Tutorial de observabilidad: cinco estaciones Linux y Elastic Stack",
+    "recommended": "reference",
+    "file": "pages/ref-tutorial-observabilidad.html",
+    "source": "source/ref-tutorial-observabilidad.md",
+    "sha256": "b517b0a08b46ada4775049bc2494f82fa311ed72f6294b61f694a4c24078ab04",
+    "upstream": "docs/tutorial-observabilidad.md"
+  },
+  {
+    "id": "ref-validacion-guias-locales",
+    "title": "Guías locales noVNC · Actualización y validación",
+    "recommended": "reference",
+    "file": "pages/ref-validacion-guias-locales.html",
+    "source": "source/ref-validacion-guias-locales.md",
+    "sha256": "ec5ce9f5155da351202e483dfd988070663a38ab6258ed77bb61052c42127cd3",
+    "upstream": "docs/validacion-guias-locales.md"
+  },
+  {
+    "id": "ref-validacion-modulo-10",
+    "title": "Validación del módulo 10 y Anatomy activo",
+    "recommended": "reference",
+    "file": "pages/ref-validacion-modulo-10.html",
+    "source": "source/ref-validacion-modulo-10.md",
+    "sha256": "519996d8529d2c6e1852991d5a8bbd33be76b8ef6bd4244602803c974b62f563",
+    "upstream": "docs/validacion-modulo-10.md"
+  },
+  {
+    "id": "ref-validacion",
+    "title": "Validación del perfil ampliado Retail OT",
+    "recommended": "reference",
+    "file": "pages/ref-validacion.html",
+    "source": "source/ref-validacion.md",
+    "sha256": "bea374a83ae0867ac44b7b96dbffb32f954730ead7f08222e31686e33ad08ac5",
+    "upstream": "docs/validacion.md"
+  }
+]

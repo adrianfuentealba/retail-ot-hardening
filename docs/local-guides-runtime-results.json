@@ -1,0 +1,32 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "name": "ws-corporate local bundle/identity/CLI",
+      "passed": true,
+      "detail": "{\"host\": \"ws-corporate\", \"guides\": 29, \"process_available\": true}"
+    },
+    {
+      "name": "ws-vendor local bundle/identity/CLI",
+      "passed": true,
+      "detail": "{\"host\": \"ws-vendor\", \"guides\": 29, \"process_available\": true}"
+    },
+    {
+      "name": "ws-engineering local bundle/identity/CLI",
+      "passed": true,
+      "detail": "{\"host\": \"ws-engineering\", \"guides\": 29, \"process_available\": true}"
+    },
+    {
+      "name": "ws-hmi local bundle/identity/CLI",
+      "passed": true,
+      "detail": "{\"host\": \"ws-hmi\", \"guides\": 29, \"process_available\": true}"
+    },
+    {
+      "name": "ws-soc local bundle/identity/CLI",
+      "passed": true,
+      "detail": "{\"host\": \"ws-soc\", \"guides\": 29, \"process_available\": true}"
+    }
+  ],
+  "notice": "Solo lectura; no demuestra nuevo ensayo de escenarios ni portapapeles GUI.",
+  "environment": "QA aislada de documentación"
+}

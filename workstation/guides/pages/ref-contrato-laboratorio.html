@@ -1,0 +1,45 @@
+<h1 id="contrato-del-laboratorio-retail-ot">Contrato del laboratorio Retail OT</h1>
+<p>Repositorio nuevo y local. Perfil ampliado: Linux, cinco noVNC, osquery 5.23.1, Elasticsearch/Logstash/Kibana 8.17.3, Suricata, PCAP, Three.js y kit Anatomy. Ocho talleres más desafío integrador, sin duración sugerida.</p>
+<h2 id="servicios-y-zonas">Servicios y zonas</h2>
+<ul>
+<li><code>panel</code>: orquestador pedagógico y portal 3D, publicado solo en <code>127.0.0.1:8090</code>.</li>
+<li><code>ws-corporate</code>: TI L4, noVNC <code>127.0.0.1:6081</code>.</li>
+<li><code>ws-vendor</code>: DMZ L3.5, noVNC <code>127.0.0.1:6082</code>.</li>
+<li><code>ws-engineering</code>: ingeniería L3, noVNC <code>127.0.0.1:6083</code>.</li>
+<li><code>ws-hmi</code>: supervisión L2, noVNC <code>127.0.0.1:6084</code>.</li>
+<li><code>ws-soc</code>: SOC, noVNC <code>127.0.0.1:6085</code>.</li>
+<li><code>gateway</code>: pasarela Modbus de aplicación, en supervisión y control; no es firewall transparente ni iptables DPI.</li>
+<li><code>plc</code>: controlador ficticio de refrigeración, red de control, Modbus 502 y OPC UA 4840, sin puertos publicados.</li>
+<li><code>sensor</code>: PCAP y Suricata pasivos en el namespace de red de la pasarela, con privilegios de captura mínimos.</li>
+<li><code>collector</code>: lee volúmenes de evidencia separados en modo lectura y envía JSON a Logstash; no reenvía IP.</li>
+<li><code>elasticsearch</code>, <code>logstash</code>, <code>kibana</code>: red SOC/telemetría; Kibana solo loopback 5601. Un inicializador instala índice, búsquedas y dashboards.</li>
+</ul>
+<p>El panel tiene una red de administración pedagógica fuera de banda para comunicarse con los agentes. Es una excepción de diseño declarada, no un conducto OT de producción. La topología distinguirá red de proceso y administración. Las estaciones no serán routers; la conectividad de datos depende de las redes asignadas, no de etiquetas Purdue.</p>
+<h2 id="comandos-de-lista-blanca">Comandos de lista blanca</h2>
+<p>En cualquier escritorio abra Terminal. <code>labctl</code> está en PATH, escribe evidencia local y expone exactamente:</p>
+<pre><code class="language-sh">labctl status
+labctl inventory
+labctl baseline
+labctl simulate defrost
+labctl simulate malware
+labctl simulate lateral
+labctl simulate firmware
+labctl simulate opcua
+labctl harden os
+labctl harden application
+labctl harden plc
+labctl harden network
+labctl harden access
+labctl harden opcua
+labctl harden supply-chain
+labctl detect
+labctl recover
+labctl reset
+labctl evidence
+</code></pre>
+<p>No acepta direcciones, scripts arbitrarios ni objetivos externos. La consola web utiliza las mismas acciones permitidas. La ejecución Linux real se realiza dentro del endpoint mediante comandos concretos (chmod, creación de artefactos benignos, procesos de prueba y osquery), no sobre el anfitrión. Los cambios de política PLC/pasarela se ejecutan por API de entrenamiento fija y se verifican por transacciones de protocolo.</p>
+<p><code>simulate malware</code> es emulación benigna: descarga local de un marcador de entrenamiento, proceso temporizado y archivo dentro de <code>/home/student/lab</code>; no cifra archivos ni explota equipos. <code>simulate lateral</code> solicita únicamente dos agentes internos fijos; la prevención es una política de laboratorio, no una prueba de explotación o un firewall del kernel.</p>
+<h2 id="evidencia">Evidencia</h2>
+<p>Fuentes diferentes: <code>lab.endpoint</code> (acciones Linux), <code>osquery</code> (SQL ejecutado por osqueryd), <code>suricata</code> (EVE), <code>lab.control</code> (políticas/telemetría), PCAP (Ethernet real). El dashboard debe separar fuentes y resultado permitido/bloqueado. Eventos de simulación no se etiquetan como detectados por Suricata u osquery sin evidencia de esas fuentes.</p>
+<h2 id="criterios-de-entrega">Criterios de entrega</h2>
+<p>Un <code>docker compose up -d</code> construye e inicia todo. Pruebas: cinco osquery reales, cinco noVNC, eventos indexados de las cinco estaciones, dashboards importados, FC03/FC06 capturados, firma Suricata FC06, efecto térmico y contramedida, controles de archivos comprobables y OPC UA real. Toda limitación o prueba no completada se documenta sin afirmar funcionalidad total.</p>

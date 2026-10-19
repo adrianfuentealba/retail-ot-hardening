@@ -1,0 +1,8 @@
+{
+  "passed": true,
+  "environment": "Escritorio HMI QA, usuario student, X11",
+  "copied_command": "hostname\nid",
+  "method": "Botón Copiar en Firefox → portapapeles X11 verificado con xclip → Ctrl+Shift+V en xfce4-terminal → revisión y Enter",
+  "terminal_result": "student@ws-hmi:~$ hostname\nid\nws-hmi\nuid=1000(student) gid=1000(student) groups=1000(student)\nstudent@ws-hmi:~$ \n",
+  "notice": "No se usó portapapeles del anfitrión ni el portal para copiar instrucciones."
+}

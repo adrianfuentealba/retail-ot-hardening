@@ -1,0 +1,145 @@
+<h1 id="empieza-aqui-trabaja-dentro-de-novnc">Empieza aquí · Trabaja dentro de noVNC</h1>
+<p>Las once entradas de inicio y talleres, la solución y las referencias están incluidas en la imagen de cada una de las cinco estaciones. <strong>No debes volver al portal para leer ni copiar instrucciones.</strong> Las guías se sirven desde <code>127.0.0.1:8010</code> dentro del Linux que estás viendo. Ese localhost no es el de tu computador anfitrión.</p>
+<h2 id="1-abre-la-guia-y-una-terminal">1 · Abre la guía y una terminal</h2>
+<p>Doble clic en <strong>Guías paso a paso — Retail OT</strong>. Si XFCE pregunta si confías en el lanzador, confirma únicamente ese archivo creado en el laboratorio. También puedes abrir Terminal del laboratorio y ejecutar:</p>
+<pre><code class="language-bash">labctl guides
+</code></pre>
+<p><strong>Resultado esperado:</strong> Firefox muestra «Guías locales · Retail OT» y la identidad de la estación. No abre el portal ni crea una conexión de pentest. Si Firefox no abre, ejecuta desde la terminal gráfica de noVNC, no desde una terminal sin DISPLAY del anfitrión. Alternativa: escribir <code>http://127.0.0.1:8010/guides/</code> en Firefox dentro de la estación.</p>
+<p>Abre <strong>Terminal del laboratorio</strong> y coloca ambas ventanas lado a lado; arrastra cada barra de título hacia el borde de la pantalla para organizarte.</p>
+<h2 id="2-verifica-tu-identidad-antes-de-copiar">2 · Verifica tu identidad antes de copiar</h2>
+<pre><code class="language-bash">hostname
+id
+</code></pre>
+<p><strong>Resultado esperado:</strong> uno de los cinco nombres siguientes y usuario <code>student</code>. Los identificadores numéricos son datos del sistema, no una contraseña. Si estás en otra máquina, los comandos locales actúan allí aunque estés leyendo una guía de otro rol.</p>
+<table>
+<thead>
+<tr>
+<th>Estación</th>
+<th>Rol</th>
+<th>Taller recomendado</th>
+<th>noVNC desde el anfitrión</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ws-corporate</td>
+<td>TI L4</td>
+<td>Inventario y consulta de referencias</td>
+<td>127.0.0.1:6081</td>
+</tr>
+<tr>
+<td>ws-vendor</td>
+<td>Proveedor L3.5</td>
+<td>05, y etapa de proveedor del 09</td>
+<td>127.0.0.1:6082</td>
+</tr>
+<tr>
+<td>ws-engineering</td>
+<td>Ingeniería L3</td>
+<td>04, 06, 07, 09 y 10</td>
+<td>127.0.0.1:6083</td>
+</tr>
+<tr>
+<td>ws-hmi</td>
+<td>HMI L2</td>
+<td>01, 02, 03 y 08</td>
+<td>127.0.0.1:6084</td>
+</tr>
+<tr>
+<td>ws-soc</td>
+<td>SOC</td>
+<td>Evidencia y correlación de todos</td>
+<td>127.0.0.1:6085</td>
+</tr>
+</tbody>
+</table>
+<p>Todos tienen las guías completas. <strong>Esto no cambia automáticamente el rol de ejecución.</strong> En talleres multihost, abre el noVNC del host indicado; ya encontrarás la misma guía allí. No es necesario copiar un comando al anfitrión y luego a otra máquina.</p>
+<h2 id="3-copia-y-pega-sin-pivote">3 · Copia y pega sin pivote</h2>
+<p>En un bloque marcado <strong>COMANDO · TERMINAL LINUX</strong>, pulsa <strong>Copiar</strong>. Vuelve a la Terminal de ese mismo escritorio y pulsa <strong>Ctrl + Shift + V</strong>. Revisa la línea y pulsa Enter.</p>
+<p><strong>Resultado esperado:</strong> solo se pega el comando; no se ejecuta al copiar. El portapapeles es el de Firefox/Terminal de la estación Linux. No uses el panel de portapapeles de noVNC ni el del anfitrión para este flujo. En un terminal Linux, Ctrl+C interrumpe un proceso; no es el atajo para pegar.</p>
+<p>Si el botón no copia, selecciona el texto en Firefox y pulsa Ctrl+C <strong>dentro de Firefox</strong>, luego Ctrl+Shift+V en Terminal. También puedes usar el menú Editar → Pegar en Terminal. Los bloques <strong>RESULTADO / REFERENCIA · NO EJECUTAR</strong> no tienen botón Copiar; son ejemplos a interpretar, no comandos. No copies <code>$</code>, prompts, JSON de salida ni comentarios narrativos como si fueran órdenes.</p>
+<h2 id="4-confirma-el-agente-local-y-el-proceso-compartido">4 · Confirma el agente local y el proceso compartido</h2>
+<pre><code class="language-bash">labctl status
+</code></pre>
+<p><strong>Resultado esperado:</strong> JSON con <code>host</code>, <code>role</code>, <code>policies</code>, <code>mode</code> y versión osquery. <code>host</code> debe coincidir con hostname. <code>policies</code> son del endpoint actual; no significan que el PLC/gateway ya estén protegidos.</p>
+<pre><code class="language-bash">labctl classroom-state | jq '{process, gateway, policies, errors}'
+</code></pre>
+<p><strong>Resultado esperado:</strong> JSON del orquestador con estado del PLC, gateway, políticas globales y errores. Si <code>process</code> es null o hay servicios unavailable, no declares éxito a partir de una animación o salida antigua: pide al instructor revisar el stack. Leer las guías sigue siendo local; las acciones de proceso siguen pasando por el orquestador como antes.</p>
+<h2 id="5-distingue-reset-local-y-reset-del-aula">5 · Distingue reset local y reset del aula</h2>
+<pre><code class="language-bash">labctl reset
+</code></pre>
+<p><strong>Resultado esperado:</strong> elimina las políticas de <strong>tu endpoint actual</strong> y detiene sus procesos benignos registrados. No reinicia PLC, gateway, stock ni otros endpoints; tampoco restaura firmware ficticio. Mantiene la evidencia. Úsalo cuando la guía indica una preparación local.</p>
+<p><strong>El siguiente comando es global: coordina con el grupo antes de ejecutarlo.</strong> No lo uses para «arreglar» tu terminal mientras otro alumno trabaja sobre el proceso.</p>
+<pre><code class="language-bash">labctl reset-all
+</code></pre>
+<p><strong>Resultado esperado:</strong> aviso en Terminal y evento de reset de aula; PLC vuelve a consigna 2 °C, políticas globales y de endpoints se restablecen, stock del modelo vuelve a referencia de aula. Logs y PCAP no se borran. Comprueba después <code>labctl classroom-state</code> y <code>labctl status</code>. Un reset de stock solo es una operación pedagógica, no recuperación sanitaria.</p>
+<h2 id="6-guarda-evidencia-sin-mezclarla-con-la-captura-automatica">6 · Guarda evidencia sin mezclarla con la captura automática</h2>
+<pre><code class="language-bash">mkdir -p ~/lab/evidencias/inicio
+labctl status &gt; ~/lab/evidencias/inicio/estado-endpoint.json
+labctl classroom-state &gt; ~/lab/evidencias/inicio/estado-aula.json
+ls -lh ~/lab/evidencias/inicio
+</code></pre>
+<p><strong>Resultado esperado:</strong> dos archivos JSON no vacíos de tu sesión. Los talleres usan una carpeta distinta por número. <code>~/lab</code> vive en la capa de la estación: conserva los archivos antes de recrearla. <code>/evidence</code> es el volumen de telemetría automática persistente; no lo borres ni guardes falsas observaciones allí. Captura automática y evidencia manual son fuentes diferentes.</p>
+<h2 id="7-consulta-resultados-visuales-sin-salir-del-linux">7 · Consulta resultados visuales sin salir del Linux</h2>
+<p>El gemelo y Kibana son observadores del aula, no el lugar obligatorio para copiar instrucciones. Puedes abrirlos en pestañas de Firefox <strong>dentro de noVNC</strong>:</p>
+<ul>
+<li>Gemelo: <code>http://panel:8000</code>.</li>
+<li>Módulo 10: <code>http://panel:8000/labs/10</code>.</li>
+<li>Dashboard general: <code>http://kibana:5601/app/dashboards#/view/retail-overview</code>.</li>
+</ul>
+<p>También puedes mantener el gemelo en el navegador del anfitrión. En cambio, los comandos se copian y pegan siempre dentro de noVNC. No uses <code>http://127.0.0.1:5601</code> desde la estación: no es Kibana allí. Las URLs publicadas del README son para el anfitrión.</p>
+<h2 id="8-si-algo-no-coincide">8 · Si algo no coincide</h2>
+<table>
+<thead>
+<tr>
+<th>Síntoma</th>
+<th>Qué verificar</th>
+<th>Qué no concluir</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>No abre guía</td>
+<td>Icono o <code>labctl guides</code>; agente local activo; imagen nueva construida</td>
+<td>Que el portal deba actuar como pivote</td>
+</tr>
+<tr>
+<td>Copiar no hace nada</td>
+<td>Selección manual/Ctrl+C en Firefox y Ctrl+Shift+V en Terminal</td>
+<td>Que necesites copiar al anfitrión</td>
+</tr>
+<tr>
+<td>Guía advierte otro host</td>
+<td><code>hostname</code>; cambia al noVNC del rol indicado</td>
+<td>Que elegir taller cambie tu estación</td>
+</tr>
+<tr>
+<td>Error Connection refused en labctl</td>
+<td>El agente local no responde; informar al instructor</td>
+<td>Que la contramedida bloqueó un ataque</td>
+</tr>
+<tr>
+<td>Proceso benigno no aparece</td>
+<td>Es temporal; verificar políticas y repetir emulación si corresponde</td>
+<td>Que ausencia tardía sea prueba de detección</td>
+</tr>
+<tr>
+<td>Datos viejos en Kibana</td>
+<td>Hora/host/filtro, documentos nuevos y refresh</td>
+<td>Que un evento histórico acredite tu intento</td>
+</tr>
+<tr>
+<td>Operation not permitted con sudo</td>
+<td>Student no tiene sudo general; usar comandos de la guía</td>
+<td>Que debas desactivar restricciones del contenedor</td>
+</tr>
+<tr>
+<td>Un paso sale blocked desde el inicio</td>
+<td>Políticas heredadas y host; reset solo según alcance coordinado</td>
+<td>Que ya demostraron antes/después</td>
+</tr>
+</tbody>
+</table>
+<h2 id="criterio-de-exito-de-este-inicio">Criterio de éxito de este inicio</h2>
+<p>Debes poder abrir una guía local, identificar tu host, copiar un bloque y ejecutarlo en Terminal sin usar el portapapeles del anfitrión; distinguir estado endpoint/global y guardar evidencia con fuente explícita. Las guías no ejecutan comandos automáticamente.</p>
+<p>El laboratorio es exclusivamente educativo, con destinos internos fijos y sin conexión a sistemas industriales reales. No hay evaluación por velocidad ni duraciones de resolución. <a href="index.html?guide=ref-tutorial-observabilidad">Tutorial de observabilidad</a>, <a href="index.html?guide=ref-arquitectura">arquitectura y límites</a> y <a href="index.html?guide=ref-respuesta-chile">respuesta chilena</a> siguen disponibles como referencias locales.</p>
