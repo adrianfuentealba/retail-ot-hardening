@@ -1,0 +1,9 @@
+{
+  "temperature": 2,
+  "setpoint": 2,
+  "heater": false,
+  "compressor": true,
+  "spoiled": false,
+  "thermal_risk": false,
+  "plc_guard": false
+}

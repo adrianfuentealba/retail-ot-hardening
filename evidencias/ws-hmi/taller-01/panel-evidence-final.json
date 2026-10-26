@@ -1,0 +1,112 @@
+{
+  "notice": "Application events are independent from osquery, Suricata and PCAP; reset does not delete evidence.",
+  "state": {
+    "process": {
+      "temperature": 2,
+      "setpoint": 2,
+      "heater": false,
+      "compressor": true,
+      "exposure": 0,
+      "spoiled": false,
+      "thermal_risk": false,
+      "plc_guard": false,
+      "opcua_secure": false,
+      "opcua_rbac": false,
+      "opcua_tls_only": false,
+      "opcua_ready": true,
+      "sensor_bias": 0,
+      "sensor_connected": true,
+      "measured_temperature": 2,
+      "sensor_valid": true,
+      "input_guard": false,
+      "fallback_active": false,
+      "alarm": false,
+      "door_open": false,
+      "modbus_reads": 230,
+      "modbus_writes": 0,
+      "rejected_writes": 0,
+      "cycle": 800
+    },
+    "gateway": {
+      "deny_writes": false,
+      "fc06_only": false,
+      "modbus_allowlist": false,
+      "write_rate": false,
+      "accepted_writes": 0,
+      "blocked_writes": 0
+    },
+    "endpoints": {
+      "ws-corporate": {
+        "host": "ws-corporate",
+        "role": "corporate",
+        "policies": {
+          "os": false,
+          "application": false,
+          "network": false,
+          "access": false,
+          "supply-chain": false
+        },
+        "mode": "0o666",
+        "osquery": "osqueryi version 5.23.1"
+      },
+      "ws-vendor": {
+        "host": "ws-vendor",
+        "role": "vendor",
+        "policies": {
+          "os": false,
+          "application": false,
+          "network": false,
+          "access": false,
+          "supply-chain": false
+        },
+        "mode": "0o666",
+        "osquery": "osqueryi version 5.23.1"
+      },
+      "ws-engineering": {
+        "host": "ws-engineering",
+        "role": "engineering",
+        "policies": {
+          "os": false,
+          "application": false,
+          "network": false,
+          "access": false,
+          "supply-chain": false
+        },
+        "mode": "0o666",
+        "osquery": "osqueryi version 5.23.1"
+      },
+      "ws-hmi": {
+        "host": "ws-hmi",
+        "role": "hmi",
+        "policies": {
+          "os": false,
+          "application": false,
+          "network": false,
+          "access": false,
+          "supply-chain": false
+        },
+        "mode": "0o666",
+        "osquery": "osqueryi version 5.23.1"
+      },
+      "ws-soc": {
+        "host": "ws-soc",
+        "role": "soc",
+        "policies": {
+          "os": false,
+          "application": false,
+          "network": false,
+          "access": false,
+          "supply-chain": false
+        },
+        "mode": "0o666",
+        "osquery": "osqueryi version 5.23.1"
+      }
+    },
+    "policies": {
+      "network": false,
+      "access": false
+    },
+    "last_update": 1792982588.5454507,
+    "errors": []
+  }
+}

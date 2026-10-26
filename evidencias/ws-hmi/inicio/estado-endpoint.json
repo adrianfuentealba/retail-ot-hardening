@@ -1,0 +1,13 @@
+{
+  "host": "ws-hmi",
+  "role": "hmi",
+  "policies": {
+    "os": false,
+    "application": false,
+    "network": false,
+    "access": false,
+    "supply-chain": false
+  },
+  "mode": "0o666",
+  "osquery": "osqueryi version 5.23.1"
+}

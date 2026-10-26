@@ -1,0 +1,10 @@
+{
+  "endpoint_hosts": [
+    "ws-corporate",
+    "ws-engineering",
+    "ws-hmi",
+    "ws-soc",
+    "ws-vendor"
+  ],
+  "endpoint_count": 5
+}

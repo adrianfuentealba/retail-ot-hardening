@@ -1,0 +1,1 @@
+path=/home/student/lab/controller.conf mode=666 uid=1000 gid=1000 user=student group=student

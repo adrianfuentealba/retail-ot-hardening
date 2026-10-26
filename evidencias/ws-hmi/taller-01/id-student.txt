@@ -1,0 +1,1 @@
+uid=1000(student) gid=1000(student) groups=1000(student)

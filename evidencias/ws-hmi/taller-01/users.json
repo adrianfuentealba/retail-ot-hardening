@@ -1,0 +1,23 @@
+[
+  {"shell":"/bin/bash","uid":"0","username":"root"},
+  {"shell":"/usr/sbin/nologin","uid":"1","username":"daemon"},
+  {"shell":"/usr/sbin/nologin","uid":"2","username":"bin"},
+  {"shell":"/usr/sbin/nologin","uid":"3","username":"sys"},
+  {"shell":"/bin/sync","uid":"4","username":"sync"},
+  {"shell":"/usr/sbin/nologin","uid":"5","username":"games"},
+  {"shell":"/usr/sbin/nologin","uid":"6","username":"man"},
+  {"shell":"/usr/sbin/nologin","uid":"7","username":"lp"},
+  {"shell":"/usr/sbin/nologin","uid":"8","username":"mail"},
+  {"shell":"/usr/sbin/nologin","uid":"9","username":"news"},
+  {"shell":"/usr/sbin/nologin","uid":"10","username":"uucp"},
+  {"shell":"/usr/sbin/nologin","uid":"13","username":"proxy"},
+  {"shell":"/usr/sbin/nologin","uid":"33","username":"www-data"},
+  {"shell":"/usr/sbin/nologin","uid":"34","username":"backup"},
+  {"shell":"/usr/sbin/nologin","uid":"38","username":"list"},
+  {"shell":"/usr/sbin/nologin","uid":"39","username":"irc"},
+  {"shell":"/usr/sbin/nologin","uid":"42","username":"_apt"},
+  {"shell":"/usr/sbin/nologin","uid":"65534","username":"nobody"},
+  {"shell":"/usr/sbin/nologin","uid":"100","username":"tcpdump"},
+  {"shell":"/bin/bash","uid":"101","username":"nova"},
+  {"shell":"/bin/bash","uid":"1000","username":"student"}
+]

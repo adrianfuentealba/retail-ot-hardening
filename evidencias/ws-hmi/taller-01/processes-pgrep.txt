@@ -1,0 +1,2 @@
+42 osqueryd --logger_plugin=filesystem --config_path=/opt/retail/osquery.conf --logger_path=/evidence/osquery --database_path=/tmp/osquery.db --disable_events=true --host_identifier=hostname --logger_stderr=false
+60 osqueryd

@@ -1,0 +1,5 @@
+{
+  "host": "ws-hmi",
+  "role": "hmi",
+  "osquery": "osqueryi version 5.23.1"
+}

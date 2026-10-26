@@ -1,0 +1,3 @@
+[
+  {"cmdline":"osqueryi --json SELECT pid,name,path,cmdline FROM processes WHERE cmdline LIKE '%retail-%';","name":"osqueryi","path":"/opt/osquery/bin/osqueryd","pid":"3665"}
+]

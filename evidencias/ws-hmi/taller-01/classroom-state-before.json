@@ -1,0 +1,152 @@
+{
+  "process": {
+    "temperature": 2.0,
+    "setpoint": 2,
+    "heater": false,
+    "compressor": true,
+    "exposure": 0.0,
+    "spoiled": false,
+    "thermal_risk": false,
+    "plc_guard": false,
+    "opcua_secure": false,
+    "opcua_rbac": false,
+    "opcua_tls_only": false,
+    "opcua_ready": true,
+    "sensor_bias": 0.0,
+    "sensor_connected": true,
+    "measured_temperature": 2.0,
+    "sensor_valid": true,
+    "input_guard": false,
+    "fallback_active": false,
+    "alarm": false,
+    "door_open": false,
+    "modbus_reads": 10,
+    "modbus_writes": 0,
+    "rejected_writes": 0,
+    "cycle": 1211
+  },
+  "gateway": {
+    "deny_writes": false,
+    "fc06_only": false,
+    "modbus_allowlist": false,
+    "write_rate": false,
+    "accepted_writes": 0,
+    "blocked_writes": 0
+  },
+  "endpoints": {
+    "ws-corporate": {
+      "host": "ws-corporate",
+      "role": "corporate",
+      "policies": {
+        "os": false,
+        "application": false,
+        "network": false,
+        "access": false,
+        "supply-chain": false
+      },
+      "mode": "0o666",
+      "osquery": "osqueryi version 5.23.1"
+    },
+    "ws-vendor": {
+      "host": "ws-vendor",
+      "role": "vendor",
+      "policies": {
+        "os": false,
+        "application": false,
+        "network": false,
+        "access": false,
+        "supply-chain": false
+      },
+      "mode": "0o666",
+      "osquery": "osqueryi version 5.23.1"
+    },
+    "ws-engineering": {
+      "host": "ws-engineering",
+      "role": "engineering",
+      "policies": {
+        "os": false,
+        "application": false,
+        "network": false,
+        "access": false,
+        "supply-chain": false
+      },
+      "mode": "0o666",
+      "osquery": "osqueryi version 5.23.1"
+    },
+    "ws-hmi": {
+      "host": "ws-hmi",
+      "role": "hmi",
+      "policies": {
+        "os": false,
+        "application": false,
+        "network": false,
+        "access": false,
+        "supply-chain": false
+      },
+      "mode": "0o666",
+      "osquery": "osqueryi version 5.23.1"
+    },
+    "ws-soc": {
+      "host": "ws-soc",
+      "role": "soc",
+      "policies": {
+        "os": false,
+        "application": false,
+        "network": false,
+        "access": false,
+        "supply-chain": false
+      },
+      "mode": "0o666",
+      "osquery": "osqueryi version 5.23.1"
+    }
+  },
+  "policies": {
+    "network": false,
+    "access": false
+  },
+  "events": [],
+  "history": [
+    {
+      "t": 1792979911.938197,
+      "temperature": 2.0
+    },
+    {
+      "t": 1792979914.0181415,
+      "temperature": 2.0
+    },
+    {
+      "t": 1792979916.0925877,
+      "temperature": 2.0
+    },
+    {
+      "t": 1792979918.1659768,
+      "temperature": 2.0
+    },
+    {
+      "t": 1792979920.2763727,
+      "temperature": 2.0
+    },
+    {
+      "t": 1792979922.3550506,
+      "temperature": 2.0
+    },
+    {
+      "t": 1792979924.5118048,
+      "temperature": 2.0
+    },
+    {
+      "t": 1792979926.585806,
+      "temperature": 2.0
+    },
+    {
+      "t": 1792979928.6743922,
+      "temperature": 2.0
+    },
+    {
+      "t": 1792979930.7630327,
+      "temperature": 2.0
+    }
+  ],
+  "last_update": 1792979930.763044,
+  "errors": []
+}
