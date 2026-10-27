@@ -1,0 +1,12 @@
+{
+  "@timestamp": "2026-10-27T01:23:13Z",
+  "host": {
+    "name": "ws-engineering"
+  },
+  "event": {
+    "dataset": "lab.control",
+    "action": "recover",
+    "outcome": "success"
+  },
+  "message": "Cooling resumed and benign processes stopped. Spoiled stock remains quarantined."
+}

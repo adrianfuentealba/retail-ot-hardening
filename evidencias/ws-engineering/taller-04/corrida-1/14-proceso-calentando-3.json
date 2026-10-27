@@ -1,0 +1,19 @@
+{
+  "t": "2026-10-27T01:21:46Z",
+  "process": {
+    "temperature": 45.72350242205192,
+    "setpoint": 50,
+    "heater": true,
+    "compressor": false,
+    "exposure": 28,
+    "spoiled": true,
+    "plc_guard": false,
+    "modbus_writes": 1,
+    "rejected_writes": 0
+  },
+  "gateway": {
+    "deny_writes": false,
+    "accepted_writes": 1,
+    "blocked_writes": 0
+  }
+}

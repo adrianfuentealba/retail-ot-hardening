@@ -1,0 +1,1 @@
+path=/home/student/lab/evidencias/taller-04/corrida-1/35-retail-ot-live.pcap size=1926366 mtime=2026-10-27 01:23:23.302875293 +0000

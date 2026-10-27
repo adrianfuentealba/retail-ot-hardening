@@ -1,0 +1,50 @@
+[
+  {
+    "time": 1793064189.2740848,
+    "src": "172.30.40.20",
+    "sport": "48038",
+    "dst": "172.30.40.10",
+    "dport": "502",
+    "hex": "d2 ef 00 00 00 06 01 03 00 00 00 04",
+    "length": 12,
+    "source": "tshark passive capture",
+    "protocol": "Modbus TCP",
+    "function": 3
+  },
+  {
+    "time": 1793064189.2744505,
+    "src": "172.30.40.10",
+    "sport": "502",
+    "dst": "172.30.40.20",
+    "dport": "48038",
+    "hex": "d2 ef 00 00 00 0b 01 03 08 00 02 04 01 00 00 00 01",
+    "length": 17,
+    "source": "tshark passive capture",
+    "protocol": "Modbus TCP",
+    "function": 3
+  },
+  {
+    "time": 1793064191.3590472,
+    "src": "172.30.40.20",
+    "sport": "46750",
+    "dst": "172.30.40.10",
+    "dport": "502",
+    "hex": "d3 bf 00 00 00 06 01 03 00 00 00 04",
+    "length": 12,
+    "source": "tshark passive capture",
+    "protocol": "Modbus TCP",
+    "function": 3
+  },
+  {
+    "time": 1793064191.359371,
+    "src": "172.30.40.10",
+    "sport": "502",
+    "dst": "172.30.40.20",
+    "dport": "46750",
+    "hex": "d3 bf 00 00 00 0b 01 03 08 00 02 04 00 00 00 00 01",
+    "length": 17,
+    "source": "tshark passive capture",
+    "protocol": "Modbus TCP",
+    "function": 3
+  }
+]

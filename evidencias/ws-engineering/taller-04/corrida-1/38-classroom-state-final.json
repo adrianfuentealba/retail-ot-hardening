@@ -1,0 +1,557 @@
+{
+  "process": {
+    "temperature": 2.21111659839608,
+    "setpoint": 2,
+    "heater": false,
+    "compressor": true,
+    "exposure": 83.0,
+    "spoiled": true,
+    "thermal_risk": false,
+    "plc_guard": true,
+    "opcua_secure": false,
+    "opcua_rbac": false,
+    "opcua_tls_only": false,
+    "opcua_ready": true,
+    "sensor_bias": 0.0,
+    "sensor_connected": true,
+    "measured_temperature": 2.2294745634739996,
+    "sensor_valid": true,
+    "input_guard": false,
+    "fallback_active": false,
+    "alarm": false,
+    "door_open": false,
+    "modbus_reads": 2224,
+    "modbus_writes": 2,
+    "rejected_writes": 1,
+    "cycle": 143
+  },
+  "gateway": {
+    "deny_writes": false,
+    "fc06_only": false,
+    "modbus_allowlist": false,
+    "write_rate": false,
+    "accepted_writes": 2,
+    "blocked_writes": 0
+  },
+  "endpoints": {
+    "ws-corporate": {
+      "host": "ws-corporate",
+      "role": "corporate",
+      "policies": {
+        "os": false,
+        "application": false,
+        "network": false,
+        "access": false,
+        "supply-chain": false
+      },
+      "mode": "0o666",
+      "osquery": "osqueryi version 5.23.1"
+    },
+    "ws-vendor": {
+      "host": "ws-vendor",
+      "role": "vendor",
+      "policies": {
+        "os": false,
+        "application": false,
+        "network": false,
+        "access": false,
+        "supply-chain": false
+      },
+      "mode": "0o666",
+      "osquery": "osqueryi version 5.23.1"
+    },
+    "ws-engineering": {
+      "host": "ws-engineering",
+      "role": "engineering",
+      "policies": {
+        "os": false,
+        "application": false,
+        "network": false,
+        "access": false,
+        "supply-chain": false
+      },
+      "mode": "0o666",
+      "osquery": "osqueryi version 5.23.1"
+    },
+    "ws-hmi": {
+      "host": "ws-hmi",
+      "role": "hmi",
+      "policies": {
+        "os": false,
+        "application": false,
+        "network": false,
+        "access": false,
+        "supply-chain": false
+      },
+      "mode": "0o666",
+      "osquery": "osqueryi version 5.23.1"
+    },
+    "ws-soc": {
+      "host": "ws-soc",
+      "role": "soc",
+      "policies": {
+        "os": false,
+        "application": false,
+        "network": false,
+        "access": false,
+        "supply-chain": false
+      },
+      "mode": "0o666",
+      "osquery": "osqueryi version 5.23.1"
+    }
+  },
+  "policies": {
+    "network": false,
+    "access": false
+  },
+  "events": [
+    {
+      "@timestamp": "2026-10-27T01:03:44Z",
+      "host": {
+        "name": "panel"
+      },
+      "event": {
+        "dataset": "lab.control",
+        "action": "reset",
+        "outcome": "success"
+      },
+      "message": "Process reset; available endpoints reset. Check endpoint availability; evidence retained"
+    },
+    {
+      "@timestamp": "2026-10-27T01:03:54Z",
+      "host": {
+        "name": "panel"
+      },
+      "event": {
+        "dataset": "lab.control",
+        "action": "reset",
+        "outcome": "success"
+      },
+      "message": "Process reset; available endpoints reset. Check endpoint availability; evidence retained"
+    },
+    {
+      "@timestamp": "2026-10-27T01:20:58Z",
+      "host": {
+        "name": "panel"
+      },
+      "event": {
+        "dataset": "lab.control",
+        "action": "reset",
+        "outcome": "success"
+      },
+      "message": "Process reset; available endpoints reset. Check endpoint availability; evidence retained"
+    },
+    {
+      "@timestamp": "2026-10-27T01:21:16Z",
+      "host": {
+        "name": "ws-engineering"
+      },
+      "event": {
+        "dataset": "lab.control",
+        "action": "defrost",
+        "outcome": "success"
+      },
+      "message": "FC06 setpoint=50 on fictitious refrigeration PLC"
+    },
+    {
+      "@timestamp": "2026-10-27T01:22:16Z",
+      "host": {
+        "name": "ws-engineering"
+      },
+      "event": {
+        "dataset": "lab.control",
+        "action": "harden-plc",
+        "outcome": "success"
+      },
+      "message": "PLC validates setpoint <=6; reset nominal value"
+    },
+    {
+      "@timestamp": "2026-10-27T01:22:55Z",
+      "host": {
+        "name": "ws-engineering"
+      },
+      "event": {
+        "dataset": "lab.control",
+        "action": "defrost",
+        "outcome": "blocked"
+      },
+      "message": "FC06 setpoint=50 on fictitious refrigeration PLC"
+    },
+    {
+      "@timestamp": "2026-10-27T01:23:13Z",
+      "host": {
+        "name": "ws-engineering"
+      },
+      "event": {
+        "dataset": "lab.control",
+        "action": "recover",
+        "outcome": "success"
+      },
+      "message": "Cooling resumed and benign processes stopped. Spoiled stock remains quarantined."
+    }
+  ],
+  "history": [
+    {
+      "t": 1793064015.778753,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793064017.8689718,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793064019.954678,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793064022.0684898,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793064024.1757865,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793064026.2565408,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793064028.3386037,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793064030.4268,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793064032.5211518,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793064034.6019745,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793064036.7120242,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793064038.7980852,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793064040.90003,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793064042.9982123,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793064045.0803068,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793064047.1642866,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793064049.2737324,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793064051.3766785,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793064053.459932,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793064055.5460222,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793064057.6321769,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793064059.7129893,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793064061.7947228,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793064063.8776176,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793064065.9609783,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793064068.0505385,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793064070.138777,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793064072.2199006,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793064074.302001,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793064076.3900144,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793064078.4718106,
+      "temperature": 9.3728
+    },
+    {
+      "t": 1793064080.5557601,
+      "temperature": 15.61313792
+    },
+    {
+      "t": 1793064082.673006,
+      "temperature": 20.894959935488
+    },
+    {
+      "t": 1793064084.7689288,
+      "temperature": 25.365494089397043
+    },
+    {
+      "t": 1793064086.8613904,
+      "temperature": 29.14935419726566
+    },
+    {
+      "t": 1793064088.956088,
+      "temperature": 32.35201339256565
+    },
+    {
+      "t": 1793064091.042134,
+      "temperature": 35.06274413546757
+    },
+    {
+      "t": 1793064093.1334696,
+      "temperature": 38.36853810535897
+    },
+    {
+      "t": 1793064095.2257674,
+      "temperature": 40.15513065237584
+    },
+    {
+      "t": 1793064097.3116093,
+      "temperature": 41.667302584170905
+    },
+    {
+      "t": 1793064099.3987536,
+      "temperature": 42.94720490724226
+    },
+    {
+      "t": 1793064101.483989,
+      "temperature": 44.03051423348985
+    },
+    {
+      "t": 1793064103.569664,
+      "temperature": 44.94742724722581
+    },
+    {
+      "t": 1793064105.6534956,
+      "temperature": 45.72350242205192
+    },
+    {
+      "t": 1793064107.7371943,
+      "temperature": 46.380372450024744
+    },
+    {
+      "t": 1793064109.8190305,
+      "temperature": 46.93634724170094
+    },
+    {
+      "t": 1793064111.900718,
+      "temperature": 47.40692430537568
+    },
+    {
+      "t": 1793064113.9860165,
+      "temperature": 47.80522073206998
+    },
+    {
+      "t": 1793064116.0719433,
+      "temperature": 48.14233882762402
+    },
+    {
+      "t": 1793064118.1691763,
+      "temperature": 48.5534615370049
+    },
+    {
+      "t": 1793064120.2517526,
+      "temperature": 48.77564984492095
+    },
+    {
+      "t": 1793064122.341274,
+      "temperature": 48.9637100287411
+    },
+    {
+      "t": 1793064124.4235158,
+      "temperature": 49.122884168326465
+    },
+    {
+      "t": 1793064126.5067403,
+      "temperature": 49.25760916007152
+    },
+    {
+      "t": 1793064128.5906308,
+      "temperature": 49.37164039308453
+    },
+    {
+      "t": 1793064130.6781242,
+      "temperature": 49.46815642870675
+    },
+    {
+      "t": 1793064132.787397,
+      "temperature": 49.54984760125739
+    },
+    {
+      "t": 1793064134.8696876,
+      "temperature": 49.61899100970425
+    },
+    {
+      "t": 1793064136.9537,
+      "temperature": 49.67751399061368
+    },
+    {
+      "t": 1793064139.0545943,
+      "temperature": 42.354247841655415
+    },
+    {
+      "t": 1793064141.1396713,
+      "temperature": 36.15583537317714
+    },
+    {
+      "t": 1793064143.2286553,
+      "temperature": 28.59673913506856
+    },
+    {
+      "t": 1793064145.3148463,
+      "temperature": 24.51148000392203
+    },
+    {
+      "t": 1793064147.4012473,
+      "temperature": 21.053716675319606
+    },
+    {
+      "t": 1793064149.485842,
+      "temperature": 18.127065793990514
+    },
+    {
+      "t": 1793064151.568697,
+      "temperature": 15.649948488033571
+    },
+    {
+      "t": 1793064153.6763587,
+      "temperature": 13.553316400271614
+    },
+    {
+      "t": 1793064155.7587671,
+      "temperature": 11.778727001189894
+    },
+    {
+      "t": 1793064157.843666,
+      "temperature": 10.276714533807127
+    },
+    {
+      "t": 1793064159.9404857,
+      "temperature": 9.005411181414352
+    },
+    {
+      "t": 1793064162.027495,
+      "temperature": 7.929380023949108
+    },
+    {
+      "t": 1793064164.1170802,
+      "temperature": 7.018627252270525
+    },
+    {
+      "t": 1793064166.2284474,
+      "temperature": 5.9079448178160305
+    },
+    {
+      "t": 1793064168.310847,
+      "temperature": 5.3076844937994885
+    },
+    {
+      "t": 1793064170.4027452,
+      "temperature": 4.799624155551887
+    },
+    {
+      "t": 1793064172.498416,
+      "temperature": 4.369601885259117
+    },
+    {
+      "t": 1793064174.5829718,
+      "temperature": 4.005631035683316
+    },
+    {
+      "t": 1793064176.6680062,
+      "temperature": 3.697566108602359
+    },
+    {
+      "t": 1793064178.7555153,
+      "temperature": 3.4368199543210363
+    },
+    {
+      "t": 1793064180.8381438,
+      "temperature": 3.216124409337325
+    },
+    {
+      "t": 1793064182.94321,
+      "temperature": 3.029327700063112
+    },
+    {
+      "t": 1793064185.0288663,
+      "temperature": 2.871222965333418
+    },
+    {
+      "t": 1793064187.111176,
+      "temperature": 2.737403117858205
+    },
+    {
+      "t": 1793064189.1972368,
+      "temperature": 2.624137998955185
+    },
+    {
+      "t": 1793064191.2778993,
+      "temperature": 2.486008770130415
+    },
+    {
+      "t": 1793064193.3644085,
+      "temperature": 2.4113578230383834
+    },
+    {
+      "t": 1793064195.4724863,
+      "temperature": 2.3481732614196877
+    },
+    {
+      "t": 1793064197.6602974,
+      "temperature": 2.2946938484656236
+    },
+    {
+      "t": 1793064199.7401876,
+      "temperature": 2.249428873341304
+    },
+    {
+      "t": 1793064201.824033,
+      "temperature": 2.21111659839608
+    }
+  ],
+  "last_update": 1793064201.8240566,
+  "errors": []
+}

@@ -1,0 +1,110 @@
+{
+  "host": "ws-engineering",
+  "events": [
+    {
+      "@timestamp": "2026-10-26T01:24:13Z",
+      "host": {
+        "name": "ws-engineering"
+      },
+      "event": {
+        "dataset": "lab.endpoint",
+        "action": "reset",
+        "outcome": "success"
+      },
+      "message": "Endpoint policies reset; evidence retained",
+      "role": "engineering"
+    },
+    {
+      "@timestamp": "2026-10-26T02:01:53Z",
+      "host": {
+        "name": "ws-engineering"
+      },
+      "event": {
+        "dataset": "lab.endpoint",
+        "action": "reset",
+        "outcome": "success"
+      },
+      "message": "Endpoint policies reset; evidence retained",
+      "role": "engineering"
+    },
+    {
+      "@timestamp": "2026-10-26T02:50:13Z",
+      "host": {
+        "name": "ws-engineering"
+      },
+      "event": {
+        "dataset": "lab.endpoint",
+        "action": "reset",
+        "outcome": "success"
+      },
+      "message": "Endpoint policies reset; evidence retained",
+      "role": "engineering"
+    },
+    {
+      "@timestamp": "2026-10-27T01:03:44Z",
+      "host": {
+        "name": "ws-engineering"
+      },
+      "event": {
+        "dataset": "lab.endpoint",
+        "action": "reset",
+        "outcome": "success"
+      },
+      "message": "Endpoint policies reset; evidence retained",
+      "role": "engineering"
+    },
+    {
+      "@timestamp": "2026-10-27T01:03:54Z",
+      "host": {
+        "name": "ws-engineering"
+      },
+      "event": {
+        "dataset": "lab.endpoint",
+        "action": "reset",
+        "outcome": "success"
+      },
+      "message": "Endpoint policies reset; evidence retained",
+      "role": "engineering"
+    },
+    {
+      "@timestamp": "2026-10-27T01:20:58Z",
+      "host": {
+        "name": "ws-engineering"
+      },
+      "event": {
+        "dataset": "lab.endpoint",
+        "action": "reset",
+        "outcome": "success"
+      },
+      "message": "Endpoint policies reset; evidence retained",
+      "role": "engineering"
+    },
+    {
+      "@timestamp": "2026-10-27T01:21:07Z",
+      "host": {
+        "name": "ws-engineering"
+      },
+      "event": {
+        "dataset": "lab.endpoint",
+        "action": "baseline",
+        "outcome": "success"
+      },
+      "message": "Manual osquery evidence query",
+      "role": "engineering"
+    },
+    {
+      "@timestamp": "2026-10-27T01:23:13Z",
+      "host": {
+        "name": "ws-engineering"
+      },
+      "event": {
+        "dataset": "lab.endpoint",
+        "action": "contain",
+        "outcome": "success"
+      },
+      "message": "Benign process stopped; evidence retained",
+      "role": "engineering"
+    }
+  ],
+  "osquery_logs": "/evidence/osquery/osqueryd.results.log"
+}

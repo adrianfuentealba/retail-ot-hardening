@@ -1,0 +1,10 @@
+{
+  "source": "osqueryi",
+  "rows": [
+    {
+      "cpu_type": "x86_64",
+      "hostname": "ws-engineering",
+      "physical_memory": "16770494464"
+    }
+  ]
+}

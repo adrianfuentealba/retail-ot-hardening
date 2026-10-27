@@ -1,0 +1,29 @@
+{
+  "event": {
+    "@timestamp": "2026-10-27T01:21:07Z",
+    "host": {
+      "name": "ws-engineering"
+    },
+    "event": {
+      "dataset": "lab.endpoint",
+      "action": "baseline",
+      "outcome": "success"
+    },
+    "message": "Manual osquery evidence query",
+    "role": "engineering"
+  },
+  "rows": [
+    {
+      "mode": "0666",
+      "path": "/home/student/lab/controller.conf",
+      "uid": "1000"
+    }
+  ],
+  "policies": {
+    "os": false,
+    "application": false,
+    "network": false,
+    "access": false,
+    "supply-chain": false
+  }
+}

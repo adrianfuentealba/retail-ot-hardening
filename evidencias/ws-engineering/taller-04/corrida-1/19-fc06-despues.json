@@ -1,0 +1,21 @@
+{
+  "event": {
+    "@timestamp": "2026-10-27T01:22:55Z",
+    "host": {
+      "name": "ws-engineering"
+    },
+    "event": {
+      "dataset": "lab.control",
+      "action": "defrost",
+      "outcome": "blocked"
+    },
+    "message": "FC06 setpoint=50 on fictitious refrigeration PLC"
+  },
+  "packet": {
+    "protocol": "Modbus TCP",
+    "function": 6,
+    "hex": "cd 70 00 00 00 03 01 86 03",
+    "exception": true,
+    "source": "actual TCP response"
+  }
+}
