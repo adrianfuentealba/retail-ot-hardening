@@ -1,0 +1,1 @@
+mode=640 owner=root group=student uid=0 gid=1000 size=47 mtime=1793063030 path=/home/student/lab/controller.conf

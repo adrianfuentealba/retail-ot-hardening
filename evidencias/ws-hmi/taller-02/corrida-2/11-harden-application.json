@@ -1,0 +1,13 @@
+{
+  "@timestamp": "2026-10-27T01:03:47Z",
+  "host": {
+    "name": "ws-hmi"
+  },
+  "event": {
+    "dataset": "lab.endpoint",
+    "action": "harden-application",
+    "outcome": "success"
+  },
+  "message": "Endpoint policy applied; educational application policy",
+  "role": "hmi"
+}

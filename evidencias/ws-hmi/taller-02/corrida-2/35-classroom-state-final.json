@@ -1,0 +1,485 @@
+{
+  "process": {
+    "temperature": 2.0,
+    "setpoint": 2,
+    "heater": false,
+    "compressor": true,
+    "exposure": 0.0,
+    "spoiled": false,
+    "thermal_risk": false,
+    "plc_guard": false,
+    "opcua_secure": false,
+    "opcua_rbac": false,
+    "opcua_tls_only": false,
+    "opcua_ready": true,
+    "sensor_bias": 0.0,
+    "sensor_connected": true,
+    "measured_temperature": 2.0,
+    "sensor_valid": true,
+    "input_guard": false,
+    "fallback_active": false,
+    "alarm": false,
+    "door_open": false,
+    "modbus_reads": 1664,
+    "modbus_writes": 0,
+    "rejected_writes": 0,
+    "cycle": 7
+  },
+  "gateway": {
+    "deny_writes": false,
+    "fc06_only": false,
+    "modbus_allowlist": false,
+    "write_rate": false,
+    "accepted_writes": 0,
+    "blocked_writes": 0
+  },
+  "endpoints": {
+    "ws-corporate": {
+      "host": "ws-corporate",
+      "role": "corporate",
+      "policies": {
+        "os": false,
+        "application": false,
+        "network": false,
+        "access": false,
+        "supply-chain": false
+      },
+      "mode": "0o666",
+      "osquery": "osqueryi version 5.23.1"
+    },
+    "ws-vendor": {
+      "host": "ws-vendor",
+      "role": "vendor",
+      "policies": {
+        "os": false,
+        "application": false,
+        "network": false,
+        "access": false,
+        "supply-chain": false
+      },
+      "mode": "0o666",
+      "osquery": "osqueryi version 5.23.1"
+    },
+    "ws-engineering": {
+      "host": "ws-engineering",
+      "role": "engineering",
+      "policies": {
+        "os": false,
+        "application": false,
+        "network": false,
+        "access": false,
+        "supply-chain": false
+      },
+      "mode": "0o666",
+      "osquery": "osqueryi version 5.23.1"
+    },
+    "ws-hmi": {
+      "host": "ws-hmi",
+      "role": "hmi",
+      "policies": {
+        "os": true,
+        "application": false,
+        "network": false,
+        "access": false,
+        "supply-chain": false
+      },
+      "mode": "0o640",
+      "osquery": "osqueryi version 5.23.1"
+    },
+    "ws-soc": {
+      "host": "ws-soc",
+      "role": "soc",
+      "policies": {
+        "os": false,
+        "application": false,
+        "network": false,
+        "access": false,
+        "supply-chain": false
+      },
+      "mode": "0o666",
+      "osquery": "osqueryi version 5.23.1"
+    }
+  },
+  "policies": {
+    "network": false,
+    "access": false
+  },
+  "events": [
+    {
+      "@timestamp": "2026-10-27T01:03:44Z",
+      "host": {
+        "name": "panel"
+      },
+      "event": {
+        "dataset": "lab.control",
+        "action": "reset",
+        "outcome": "success"
+      },
+      "message": "Process reset; available endpoints reset. Check endpoint availability; evidence retained"
+    }
+  ],
+  "history": [
+    {
+      "t": 1793062845.9085507,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062847.9982715,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062850.0857468,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062852.1687796,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062854.2592099,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062856.341947,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062858.424464,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062860.5124373,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062862.6105454,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062864.7035446,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062866.787397,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062868.8719473,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062870.9579217,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062873.0487645,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062875.134593,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062877.2207153,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062879.328246,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062881.4166353,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062883.502394,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062885.589713,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062887.6735477,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062889.75995,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062891.859081,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062893.9442015,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062896.0268872,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062898.1239328,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062900.218574,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062902.3012154,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062904.3845177,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062906.4656897,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062908.5475097,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062910.628944,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062912.7118268,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062914.8025124,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062916.8959754,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062918.9981146,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062921.0966423,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062923.1958635,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062925.289567,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062927.3751872,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062929.4662733,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062931.5538075,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062933.6392016,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062935.7194107,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062937.806343,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062939.8983517,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062941.9811842,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062944.1023848,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062946.1881876,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062948.2814298,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062950.3784142,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062952.474799,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062954.5576665,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062956.6404445,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062958.728712,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062960.9050736,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062962.989186,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062965.082828,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062967.1656573,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062969.246989,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062971.3276448,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062973.409445,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062975.5023975,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062977.5862455,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062979.6676137,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062981.7499852,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062983.8368115,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062985.9169369,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062988.0027597,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062990.095939,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062992.1953712,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062994.3000538,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062996.398805,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793062998.4947376,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793063000.6239974,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793063002.707717,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793063004.7957675,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793063006.8779957,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793063008.98147,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793063011.0857122,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793063013.180792,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793063015.2641702,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793063017.3514838,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793063019.4368212,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793063021.52746,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793063023.6375287,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793063025.738092,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793063027.8195755,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793063029.9058857,
+      "temperature": 2.0
+    },
+    {
+      "t": 1793063032.0065958,
+      "temperature": 2.0
+    }
+  ],
+  "last_update": 1793063032.0066123,
+  "errors": []
+}

@@ -1,0 +1,12 @@
+{
+  "@timestamp": "2026-10-27T01:03:54Z",
+  "host": {
+    "name": "panel"
+  },
+  "event": {
+    "dataset": "lab.control",
+    "action": "reset",
+    "outcome": "success"
+  },
+  "message": "Process reset; available endpoints reset. Check endpoint availability; evidence retained"
+}

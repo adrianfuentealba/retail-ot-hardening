@@ -1,0 +1,13 @@
+{
+  "@timestamp": "2026-10-27T01:03:50Z",
+  "host": {
+    "name": "ws-hmi"
+  },
+  "event": {
+    "dataset": "lab.endpoint",
+    "action": "harden-os",
+    "outcome": "success"
+  },
+  "message": "Endpoint policy applied; mode=0640 owner=root",
+  "role": "hmi"
+}

@@ -1,0 +1,29 @@
+{
+  "event": {
+    "@timestamp": "2026-10-27T01:03:45Z",
+    "host": {
+      "name": "ws-hmi"
+    },
+    "event": {
+      "dataset": "lab.endpoint",
+      "action": "baseline",
+      "outcome": "success"
+    },
+    "message": "Manual osquery evidence query",
+    "role": "hmi"
+  },
+  "rows": [
+    {
+      "mode": "0666",
+      "path": "/home/student/lab/controller.conf",
+      "uid": "1000"
+    }
+  ],
+  "policies": {
+    "os": false,
+    "application": false,
+    "network": false,
+    "access": false,
+    "supply-chain": false
+  }
+}
